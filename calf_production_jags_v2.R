@@ -61,6 +61,30 @@ for (k in 1:length(FILES)){
 
 n.weeks.vec <- unlist(n.weeks)
 
+cumsum.count <- apply(count.obs.mat, MARGIN = 1, FUN = cumsum) %>% t()
+
+count.obs.long.df <- data.frame(count.obs.mat ) %>%
+  pivot_longer(everything(), names_to = "name", values_to = "counts") %>%
+  select(-name) %>%
+  mutate(year = rep(years, each = ncol(count.obs.mat)),
+         day = rep(1:ncol(count.obs.mat), nrow(count.obs.mat)))
+  
+cumsum.count.obs.long.df <- data.frame(cumsum.count) %>%
+  pivot_longer(everything(), names_to = "name", values_to = "counts") %>%
+  select(-name) %>%
+  mutate(year = rep(years, each = ncol(count.obs.mat)),
+         day = rep(1:ncol(count.obs.mat), nrow(count.obs.mat)))
+
+ggplot(cumsum.count.obs.long.df %>% group_by(year)) +
+  geom_path(aes(x = day, y = counts, 
+                color = as.factor(year)))
+
+ggplot(count.obs.long.df %>% na.omit() %>% filter(counts > 0)) +
+  geom_bar(aes(counts), width = 1) +
+  facet_wrap("year")
+
+# Obviously, there are just too many zeros... 
+
 jags.data <- list(count.obs = count.obs.mat,
                   effort = effort.mat,
                   week = week.mat,
