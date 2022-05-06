@@ -12,6 +12,9 @@ library(bayesplot)
 
 source("Piedras_Blancas_fcns.R")
 
+save.files <- F
+savre.figs <- T
+
 #FILES <- list.files(pattern = ".csv$")
 data.path <- "data/Formatted Annual Data/"
 FILES <- list.files(path = data.path, 
@@ -88,8 +91,6 @@ for(i in 1:length(FILES)){
   }
 }
 
-
-Mean <- Median <- LCL <- UCL <- vector(mode = "numeric", length = length(FILES))
 stats.total.calves <- lapply(jm.out, FUN = function(x){
   Mean <- x$jm$mean$Total.Calves
   Median <- x$jm$q50$Total.Calves
@@ -106,9 +107,10 @@ Estimates <- do.call(rbind, stats.total.calves)
 Estimates$Year <- years
 Estimates$Method <- "v4"
 
-write.csv(Estimates,
-          "data/Calf Estimates v4.csv",
-          row.names = F)
+if (save.files)
+  write.csv(Estimates,
+            "data/Calf Estimates v4.csv",
+            row.names = F)
 
 #Compare Wayne's estimates and new estimates
 WayneAll <- read.csv("data/Calf Production Wayne Estimates.csv")
@@ -121,6 +123,11 @@ WayneAll %>% filter(!is.na(Effort)) %>%
 estimates.PandV4 <- rbind(Estimates %>% select(Year, Mean, LCL, UCL, Method),
                          WayneShort %>% select(Year, Mean, LCL, UCL, Method))
 
+WayneVsV4.lm.data <- data.frame(Mean.Wayne = WayneShort$Mean,
+                                Mean.V4 = Estimates$Mean)
+
+WayneVsV4.lm <- lm(Mean.V4 ~ Mean.Wayne, data = WayneVsV4.lm.data)
+
 p.PvsV4 <- ggplot(data = estimates.PandV4) + 
   geom_point(aes(x = Year, 
                  y = Mean, 
@@ -130,6 +137,9 @@ p.PvsV4 <- ggplot(data = estimates.PandV4) +
               alpha = 0.4)+
   title("Perryman vs V4 (weekly + binomial)")
 
+if (save.figs)
+  ggsave(p.PvsV4, filename = "figures/WayneVsV4.png",
+         device = "png", dpi = 600)
 
 # compare to V1
 Estimates.samples.V1 <- read.csv("data/Updated Calf Estimates 1994-2019.csv")
@@ -148,6 +158,11 @@ colnames(Estimates.V1) <- c("Mean", "LCL", "Median", "UCL", "Year", "Method")
 estimates.V1andV4 <- rbind(Estimates %>% select(Year, Mean, LCL, UCL, Method),
                            Estimates.V1 %>% select(Year, Mean, LCL, UCL, Method))
 
+V1VsV4.lm.data <- data.frame(Mean.V1 = Estimates.V1$Mean,
+                             Mean.V4 = Estimates$Mean)
+
+V1vsV4.lm <- lm(Mean.V4 ~ Mean.V1, data = V1VsV4.lm.data)
+
 p.V1vsV4 <- ggplot(data = estimates.V1andV4) + 
   geom_point(aes(x = Year, 
                  y = Mean, 
@@ -157,4 +172,14 @@ p.V1vsV4 <- ggplot(data = estimates.V1andV4) +
               alpha = 0.4) +
   title("V1 (Stewwart) vs V4 (weekly + binomial)")
 
+if (save.figs)
+  ggsave(p.V1vsV4, filename = "figures/V1VsV4.png",
+         device = "png", dpi = 600)
+
 # They are identical (almost)
+
+WayneVsV1.lm.data <- data.frame(Mean.Wayne = WayneShort$Mean,
+                                Mean.V1 = Estimates.V1$Mean)
+
+WayneVsV1.lm <- lm(Mean.V1 ~ Mean.Wayne, data = WayneVsV1.lm.data)
+

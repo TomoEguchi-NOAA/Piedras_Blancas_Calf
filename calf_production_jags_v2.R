@@ -3,7 +3,11 @@
 # I inherited it from Josh Stewart in early 2022.
 
 # In this version (v2), I combine all years into one jags run. There is no 
-# hyper parameters that link parameters among yeras.
+# hyper parameters that link parameters among years. It turns out, somehow
+# total calf counts get very much inflated... I don't know how this happens
+# but it is quite useless at the moment... 2022-05-06
+
+
 rm(list=ls())
 library(jagsUI)
 library(tidyverse)
