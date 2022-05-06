@@ -127,7 +127,9 @@ p.PvsV3 <- ggplot(data = estimates.PandV3) +
                  color = Method)) +
   geom_ribbon(aes(x = Year, 
                   ymin = LCL, ymax = UCL, fill = Method),
-              alpha = 0.4)
+              alpha = 0.4)+
+  title("Perryman vs V3 (weekly + Poisson)")
+
 
 # compare to V1
 Estimates.samples.V1 <- read.csv("data/Updated Calf Estimates 1994-2019.csv")
@@ -152,6 +154,8 @@ p.V1vsV3 <- ggplot(data = estimates.V1andV3) +
                  color = Method)) +
   geom_ribbon(aes(x = Year, 
                   ymin = LCL, ymax = UCL, fill = Method),
-              alpha = 0.4)
+              alpha = 0.4) +
+  title("V1 (Stewwart) vs V3 (weekly + Poisson)")
+
 
 # They are identical (almost)

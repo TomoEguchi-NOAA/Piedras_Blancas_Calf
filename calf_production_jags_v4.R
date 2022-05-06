@@ -127,7 +127,9 @@ p.PvsV4 <- ggplot(data = estimates.PandV4) +
                  color = Method)) +
   geom_ribbon(aes(x = Year, 
                   ymin = LCL, ymax = UCL, fill = Method),
-              alpha = 0.4)
+              alpha = 0.4)+
+  title("Perryman vs V4 (weekly + binomial)")
+
 
 # compare to V1
 Estimates.samples.V1 <- read.csv("data/Updated Calf Estimates 1994-2019.csv")
@@ -152,6 +154,7 @@ p.V1vsV4 <- ggplot(data = estimates.V1andV4) +
                  color = Method)) +
   geom_ribbon(aes(x = Year, 
                   ymin = LCL, ymax = UCL, fill = Method),
-              alpha = 0.4)
+              alpha = 0.4) +
+  title("V1 (Stewwart) vs V4 (weekly + binomial)")
 
 # They are identical (almost)
