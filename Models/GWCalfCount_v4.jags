@@ -1,9 +1,6 @@
-# this version (v3) uses weekly sum and Poisson data likelihood, 
+# this version (v4) uses weekly sum and binomial likelihood, 
 # rather than daily counts and binomial likelihood because
 # Pareto k values were very bad for the daily-count binomial model
-
-# I think changing Poisson and binomial for the likelihood function
-# should not make much difference. But see v4 for binomial likelihood.
 
     model {
       p.obs ~ dnorm(0.889,0.06375^-2) #estimated observation probability
@@ -24,11 +21,9 @@
         # prop of max effort is given in prop.effort. use it to adjuct observation probability accordingly   
 
         p.obs.corr[j] <- p.obs * prop.effort[j]
-        #count.obs[j] ~ dbin(p.obs.corr[j], count.true[j])
-        #loglik[j] <- logdensity.bin(count.obs[j], p.obs.corr[j], count.true[j])
+        count.obs[j] ~ dbin(p.obs.corr[j], count.true[j])
+        loglik[j] <- logdensity.bin(count.obs[j], p.obs.corr[j], count.true[j])
 
-        count.obs[j] ~ dpois(p.obs.corr[j] * count.true[j])
-        loglik[j] <- logdensity.pois(count.obs[j], p.obs.corr[j] * count.true[j])
       }
 
       Total.Calves <- sum(count.true)
