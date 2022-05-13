@@ -3,6 +3,17 @@ title: "Comparing approaches by Perryman et al. and Stewart and Weller"
 output: html_notebook
 ---
 
+```{r}
+
+rm(list=ls())
+library(jagsUI)
+library(tidyverse)
+library(lubridate)
+library(bayesplot)
+
+```
+
+
 This document describes the difference between the approaches taken by Perryman et al. (YR) and Stewart and Weller (2021), P and S/W respectively hereafter. Estimates of calf productions differ slightly between the two methods, where the S/W approach results in higher estimates than the P approach.
 
 In this notebook, I explain why they are different analytically. 
@@ -96,4 +107,154 @@ The partial derivatives are (I omit subscripts to increase legibility):
 \frac{\partial f}{\partial \hat{p}} = \frac{168 n}{e \hat{p}^2}
 \end{aligned}
 \]
+
+In the next section, I numerically compare these methods:
+
+```{r}
+p.hat <- 0.889
+SE.p.hat <- 0.06375
+
+#FILES <- list.files(pattern = ".csv$")
+data.path <- "data/Formatted Annual Data/"
+FILES <- list.files(path = data.path, 
+                    pattern = "Formatted.csv")
+
+# get data
+#count.obs <- effort <- week <- n.obs <- n.weeks <- list()
+var.comp.1 <- var.comp.2 <- var.comp.3 <- var.Nhat <- Nhat <- vector(mode = "numeric", length = length(FILES))
+
+for(i in 1:length(FILES)){
+  
+  data <- read.csv(paste0(data.path, FILES[i]))
+  data$Effort[is.na(data$Effort)] <- 0
+  
+  # Method of Weller & Perryman
+  data %>% filter(Effort > 0) %>%
+    mutate(adj.n = ifelse(Effort > 0, 
+                          3 * Sightings/Effort, 0),           # Column E
+           Est.N.j.hat = adj.n/p.hat) -> data          # Column F
+  
+  data %>% group_by(Week) %>%
+    summarise(Effort.hr = sum(Effort),
+              Effort.shift = sum(Effort > 0),
+              n.k = sum(Sightings),
+              var.N.j.hat = var(Est.N.j.hat),
+              var.Effort = var(Effort),
+              var.Sightings = var(Sightings),
+              cov.Eff.Sigh = cov(Effort, Sightings)) %>%
+    mutate(Total.N.hat.k = (168/Effort.hr) * (n.k/p.hat),
+           V1.k = (56^2) * 
+                (1 - Effort.shift/56) * 
+                (1/Effort.shift) * 
+                var.N.j.hat,
+           V2.k = Total.N.hat.k * 
+             ((1-p.hat)/p.hat) * (1 + (SE.p.hat^2)/(p.hat^2))) -> data.weekly
+  
+  var.comp.1[i] <- sum(data.weekly$V1.k)
+  var.comp.2[i] <- sum(data.weekly$V2.k)
+  var.comp.3[i] <- (SE.p.hat^2)/(p.hat^2) * (sum(data.weekly$Total.N.hat.k))^2
+  var.Nhat[i] <- var.comp.1[i] + var.comp.2[i] + var.comp.3[i]
+  Nhat[i] <- sum(data.weekly$Total.N.hat.k)
+  
+  # Trying to add my version of the Delta method but not quite working because
+  # zero variance when no whale was sighted makes it difficult to compute the
+  # total variance. Covariance also becomes zero
+  # data.weekly %>% 
+  #   mutate(V.1 = var.Effort/(Effort.hr^2),
+  #          V.2 = var.Sightings/(n.k^2),
+  #          V.3 = (2/n.k) * (cov.Eff.Sigh/Effort.hr),
+  #          Var.week = (Total.N.hat.k^2) * 
+  #            (V.1 + V.2 + (SE.p.hat^2)/(p.hat^2) + V.3)) -> data.weekly.2
+  
+  # count.obs[[i]] <- data$Sightings
+  # effort[[i]] <- data$Effort
+  # week[[i]] <- data$Week
+  # n.obs[[i]] <- length(data$Sightings)
+  # n.weeks[[i]] <- max(data$Week)
+
+}
+
+```
+
+
+In the Weller/Perryman method, the observed number of whales was "corrected" for the estimated sighting probability when there was at least one pair was sighted. When no whale was sighted, however, zero whale was considered to be recorded without error. In reality, however, there was non zero probability of recording zero, when at least one whale was present in the study area. Consequently, there was negative bias in the Weller/Perryman method. 
+
+Compare different approaches:
+```{r}
+
+# get data
+count.obs <- effort <- week <- n.obs <- n.weeks <- list()
+years <- vector(mode = "numeric", length = length(FILES))
+jm.out.v1 <- jm.out.v3 <- jm.out.v4 <- jm.out.v5 <- list()
+
+i <- 3
+for(i in 1:length(FILES)){
+  years[i] <- as.numeric(str_split(FILES[i], " Formatted.csv")[[1]][1])
+  jm.out.v1[[i]] <- readRDS(paste0("RData/calf_estimates_v1_", years[i], ".rds"))
+  jm.out.v3[[i]] <- readRDS(paste0("RData/calf_estimates_v3_", years[i], ".rds"))
+  jm.out.v4[[i]] <- readRDS(paste0("RData/calf_estimates_v4_", years[i], ".rds"))
+  jm.out.v5[[i]] <- readRDS(paste0("RData/calf_estimates_v5_", years[i], ".rds"))
+}
+
+summary.stats.fcn <- function(x, years, v.txt){
+  tmp <- lapply(x, 
+                FUN = function(x){
+
+                  return(data.frame(Mean = x$jm$mean$Total.Calves,
+                                    Median = x$jm$q50$Total.Calves,
+                                    SE = x$jm$sd$Total.Calves,
+                                    LCL = x$jm$q2.5$Total.Calves,
+                                    UCL = x$jm$q97.5$Total.Calves))
+                }) 
+  tmp.1 <- do.call(rbind, tmp)
+  tmp.1$Year <- years
+  tmp.1$Method <- v.txt
+  return(tmp.1)
+} 
+
+Estimates.V1 <- summary.stats.fcn(jm.out.v1, years, "V1")
+Estimates.V3 <- summary.stats.fcn(jm.out.v3, years, "V3")
+Estimates.V4 <- summary.stats.fcn(jm.out.v4, years, "V4")
+Estimates.V5 <- summary.stats.fcn(jm.out.v5, years, "V5")
+
+Estimates.WP <- data.frame(Mean = Nhat,
+                           SE = sqrt(var.Nhat),
+                           LCL = Nhat - 1.96 * sqrt(var.Nhat),
+                           UCL = Nhat + 1.96 * sqrt(var.Nhat),
+                           Year = years,
+                           Method = "WP")
+```
+
+
+Figures
+
+```{r}
+estimates.all <- rbind(Estimates.V1 %>% select(Year, Mean, LCL, UCL, Method),
+                       Estimates.V3 %>% select(Year, Mean, LCL, UCL, Method),
+                       Estimates.V4 %>% select(Year, Mean, LCL, UCL, Method),                         Estimates.V5 %>% select(Year, Mean, LCL, UCL, Method),
+                       Estimates.WP %>% select(Year, Mean, LCL, UCL, Method))
+
+# WayneVsV4.lm.data <- data.frame(Mean.Wayne = WayneShort$Mean,
+#                                 Mean.V4 = Estimates$Mean)
+
+# WayneVsV4.lm <- lm(Mean.V4 ~ Mean.Wayne, data = WayneVsV4.lm.data)
+
+p.comparison <- ggplot(data = estimates.all) + 
+  geom_point(aes(x = Year, 
+                 y = Mean, 
+                 color = Method),
+             position = position_dodge(width = 0.5)) +
+  geom_errorbar(aes(x = Year, 
+                    ymin = LCL,
+                    ymax = UCL,
+                    color = Method),
+             position = position_dodge(width = 0.5)) +
+  # geom_ribbon(aes(x = Year, 
+  #                 ymin = LCL, ymax = UCL, fill = Method),
+  #             alpha = 0.4) +
+  labs(title = "Comparison of diffrent approaches")
+
+
+```
+
 

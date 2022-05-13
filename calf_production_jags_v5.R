@@ -2,6 +2,8 @@
 # This script is a modified version of "Running Individual Year Model.R"
 # I inherited it from Josh Stewart in early 2022.
 
+# In this version (v3), I try Poisson likelihood instead of binomial. 
+
 
 rm(list=ls())
 library(jagsUI)
@@ -46,11 +48,11 @@ for(i in 1:length(FILES)){
                     n.obs = length(data$Sightings),
                     n.weeks = max(data$Week))
   
-  if (!file.exists(paste0("RData/calf_estimates_v1_", years[i], ".rds"))){
+  if (!file.exists(paste0("RData/calf_estimates_v5_", years[i], ".rds"))){
     jm <- jags(jags.data,
                inits = NULL,
                parameters.to.save= jags.params,
-               "models/GWCalfCount_v1.jags", 
+               "models/GWCalfCount_v5.jags", 
                n.chains = MCMC.params$n.chains,
                n.burnin = MCMC.params$n.burnin,
                n.thin = MCMC.params$n.thin,
@@ -67,15 +69,16 @@ for(i in 1:length(FILES)){
                         run.date = Sys.Date())     
     
     saveRDS(jm.out[[i]],
-            file = paste0("RData/calf_estimates_v1_", years[i], ".rds"))
+            file = paste0("RData/calf_estimates_v5_", years[i], ".rds"))
     
   } else {
-    jm.out[[i]] <- readRDS(paste0("RData/calf_estimates_v1_", years[i], ".rds"))
+    jm.out[[i]] <- readRDS(paste0("RData/calf_estimates_v5_", years[i], ".rds"))
     #jm <- jm.out$jm
   }
 }
 
-stats.total.calves <- lapply(jm.out, FUN = function(x){
+stats.total.calves <- lapply(jm.out, 
+                             FUN = function(x){
   Mean <- x$jm$mean$Total.Calves
   Median <- x$jm$q50$Total.Calves
   LCL <- x$jm$q2.5$Total.Calves
@@ -89,10 +92,10 @@ stats.total.calves <- lapply(jm.out, FUN = function(x){
 
 Estimates <- do.call(rbind, stats.total.calves)
 Estimates$Year <- years
-Estimates$Method <- "v1"
+Estimates$Method <- "v5"
 
 write.csv(Estimates,
-          "data/Calf Estimates v1.csv",
+          "data/Calf Estimates v5.csv",
           row.names = F)
 
 

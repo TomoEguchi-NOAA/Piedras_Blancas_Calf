@@ -2,7 +2,8 @@
 # This script is a modified version of "Running Individual Year Model.R"
 # I inherited it from Josh Stewart in early 2022.
 
-# In this version (v3), I try Poisson likelihood instaed of binomial. 
+# In this version (v3), I try Poisson likelihood with weekly sum 
+# instead of binomial. 
 
 rm(list=ls())
 library(jagsUI)
