@@ -2,7 +2,7 @@
 # This script is a modified version of "Running Individual Year Model.R"
 # I inherited it from Josh Stewart in early 2022.
 
-# In this version (v3), I try Poisson likelihood instaed of binomial. 
+# In this version (v4), weekly sum and the binomial likelihood. 
 
 rm(list=ls())
 library(jagsUI)
@@ -13,7 +13,7 @@ library(bayesplot)
 source("Piedras_Blancas_fcns.R")
 
 save.files <- F
-savre.figs <- T
+save.figs <- T
 
 #FILES <- list.files(pattern = ".csv$")
 data.path <- "data/Formatted Annual Data/"
@@ -134,8 +134,8 @@ p.PvsV4 <- ggplot(data = estimates.PandV4) +
                  color = Method)) +
   geom_ribbon(aes(x = Year, 
                   ymin = LCL, ymax = UCL, fill = Method),
-              alpha = 0.4)+
-  title("Perryman vs V4 (weekly + binomial)")
+              alpha = 0.4) +
+  labs(title = "Perryman vs V4 (weekly + binomial)")
 
 if (save.figs)
   ggsave(p.PvsV4, filename = "figures/WayneVsV4.png",
@@ -151,7 +151,7 @@ Estimates.V1 <- apply(Estimates.samples.V1, MARGIN = 2,
                         return(c(mean, qtiles))}) %>%
   t() %>% data.frame() %>%
   mutate(Year = years,
-         Method = "V1")
+         Method = "v1")
 
 colnames(Estimates.V1) <- c("Mean", "LCL", "Median", "UCL", "Year", "Method")
 
@@ -170,7 +170,7 @@ p.V1vsV4 <- ggplot(data = estimates.V1andV4) +
   geom_ribbon(aes(x = Year, 
                   ymin = LCL, ymax = UCL, fill = Method),
               alpha = 0.4) +
-  title("V1 (Stewwart) vs V4 (weekly + binomial)")
+  labs(title = "V1 (Stewwart) vs V4 (weekly + binomial)")
 
 if (save.figs)
   ggsave(p.V1vsV4, filename = "figures/V1VsV4.png",

@@ -12,6 +12,7 @@ library(bayesplot)
 
 source("Piedras_Blancas_fcns.R")
 
+save.figs <- T
 #FILES <- list.files(pattern = ".csv$")
 data.path <- "data/Formatted Annual Data/"
 FILES <- list.files(path = data.path, 
@@ -128,8 +129,11 @@ p.PvsV3 <- ggplot(data = estimates.PandV3) +
   geom_ribbon(aes(x = Year, 
                   ymin = LCL, ymax = UCL, fill = Method),
               alpha = 0.4)+
-  title("Perryman vs V3 (weekly + Poisson)")
+  labs(title = "Perryman vs V3 (weekly + Poisson)")
 
+if (save.figs)
+  ggsave(p.VvsV3, filename = "figures/PVsV3.png",
+         device = "png", dpi = 600)
 
 # compare to V1
 Estimates.samples.V1 <- read.csv("data/Updated Calf Estimates 1994-2019.csv")
@@ -155,7 +159,10 @@ p.V1vsV3 <- ggplot(data = estimates.V1andV3) +
   geom_ribbon(aes(x = Year, 
                   ymin = LCL, ymax = UCL, fill = Method),
               alpha = 0.4) +
-  title("V1 (Stewwart) vs V3 (weekly + Poisson)")
+  labs(title = "V1 (Stewwart) vs V3 (weekly + Poisson)")
 
+if (save.figs)
+  ggsave(p.V1vsV3, filename = "figures/V1VsV3.png",
+         device = "png", dpi = 600)
 
 # They are identical (almost)

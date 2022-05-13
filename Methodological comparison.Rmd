@@ -1,0 +1,99 @@
+---
+title: "Comparing approaches by Perryman et al. and Stewart and Weller"
+output: html_notebook
+---
+
+This document describes the difference between the approaches taken by Perryman et al. (YR) and Stewart and Weller (2021), P and S/W respectively hereafter. Estimates of calf productions differ slightly between the two methods, where the S/W approach results in higher estimates than the P approach.
+
+In this notebook, I explain why they are different analytically. 
+
+I use the following notation.
+
+$e_{t,i}$: The number of survey hours during the $i$th week of year $t$, where $i = 1, \dots, I_t$ and $I_t$ is the number of weeks survey was conducted for year $t$.
+
+$E_{t,i}$: The number of 3-hr watch periods with > 0 hrs of survey during the $i$th week of year $t$
+
+$n_{t,i}$: Total number of observed calves during the $i$th week of year $t$
+
+$\hat{n}_{t,i}$: "Adjusted" number of sightings during the $i$th week of year $t$; $\hat{n}_{t,i} = \frac{3n_{t,i}}{e_{t,i}}$
+
+
+$\hat{p}$: Probability of detecting a mother-calf pair ($\hat{p}$ = 0.889)
+
+$SE(\hat{p})$: Standard error of $\hat{p}$ ($SE(\hat{p})$ = 0.06375)
+
+$\hat{N}_{t,i}$: Annual calf abundance for the $i$th week of year $t$
+
+In the analysis, the sampling unit is a 3-hr watch period (shift). There are 12 possible hours of observation in a day. It is assumed that the same number of whales moves through the sampling area while there are no observers, e.g., night time and unsuitable weather conditions for observation effort. There are 168 hrs in a week (24 x 7), which equates to 56 possible shifts (168/3). 
+
+In Weller and Perryman, the total abundance during the $i$th week of year $t$ was estimated by using the following estimator:
+
+\[
+\hat{N}_{t,i} = \frac{168}{e_{t,i}} \frac{n_{t,i}}{\hat{p}}
+\]
+
+The total abundance for the entire year ($t$) is:
+
+\[
+\hat{N}_{t} = \sum_{i=1}^{I_t} \hat{N}_{t,i} 
+\]
+
+The variance of $\hat{N}$ was computed using a Taylor expansion (Weller and Perryman). The Excel spreadsheet contained the following equation:
+
+\[
+\begin{aligned}
+var({\hat{N}}_t) & = \sum_{i=1}^{I_t} 56^2 (1 - \frac{E_{t,i}}{56}) (\frac{1}{E_i}) var(\hat{n}_{t,i}) + \sum_{i=1}^{I_t} \hat{N}_{t,i} (\frac{1-\hat{p}}{\hat{p}}) (1 + \frac{var(\hat{p})}{\hat{p}^2}) + \frac{var(\hat{p})}{\hat{p}^2} (\sum_{i=1}^{I_t} \hat{N}_{t,i})^2
+\end{aligned}
+\]
+
+This equation is not intuitive. In the abundance estimator, survey effort was measured in hours (168 hrs = 24 hrs $\times$ 7 days). In the variance estimator, however, the effort is measured in the number of 3-hr watch periods with >0 hrs of effort (56 = 168/3).  
+
+Because the total abundance for year $t$ is a sum of estimates over the $I_t$ weeks, the variance of $\hat{N}_t$ can be expressed in the following:
+
+\[
+\begin{aligned}
+var(\hat{N}_t) & = var(\sum_{i=1}^{I_t} \hat{N}_{t,i})\\
+&= var(\hat{N}_{t,1} + \hat{N}_{t,2} + \dots + \hat{N}_{t,I_t}) \\
+&= \sum_{i=1}^{I_t} var(\hat{N}_{t,i}) + 2\sum_{i<j} cov(\hat{N}_{t,i}, \hat{N}_{t,j})
+\end{aligned}
+\]
+
+The variance of each $\hat{N}_{t,i}$ can be derived using the estimator of the abundance: 
+
+\[
+\begin{aligned} 
+var(\hat{N}_{t,i}) & = var(\frac{168}{e_{t,i}} \frac{n_{t,i}}{\hat{p}}) \\
+ & = 168^2 var(\frac{1}{e_{t,i}} \frac{n_{t,i}}{\hat{p}}) \\
+ & = 168^2 var(\frac{n_{t,i}}{e_{t,i}\hat{p}})
+\end{aligned}
+\]
+
+If we treat the estimator as a function of $e_{t,i}$, $n_{t,i}$, and $\hat{p}$, i.e., $\hat{N}_{t,i} = f(e_{t,i}, n_{t,i}, \hat{p})$ and using the Delta method, the variance of $\hat{N}_{t,i}$ is:
+
+\[
+\begin{aligned}
+var(\hat{N}_{t,i}) &= (\frac{\partial f}{\partial e_{t,i}})^2 var(e_{t,i}) + (\frac{\partial f}{\partial n_{t,i}})^2 var(n_{t,i}) + (\frac{\partial f}{\partial \hat{p}})^2 var(\hat{p}) + 2\frac{\partial f}{\partial E_{t,i}}\frac{\partial f}{\partial n_{t,i}} cov(E_{t,i}, n_{t,i}) + 2\frac{\partial f}{\partial e_{t,i}}\frac{\partial f}{\partial \hat{p}} cov(e_{t,i}, \hat{p}) +  2\frac{\partial f}{\partial n_{t,i}}\frac{\partial f}{\partial \hat{p}} cov(n_{t,i}, \hat{p})
+\end{aligned}
+\]
+
+
+The partial derivatives are (I omit subscripts to increase legibility):
+
+\[
+\begin{aligned}
+\frac{\partial f}{\partial e} = \frac{168 n}{e^2 \hat{p}}
+\end{aligned}
+\]
+
+\[
+\begin{aligned}
+\frac{\partial f}{\partial n} = \frac{168}{e \hat{p}}
+\end{aligned}
+\]
+
+\[
+\begin{aligned}
+\frac{\partial f}{\partial \hat{p}} = \frac{168 n}{e \hat{p}^2}
+\end{aligned}
+\]
+
