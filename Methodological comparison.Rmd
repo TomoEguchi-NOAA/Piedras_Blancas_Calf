@@ -128,7 +128,10 @@ for(i in 1:length(FILES)){
   data <- read.csv(paste0(data.path, FILES[i]))
   data$Effort[is.na(data$Effort)] <- 0
   
-  # Method of Weller & Perryman
+  # Method of Weller & Perryman - extracted from Excel spreadsheet
+  # No explanations were available as of May 2022. Supposed to be
+  # a Taylor series expansion of Nhat to compute the variance.
+  # It's unclear how these equations were derived. 
   data %>% filter(Effort > 0) %>%
     mutate(adj.n = ifelse(Effort > 0, 
                           3 * Sightings/Effort, 0),           # Column E
@@ -179,7 +182,11 @@ for(i in 1:length(FILES)){
 
 In the Weller/Perryman method, the observed number of whales was "corrected" for the estimated sighting probability when there was at least one pair was sighted. When no whale was sighted, however, zero whale was considered to be recorded without error. In reality, however, there was non zero probability of recording zero, when at least one whale was present in the study area. Consequently, there was negative bias in the Weller/Perryman method. 
 
-Compare different approaches:
+For the comparison between using daily and weekly counts, they should be close to identical because the "true" daily counts within a week are treated as independent observations from a Poisson distribution with the same mean. A sum of independent Poisson random variables is also a Poisson distribution. 
+
+A better approach may be to treat the true count as an autoregressive parameter? 
+
+Numerically compare different approaches:
 ```{r}
 
 # get data
@@ -231,7 +238,8 @@ Figures
 ```{r}
 estimates.all <- rbind(Estimates.V1 %>% select(Year, Mean, LCL, UCL, Method),
                        Estimates.V3 %>% select(Year, Mean, LCL, UCL, Method),
-                       Estimates.V4 %>% select(Year, Mean, LCL, UCL, Method),                         Estimates.V5 %>% select(Year, Mean, LCL, UCL, Method),
+                       Estimates.V4 %>% select(Year, Mean, LCL, UCL, Method),       
+                       Estimates.V5 %>% select(Year, Mean, LCL, UCL, Method),
                        Estimates.WP %>% select(Year, Mean, LCL, UCL, Method))
 
 # WayneVsV4.lm.data <- data.frame(Mean.Wayne = WayneShort$Mean,
@@ -256,5 +264,8 @@ p.comparison <- ggplot(data = estimates.all) +
 
 
 ```
+
+So, pooling data by week does not affect the outcome. Using the Poisson likelihood (v5) with weekly counts results in greater estimates than when the binomial likelihood (v1) used. When daily counts were used, the Poisson likelihood (v3) and the binomial likelihoods (v4) resulted in similar estimates.
+
 
 

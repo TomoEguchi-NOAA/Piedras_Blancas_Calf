@@ -22,9 +22,10 @@
 
           # watch period is 3 hours, so any amount of effort 
           # below 3 hours scales the observation probability accordingly:      
-          p.obs.corr[y,i] <- p.obs * effort[y,i]/3 
+          p.obs.corr[y,i] <- p.obs * effort[y,i]/3
         
           count.obs[y,i] ~ dbin(p.obs.corr[y, i], count.true[y, i])
+          loglik[y,i] <- logdensity.bin(count.obs[y,i], p.obs.corr[y,i], count.true[y,i])
         }#i
 
         Total.Calves[y] <- sum(count.true[y, 1:n.obs[y]])
