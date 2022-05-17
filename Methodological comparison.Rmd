@@ -262,10 +262,10 @@ p.comparison <- ggplot(data = estimates.all) +
   #             alpha = 0.4) +
   labs(title = "Comparison of diffrent approaches")
 
-
+p.comparison
 ```
 
-So, pooling data by week does not affect the outcome. Using the Poisson likelihood (v5) with weekly counts results in greater estimates than when the binomial likelihood (v1) used. When daily counts were used, the Poisson likelihood (v3) and the binomial likelihoods (v4) resulted in similar estimates.
+So, pooling data by week does not affect the outcome. Using the Poisson likelihood (v5) with weekly counts results in greater estimates than when the binomial likelihood (v1) is used. When per-shift counts were used, Poisson (v3) and binomial likelihoods (v4) resulted in similar estimates.
 
 
 
