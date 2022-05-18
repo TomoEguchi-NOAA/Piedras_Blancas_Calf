@@ -1,0 +1,103 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+In this document, I explain my logic for developing a new approach to analyzing the gray whale calf production dataset (Piedras Blancas). The previous approaches (Weller and Perryman 2012, Stewart and Weller 2021) had some unplausible assumptions. I explore the dataset first then develop a new approach that has fewer assumptions than the previous approaches. 
+
+This needs to get it done from the ground up as I don't have real raw data files... 2022-05-18
+
+
+
+```{r setup-and-data}
+
+rm(list=ls())
+library(jagsUI)
+library(tidyverse)
+library(lubridate)
+library(bayesplot)
+
+#FILES <- list.files(pattern = ".csv$")
+data.path <- "data/Formatted Annual Data/"
+FILES <- list.files(path = data.path, 
+                    pattern = "Formatted.csv")
+
+MCMC.params <- list(n.samples = 500000,
+                    n.thin = 100,
+                    n.burnin = 300000,
+                    n.chains = 3)
+
+n.samples <- MCMC.params$n.chains * ((MCMC.params$n.samples - MCMC.params$n.burnin)/MCMC.params$n.thin)
+
+# get data
+col.defs <- cols(Week = col_integer(),
+                Date = col_date(format = "%d-%b-%y"),
+                Effort = col_double(),
+                Sightings = col_integer())
+
+count.obs <- effort <- week <- date <- n.obs <- n.weeks <- list()
+years <- vector(mode = "numeric", length = length(FILES))
+
+i <- 25
+for(i in 1:length(FILES)){
+  
+  data <- read_csv(paste0(data.path, FILES[i]), 
+                   col_types = col.defs)
+  data$Effort[is.na(data$Effort)] <- 0
+  
+  years[i] <- as.numeric(str_split(FILES[i], " Formatted.csv")[[1]][1])  
+  count.obs[[i]] <- data$Sightings
+  effort[[i]] <- data$Effort
+  week[[i]] <- data$Week
+  date[[i]] <- data$Date
+  n.obs[[i]] <- length(data$Sightings)
+  n.weeks[[i]] <- max(data$Week)
+  
+}
+
+n.obs.vec <- unlist(n.obs)
+n.weeks.vec <- unlist(n.weeks)
+date.mat <- week.mat <- effort.mat <- count.obs.mat <- matrix(data = NA, 
+                                                              nrow = length(FILES),
+                                                              ncol = max(n.obs.vec))
+
+# prepare data matrices
+for (k in 1:length(FILES)){
+
+  count.obs.mat[k, 1:n.obs[[k]]] <- count.obs[[k]]
+  effort.mat[k, 1:n.obs[[k]]] <- effort[[k]]
+  week.mat[k, 1:n.obs[[k]]] <- week[[k]]
+  date.mat[k, 1:n.obs[[k]]] <- date[[k]]
+  
+}#k
+
+cumsum.count <- apply(count.obs.mat, 
+                      MARGIN = 1, 
+                      FUN = cumsum) %>% t()
+
+count.obs.long.df <- data.frame(count.obs.mat ) %>%
+  pivot_longer(everything(), 
+               names_to = "name", 
+               values_to = "counts") -> tmp
+  select(-name) %>%
+  mutate(year = rep(years, each = ncol(count.obs.mat)),
+         day = rep(1:ncol(count.obs.mat), nrow(count.obs.mat)))
+
+cumsum.count.obs.long.df <- data.frame(cumsum.count) %>%
+  pivot_longer(everything(), 
+               names_to = "name", 
+               values_to = "counts") %>%
+  select(-name) %>%
+  mutate(year = rep(years, each = ncol(count.obs.mat)),
+         day = rep(1:ncol(count.obs.mat), nrow(count.obs.mat)))
+
+```
+
+Take a look at the data:
+
+```{r data}
+ggplot(count.obs.long.df %>% filter(year == 1995)) +
+  geom_point(aes(x = day, y = counts))
+
+```
+
