@@ -1,0 +1,137 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This notebook is used to extract data from original data files in the Excel format. Because the file format changes over time, each year is done separately. 
+
+```{r setup}
+rm(list=ls())
+library(tidyverse)
+library(lubridate)
+library(readxl)
+
+# Function to convert character time (e.g., 1349) to minutes from 
+# a particular start time of the day (e.g., 0700). Default is midnight (0000)
+# Use as char_time2min(x, origin = "0000"). 
+char_time2min <- function(x, origin = "0000"){
+  chars.origin <- strsplit(origin, split = "") %>% unlist
+  if (length(chars.origin) == 3){
+    hr <- as.numeric(chars.origin[1])
+    m <- as.numeric(c(chars.origin[2:3]))
+    M.0 <- hr * 60 + m[1] * 10 + m[2]
+  } else {
+    hr <- as.numeric(chars.origin[1:2])
+    m <- as.numeric(c(chars.origin[3:4]))
+    M.0 <- (hr[1] * 10 + hr[2]) * 60 + m[1] * 10 + m[2]
+  }
+  
+  if (!is.na(x)){
+    chars <- strsplit(x, split = "") %>% unlist()
+    if (length(chars) == 3){
+      hr <- as.numeric(chars[1])
+      m <- as.numeric(c(chars[2:3]))
+      M.1 <- (hr * 60 + m[1] * 10 + m[2])
+    } else {
+      hr <- as.numeric(chars[1:2])
+      m <- as.numeric(c(chars[3:4]))
+      M.1 <- (hr[1] * 10 + hr[2]) * 60 + m[1] * 10 + m[2]
+    }
+  } else {
+    M.1 <- NA
+  }
+  
+  if (!is.na(M.1)){
+    if (M.1 >= M.0){
+      out <- M.1 - M.0
+    } else {
+      out <- 1440 - (M.0 - M.1)
+    }
+    
+  } else {
+    out <- NA
+  }
+  
+  return(out)
+}
+
+find.shift <- function(x0){
+  x <- as.numeric(x0)
+  if (!is.na(x)){
+    if (x <= 600){
+      shift <- 1
+    } else if (x > 600 & x <= 780) {
+      shift <- 2
+    } else if (x > 780 & x <= 960){
+      shift <- 3
+    } else if (x > 960 & x <= 1140){
+      shift <- 4
+    } else {
+      shift <- NA
+    }
+  } else {
+    shift <- NA
+  }
+  return(shift)
+}
+
+
+data.dir <- "data/All data/"
+```
+
+
+## 1994
+
+```{r}
+dir.name <- "C_C 1994"
+start.time <- "630"
+xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
+
+data.inshore.1994 <- read_excel(paste0(data.dir, dir.name, "/", xls.files[1]),
+                                sheet = "INSHORE LOG",
+                                col_types = c("date", "numeric", "text", 
+                                              "numeric", "numeric",
+                                              "numeric", "numeric", "text", 
+                                              "text")) %>% 
+  select(Date, Event, Time, "Obs. Code", "Sea State", "Vis. IN", "Cow  / Calf") %>%
+  transmute(Date = Date,
+            Event = Event,
+            Time = Time,
+            Time_minutes = sapply(Time, FUN = char_time2min, start.time),
+            Time_0000 = sapply(Time, FUN = char_time2min),
+            Shift = sapply(Time_0000, FUN = find.shift),
+            Obs = `Obs. Code`,
+            SeaState = `Sea State`,
+            Vis = `Vis. IN`,
+            Mother_Calf = `Cow  / Calf`,
+            Year = 1994,
+            Area = "inshore")
+
+# Somehow read_xls can't bring in the date column correctly
+data.offshore.1994 <- read_excel(paste0(data.dir, dir.name, "/", xls.files[2]),
+                                 col_types = c("date", "numeric", "text", 
+                                               "numeric", "numeric",
+                                               "numeric", "numeric", "numeric", 
+                                               "text", "text")) %>%
+  select(Date, Event, Time, Obs., `Sea State`, 
+         `Vis. Code`, `Cow/Calf`, `Ad./Juv.`) %>%
+  transmute(Date = Date,
+            Event = Event,
+            Time = Time,
+            Time_minutes = sapply(Time, FUN = char_time2min, start.time),
+            Time_0000 = sapply(Time, FUN = char_time2min),
+            Shift = sapply(Time_0000, FUN = find.shift),
+            Obs = Obs.,
+            SeaState = `Sea State`,
+            Vis = `Vis. Code`,
+            Mother_Calf = `Cow/Calf`,
+            Year = 1994,
+            Area = "offshore")
+
+data.1994 <- rbind(data.inshore.1994, data.offshore.1994) %>% 
+  arrange(Date, Time_minutes)
+
+data.1994 %>% summarise()
+
+```
+

@@ -18,9 +18,9 @@ library(lubridate)
 library(bayesplot)
 
 #FILES <- list.files(pattern = ".csv$")
-data.path <- "data/Formatted Annual Data/"
+data.path <- "data/Raw data/"
 FILES <- list.files(path = data.path, 
-                    pattern = "Formatted.csv")
+                    pattern = ".csv")
 
 MCMC.params <- list(n.samples = 500000,
                     n.thin = 100,
@@ -31,73 +31,415 @@ n.samples <- MCMC.params$n.chains * ((MCMC.params$n.samples - MCMC.params$n.burn
 
 # get data
 col.defs <- cols(Week = col_integer(),
-                Date = col_date(format = "%d-%b-%y"),
-                Effort = col_double(),
-                Sightings = col_integer())
+                 Date = col_character(), #col_date(format = "%d-%b-%y"),
+                 Effort = col_double(),
+                 Sightings = col_integer())
 
-count.obs <- effort <- week <- date <- n.obs <- n.weeks <- list()
+count.obs <- effort <- week <- date <- n.obs <- n.weeks <- all.data <- list()
 years <- vector(mode = "numeric", length = length(FILES))
 
-i <- 25
+i <- 6
 for(i in 1:length(FILES)){
   
   data <- read_csv(paste0(data.path, FILES[i]), 
                    col_types = col.defs)
   data$Effort[is.na(data$Effort)] <- 0
   
-  years[i] <- as.numeric(str_split(FILES[i], " Formatted.csv")[[1]][1])  
+  years[i] <- as.numeric(str_split(FILES[i], ".csv")[[1]][1])  
   count.obs[[i]] <- data$Sightings
   effort[[i]] <- data$Effort
   week[[i]] <- data$Week
-  date[[i]] <- data$Date
+  date.tmp <- data$Date
+  shift.vec <- vector(mode = "numeric", length(date.tmp))
+  
+  for (k in 1:length(date.tmp)){
+    if (!is.na(date.tmp[k])){
+      new.date <- date.tmp[k]
+    } else {
+      date.tmp[k] <- new.date
+    }
+  }
+  
+  new.date <- date.tmp[1]
+  shift.vec[1] <- 1
+  for (k in 2:length(date.tmp)){
+    if (date.tmp[k] == new.date){
+      shift.vec[k] <- shift.vec[k-1] + 1
+    } else {
+      new.date <- date.tmp[k]
+      shift.vec[k] <- 1
+    }
+  }
+  
+  if (length(str_split(date.tmp[1], "-") %>% unlist()) == 2){
+    date.tmp <- paste0(date.tmp, "-", years[i])
+    date[[i]] <- as.Date(date.tmp, format = "%d-%b-%Y")
+  } else {
+    yr.tmp <- str_split(date.tmp[1], "-") %>% unlist()
+    if (as.numeric(yr.tmp[3]) < 100){
+      date[[i]] <- as.Date(date.tmp, format = "%d-%b-%y")      
+    } else {
+      date[[i]] <- as.Date(date.tmp, format = "%d-%b-%Y")      
+    }
+
+  }
+
+  all.dates <- seq.Date(from = min(date[[i]]), 
+                        to = max(date[[i]]),
+                        by = "day") 
+
+  weeks <- seq.Date(from = min(date[[i]]), 
+                    to = max(date[[i]] + days(6)),
+                    by = "week") 
+
+  week.vec <- vector(mode = "numeric", length = length(all.dates))
+  for (w in 2:length(weeks)){
+    week.vec[all.dates < weeks[w] & all.dates >= weeks[w-1]] <- w-1
+  }
+  
+  # Make a template data.frame with filled in dates, shifts, and weeks
+  tmp.df.1 <- data.frame(Date = all.dates %>% rep(each = 8),
+                         Shift = rep(1:8, times = length(all.dates)),
+                         Week = week.vec %>% rep(each = 8),
+                         Seq.idx = 1:(length(all.dates)*8))
+  
+  # combine all necessary information and create a data.frame
+  tmp.df.2 <- data.frame(Date = date[[i]],
+                         Week = week[[i]],
+                         Shift = shift.vec,
+                         Effort = effort[[i]],
+                         Count = count.obs[[i]])
+  
+  # combine the two data frames to make one. 
+  tmp.df.1 %>% 
+    left_join(tmp.df.2, by = c("Date", "Shift", "Week")) -> all.data[[i]]
+
   n.obs[[i]] <- length(data$Sightings)
   n.weeks[[i]] <- max(data$Week)
   
 }
 
-n.obs.vec <- unlist(n.obs)
-n.weeks.vec <- unlist(n.weeks)
-date.mat <- week.mat <- effort.mat <- count.obs.mat <- matrix(data = NA, 
-                                                              nrow = length(FILES),
-                                                              ncol = max(n.obs.vec))
-
-# prepare data matrices
-for (k in 1:length(FILES)){
-
-  count.obs.mat[k, 1:n.obs[[k]]] <- count.obs[[k]]
-  effort.mat[k, 1:n.obs[[k]]] <- effort[[k]]
-  week.mat[k, 1:n.obs[[k]]] <- week[[k]]
-  date.mat[k, 1:n.obs[[k]]] <- date[[k]]
+all.data.2 <- lapply(all.data, FUN = function(x){
+  x %>% mutate(Year = year(Date),
+               n.hat = (Count * 3)/Effort) -> tmp
+  tmp[is.na(tmp)] <- 0
   
-}#k
+  tmp %>% 
+    mutate(cumsum.nhat = cumsum(n.hat),
+           DOY = (Date - as.Date(paste0(year(Date), "-01-01"))) %>%
+             as.numeric()) -> tmp
+  return(tmp)
+})
 
-cumsum.count <- apply(count.obs.mat, 
-                      MARGIN = 1, 
-                      FUN = cumsum) %>% t()
-
-count.obs.long.df <- data.frame(count.obs.mat ) %>%
-  pivot_longer(everything(), 
-               names_to = "name", 
-               values_to = "counts") -> tmp
-  select(-name) %>%
-  mutate(year = rep(years, each = ncol(count.obs.mat)),
-         day = rep(1:ncol(count.obs.mat), nrow(count.obs.mat)))
-
-cumsum.count.obs.long.df <- data.frame(cumsum.count) %>%
-  pivot_longer(everything(), 
-               names_to = "name", 
-               values_to = "counts") %>%
-  select(-name) %>%
-  mutate(year = rep(years, each = ncol(count.obs.mat)),
-         day = rep(1:ncol(count.obs.mat), nrow(count.obs.mat)))
+count.long.df <- do.call(rbind, all.data.2)
 
 ```
 
 Take a look at the data:
 
-```{r data}
-ggplot(count.obs.long.df %>% filter(year == 1995)) +
-  geom_point(aes(x = day, y = counts))
+```{r plot-cumsum-1990s}
+ggplot(count.long.df %>% filter(Year < 2000)) +
+  geom_point(aes(x = DOY, y = cumsum.nhat)) +
+  facet_wrap(Year ~., nrow = 3)
 
 ```
+
+```{r plot-cumsum-2000-1}
+ggplot(count.long.df %>% filter(Year > 1999, Year < 2012)) +
+  geom_point(aes(x = DOY, y = cumsum.nhat)) +
+  facet_wrap(Year ~., nrow = 3)
+
+
+
+```
+
+
+```{r plot-cumsum-2000-2}
+ggplot(count.long.df %>% filter(Year > 2011, Year < 2022)) +
+  geom_point(aes(x = DOY, y = cumsum.nhat)) +
+  facet_wrap(Year ~., nrow = 3)
+
+
+
+
+```
+
+
+Next, look at how the counts change within each year:
+
+
+```{r plot-nhat-1990s}
+ggplot(count.long.df %>% filter(Year < 2000)) +
+  geom_point(aes(x = DOY, y = n.hat)) +
+  facet_wrap(Year ~., nrow = 3)
+
+
+
+
+```
+
+
+```{r plot-nhat-2000-1}
+ggplot(count.long.df %>% filter(Year > 1999, Year < 2012)) +
+  geom_point(aes(x = DOY, y = n.hat)) +
+  facet_wrap(Year ~., nrow = 3)
+
+
+
+```
+
+
+```{r plot-nhat-2000-2}
+ggplot(count.long.df %>% filter(Year > 2011, Year < 2022)) +
+  geom_point(aes(x = DOY, y = n.hat)) +
+  facet_wrap(Year ~., nrow = 3)
+
+
+
+
+```
+
+There are many zeros... so I should look into zero-inflated models. For non-zero values, there are some "trends" in the maximum number of counts per shift, where they increase to the mid-season and then decreases. So, independence of each shift is not defensible. Although... the sighting condition changes rapidly, so statistical autocorrelation probably is not going to tell us about the correlations. Some zeros are real zeros (i.e., no whales) and others are un-observed zeros. These two kinds of zeros need to be modeled separately. 
+
+Using non-zero effort:
+
+
+```{r plot-nhat-nonzero-effort-1990s}
+ggplot(count.long.df %>% filter(Year < 2000, Effort > 0)) +
+  geom_point(aes(x = DOY, y = n.hat, color = factor(Shift))) +
+  facet_wrap(Year ~., nrow = 3)
+
+
+```
+
+
+```{r plot-nhat-nonzero-effort-2000-1}
+ggplot(count.long.df %>% filter(Year > 1999, Year < 2012, Effort > 0)) +
+  geom_point(aes(x = DOY, y = n.hat, color = factor(Shift))) +
+  facet_wrap(Year ~., nrow = 3)
+
+```
+
+
+```{r plot-nhat-nonzer-effort-2000-2}
+ggplot(count.long.df %>% filter(Year > 2011, Year < 2022, Effort > 0)) +
+  geom_point(aes(x = DOY, y = n.hat, color = factor(Shift))) +
+  facet_wrap(Year ~., nrow = 3)
+
+
+```
+
+
+
+```{r plot-n-nonzero-effort-1990s}
+ggplot(count.long.df %>% filter(Year < 2000, Effort > 0)) +
+  geom_point(aes(x = Effort, y = Count, color = DOY)) +
+  facet_wrap(Year ~., nrow = 3)
+
+
+```
+
+
+```{r plot-n-nonzero-effort-2000-1}
+ggplot(count.long.df %>% filter(Year > 1999, Year < 2012, Effort > 0)) +
+  geom_point(aes(x = Effort, y = Count, color = DOY)) +
+  facet_wrap(Year ~., nrow = 3)
+
+```
+
+```{r}
+
+ggplot(count.long.df %>% filter(Year > 2011, Year < 2022, Effort > 0)) +
+  geom_point(aes(x = Effort, y = Count, color = DOY)) +
+  facet_wrap(Year ~., nrow = 3)
+
+```
+
+Not surprisingly, more whales are sighted when the effort was longer, although zero counts are made as well. 
+
+
+From what I have so far, how do DOY and the shift duration affect the number of observed whales. Use GAMs to look at how various factors affect the number of observed whales. 
+
+```{r gam.1, cache=T}
+library(mgcv)
+library(tidymv)
+
+gam.1 <- gam(log(Count+1) ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
+             data = count.long.df, 
+             family = "tw")
+
+summary(gam.1)
+```
+
+```{r gam.1.1, cache=T}
+gam.1.1 <- gam(log(Count+1) ~ s(Effort) + s(DOY, Year) + s(Week), 
+             data = count.long.df, 
+             family = "tw")
+
+summary(gam.1.1)
+
+```
+
+
+```{r gam.1.2, cache=T}
+gam.1.2 <- gam(log(Count+1) ~ s(Effort) + s(DOY, Year, Week), 
+             data = count.long.df, 
+             family = "tw")
+
+summary(gam.1.2)
+
+```
+
+
+
+```{r gam.1.3, cache=T}
+count.long.df %>% mutate(Year.f = factor(Year)) -> count.long.df
+
+gam.1.3 <- gam(log(Count+1) ~ Year.f + s(Effort) + s(DOY, by = Year.f) + s(Week), 
+             data = count.long.df, 
+             family = "tw")
+
+summary(gam.1.3)
+
+```
+<!-- Is it related to ENSO events? Extract MEI.v2 values (https://psl.noaa.gov/enso/mei/) -->
+
+<!-- ```{r} -->
+<!-- MEI.data <- read.delim(file = "~/Oceans and Maps/Ocenographic data/meiv2_2022-05-18.txt", header = F, -->
+<!--                        sep="", -->
+<!--                        col.names = c("Year", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) %>% -->
+<!--   pivot_longer(cols = "Jan":"Dec", names_to = "Month", values_to = "MEI") -->
+
+<!-- MEI.data %>% filter(Year %in% years) %>% -->
+<!--   group_by(Year) %>% -->
+<!--   summarize(MEI.yr = sum(MEI)) -> MEI.data.yr -->
+
+<!-- MEI.data %>%  -->
+<!--   filter(Year %in% (years-1)) %>% -->
+<!--   group_by(Year) %>% -->
+<!--   summarize(MEI.yr.1 = sum(MEI)) %>% -->
+<!--   mutate(Year = as.numeric(Year) + 1) -> MEI.data.yr.lag.1 -->
+
+<!-- count.long.df %>% left_join(MEI.data.yr, by = "Year") -> count.long.df -->
+<!-- count.long.df %>% left_join(MEI.data.yr.lag.1, by = "Year") -> count.long.df   -->
+
+
+<!-- gam.2 <- gam(Count ~ s(Effort) + s(DOY) + s(Year) +  -->
+<!--                s(Week) + s(MEI.yr) + s(MEI.yr.1),  -->
+<!--              data = count.long.df) -->
+<!-- ``` -->
+
+<!-- That was a bit of digression. They don't add much to explaining deviance. Don't bother it for now. Also, this won't help with filling in the missing data points. -->
+
+
+```{r gam.2, cache=T}
+gam.2 <- gam(Count ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
+             data = count.long.df, family = "ziP")
+
+summary(gam.2)
+```
+
+Tweedie seems to fit better. 
+
+
+```{r gam.3, cache=T}
+gam.3 <- gam(Count ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
+             data = count.long.df, family = "nb")
+
+summary(gam.3)
+```
+
+Negative binomial seems to fit even better. 
+
+
+
+```{r gam.3.1, cache=T}
+gam.3.1 <- gam(Count ~ s(Effort) + s(DOY, Year) + s(Week), 
+             data = count.long.df, family = "nb")
+
+summary(gam.3.1)
+```
+
+
+
+```{r gam.3.2, cache=T}
+gam.3.2 <- gam(Count ~ Year.f + s(Effort) + s(DOY, by = Year.f) + s(Week), 
+             data = count.long.df, 
+             family = "nb")
+
+summary(gam.3.2)
+```
+
+
+```{r gam.4, cache=T}
+gam.4 <- gam((Count+1) ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
+             data = count.long.df, family = "poisson")
+
+summary(gam.4)
+```
+
+Negative binomial seems to be the best. 
+
+```{r}
+plot_smooths(model = gam.3,
+             series = Effort,
+             transform = exp)
+
+```
+
+
+```{r}
+plot_smooths(model = gam.3,
+             series = DOY,
+             transform = exp)
+
+```
+
+
+
+```{r}
+plot_smooths(model = gam.3,
+             series = Week,
+             transform = exp)
+
+```
+
+
+```{r}
+plot_smooths(model = gam.3,
+             series = Year, 
+             series_length = 40,
+             transform = exp)
+
+```
+
+The cyclical nature of the year effect is interesting... 
+
+Effects of DOY, Year, and Week seem to be quite small... 
+
+prediction using the gam model
+```{r}
+pred.data <- count.long.df %>% 
+  mutate(Effort = 3)
+
+gam.3.2.pred <- predict.gam(gam.3.2,
+                          type = "response",
+                          se.fit = T)
+
+pred.data %>% 
+  mutate(prediction = gam.3.2.pred$fit,
+         LCL = gam.3.2.pred$fit - gam.3.2.pred$se.fit * 1.96,
+         UCL = gam.3.2.pred$fit + gam.3.2.pred$se.fit * 1.96) -> pred.data
+
+ggplot(data = pred.data) +
+  geom_point(aes(x = Count, 
+                 y = prediction)) +
+  geom_errorbar(aes(x = Count, ymin = LCL, ymax = UCL))
+```
+
+
+It does pretty good job for counts that are less than 5, but larger values fail pretty badly. The model fit is okay just because of that. But, the larger values are as important, even though they don't happen too often... 
+
+I need to build a year-specific model to fill in the gaps. 
+
 
