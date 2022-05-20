@@ -10,128 +10,727 @@ rm(list=ls())
 library(tidyverse)
 library(lubridate)
 library(readxl)
-
-# Function to convert character time (e.g., 1349) to minutes from 
-# a particular start time of the day (e.g., 0700). Default is midnight (0000)
-# Use as char_time2min(x, origin = "0000"). 
-char_time2min <- function(x, origin = "0000"){
-  chars.origin <- strsplit(origin, split = "") %>% unlist
-  if (length(chars.origin) == 3){
-    hr <- as.numeric(chars.origin[1])
-    m <- as.numeric(c(chars.origin[2:3]))
-    M.0 <- hr * 60 + m[1] * 10 + m[2]
-  } else {
-    hr <- as.numeric(chars.origin[1:2])
-    m <- as.numeric(c(chars.origin[3:4]))
-    M.0 <- (hr[1] * 10 + hr[2]) * 60 + m[1] * 10 + m[2]
-  }
-  
-  if (!is.na(x)){
-    chars <- strsplit(x, split = "") %>% unlist()
-    if (length(chars) == 3){
-      hr <- as.numeric(chars[1])
-      m <- as.numeric(c(chars[2:3]))
-      M.1 <- (hr * 60 + m[1] * 10 + m[2])
-    } else {
-      hr <- as.numeric(chars[1:2])
-      m <- as.numeric(c(chars[3:4]))
-      M.1 <- (hr[1] * 10 + hr[2]) * 60 + m[1] * 10 + m[2]
-    }
-  } else {
-    M.1 <- NA
-  }
-  
-  if (!is.na(M.1)){
-    if (M.1 >= M.0){
-      out <- M.1 - M.0
-    } else {
-      out <- 1440 - (M.0 - M.1)
-    }
-    
-  } else {
-    out <- NA
-  }
-  
-  return(out)
-}
-
-find.shift <- function(x0){
-  x <- as.numeric(x0)
-  if (!is.na(x)){
-    if (x <= 600){
-      shift <- 1
-    } else if (x > 600 & x <= 780) {
-      shift <- 2
-    } else if (x > 780 & x <= 960){
-      shift <- 3
-    } else if (x > 960 & x <= 1140){
-      shift <- 4
-    } else {
-      shift <- NA
-    }
-  } else {
-    shift <- NA
-  }
-  return(shift)
-}
-
+source("Piedras_Blancas_fcns.R")
 
 data.dir <- "data/All data/"
+out.dir <- "data/Processed data/"
 ```
 
 
 ## 1994
 
 ```{r}
-dir.name <- "C_C 1994"
+Year <- 1994
+dir.name <- paste0("C_C ", Year)
 start.time <- "630"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
+xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
+xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 
-data.inshore.1994 <- read_excel(paste0(data.dir, dir.name, "/", xls.files[1]),
-                                sheet = "INSHORE LOG",
-                                col_types = c("date", "numeric", "text", 
-                                              "numeric", "numeric",
-                                              "numeric", "numeric", "text", 
-                                              "text")) %>% 
-  select(Date, Event, Time, "Obs. Code", "Sea State", "Vis. IN", "Cow  / Calf") %>%
-  transmute(Date = Date,
-            Event = Event,
-            Time = Time,
-            Time_minutes = sapply(Time, FUN = char_time2min, start.time),
-            Time_0000 = sapply(Time, FUN = char_time2min),
-            Shift = sapply(Time_0000, FUN = find.shift),
-            Obs = `Obs. Code`,
-            SeaState = `Sea State`,
-            Vis = `Vis. IN`,
-            Mother_Calf = `Cow  / Calf`,
-            Year = 1994,
-            Area = "inshore")
+sheet.name.inshore <- "INSHORE LOG"
+sheet.name.offshore <- NULL
+col.types.inshore <- c("date", "numeric", "text", 
+                       "numeric", "numeric",
+                       "numeric", "numeric", "text", 
+                       "text")
 
-# Somehow read_xls can't bring in the date column correctly
-data.offshore.1994 <- read_excel(paste0(data.dir, dir.name, "/", xls.files[2]),
-                                 col_types = c("date", "numeric", "text", 
-                                               "numeric", "numeric",
-                                               "numeric", "numeric", "numeric", 
-                                               "text", "text")) %>%
-  select(Date, Event, Time, Obs., `Sea State`, 
-         `Vis. Code`, `Cow/Calf`, `Ad./Juv.`) %>%
-  transmute(Date = Date,
-            Event = Event,
-            Time = Time,
-            Time_minutes = sapply(Time, FUN = char_time2min, start.time),
-            Time_0000 = sapply(Time, FUN = char_time2min),
-            Shift = sapply(Time_0000, FUN = find.shift),
-            Obs = Obs.,
-            SeaState = `Sea State`,
-            Vis = `Vis. Code`,
-            Mother_Calf = `Cow/Calf`,
-            Year = 1994,
-            Area = "offshore")
+col.types.offshore <- c("date", "numeric", "text", 
+                        "numeric", "numeric",
+                        "numeric", "numeric", "numeric", 
+                        "text", "text")
 
-data.1994 <- rbind(data.inshore.1994, data.offshore.1994) %>% 
-  arrange(Date, Time_minutes)
+col.names.inshore <- c("Date", "Event", "Time", "Obs. Code", 
+                       "Sea State", "Vis. IN", "Cow  / Calf")
 
-data.1994 %>% summarise()
+col.names.offshore <- c("Date", "Event", "Time", 
+                        "Obs.", "Sea State", 
+                        "Vis. Code", "Cow/Calf", "Ad./Juv.")
+
+data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                               col.types.inshore, col.types.offshore,
+                               col.names.inshore, col.names.offshore,
+                               Year, dir.name, 
+                               xls.file.name.inshore, xls.file.name.offshore,
+                               start.time)
+
+out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
+                            Year, ".csv")
+out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
+                              Year, ".csv")
+
+if (!file.exists(out.file.name.all))
+  write_csv(data.list$all,
+            file = out.file.name.all)
+
+if (!file.exists(out.file.name.shift))
+  write_csv(data.list$shift,
+            file = out.file.name.shift)
+
 
 ```
+
+
+## 1995
+
+```{r}
+Year <- 1995
+dir.name <- paste0("C_C ", Year)
+start.time <- "700"
+xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
+xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
+xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
+
+sheet.name.inshore <- "Inshore Data"
+sheet.name.offshore <- "Offshore Data"
+col.types.inshore <- c("date", "numeric", "text", "numeric", 
+                       "numeric", "numeric", "numeric", "numeric", 
+                       "text", "text", "text", "text", "text",
+                       "text", "text", "text")
+
+col.types.offshore <- c("date", "numeric", "text", "numeric", 
+                        "numeric", "numeric", "numeric", "numeric", 
+                        "numeric", "numeric", "numeric", "text")
+
+col.names.inshore <- c("Date",	"Event Code",	"Time",	"Observer Code",	
+                       "Sea State",	"Vis In",	"Vis Out",	"C/C Pairs",
+                       "Adults",	"JUV",	"In/Out",	"Time In",	
+                       "Time Out", "Reticle",	"Angle",	"Comments")
+
+col.names.offshore <- c("Date",	"Event",	"Time",	"OBS.",
+                        "Vis.",	"Sea",	"Cow/Calf",	"Adult",
+                        "JUV",	"Reticle",	"Angle",	"Comments")
+
+data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                          col.types.inshore, col.types.offshore,
+                          col.names.inshore, col.names.offshore,
+                          Year, dir.name, 
+                          xls.file.name.inshore, xls.file.name.offshore,
+                          start.time)
+
+out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
+                            Year, ".csv")
+out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
+                              Year, ".csv")
+
+if (!file.exists(out.file.name.all))
+  write_csv(data.list$all,
+            file = out.file.name.all)
+
+if (!file.exists(out.file.name.shift))
+  write_csv(data.list$shift,
+            file = out.file.name.shift)
+
+
+```
+
+
+
+## 1996
+
+```{r}
+Year <- 1996
+dir.name <- paste0("C_C ", Year)
+start.time <- "700"
+xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
+xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
+xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
+
+sheet.name.inshore <- "data"
+sheet.name.offshore <- "Sheet1"
+col.names.inshore <- c("DATE",	"EVENT CODE",	"TIME", "OBS.",	
+                       "SEA STATE",	"VIS (IN/OUT)",	"C/C")
+
+col.types.inshore <- c("date", "numeric", "text", "numeric", 
+                       "numeric", "text", "numeric", "numeric", 
+                       "numeric", "text", "text", "text", 
+                       "text", "text")
+
+col.names.offshore <- c("DATE",	"EVENT CODE",	"TIME", 	"OBS",
+                        "VIS",	"SEA ST.",	"C/C")
+
+col.types.offshore <- c("date", "numeric", "text", "numeric", 
+                        "numeric", "numeric", "numeric", "numeric", 
+                        "numeric", "text",  "text")
+
+
+data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                          col.types.inshore, col.types.offshore,
+                          col.names.inshore, col.names.offshore,
+                          Year, dir.name, 
+                          xls.file.name.inshore, xls.file.name.offshore,
+                          start.time)
+
+out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
+                            Year, ".csv")
+out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
+                              Year, ".csv")
+
+if (!file.exists(out.file.name.all))
+  write_csv(data.list$all,
+            file = out.file.name.all)
+
+if (!file.exists(out.file.name.shift))
+  write_csv(data.list$shift,
+            file = out.file.name.shift)
+
+
+```
+
+
+
+## 1997
+
+```{r}
+Year <- 1997
+dir.name <- paste0("C_C ", Year)
+start.time <- "630"
+xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
+xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
+xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
+
+sheet.name.inshore <- "LOGS"
+sheet.name.offshore <- "LOGS"
+
+col.names.inshore <- c("DATE",	"EVENT",	"TIME",	"OBSER" ,	
+                       "VIS I/O",	"SEA STATE", "C/C")
+
+col.types.inshore <- c("date", "numeric", "text", "numeric", 
+                       "numeric", "numeric", "text", "text", 
+                       "text", "text", "text", "text", 
+                       "text", "text")
+
+col.names.offshore <- c("DATE",	"EVENT CODE",	"TIME", "OBS",
+                        "VIS", "S STATE",	"COW/CA")
+
+col.types.offshore <- c("date", "numeric", "text", "numeric", 
+                        "numeric", "text", "text", "numeric", 
+                        "text", "text",  "numeric", "text")
+
+
+data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                          col.types.inshore, col.types.offshore,
+                          col.names.inshore, col.names.offshore,
+                          Year, dir.name, 
+                          xls.file.name.inshore, xls.file.name.offshore,
+                          start.time)
+
+out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
+                            Year, ".csv")
+out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
+                              Year, ".csv")
+
+if (!file.exists(out.file.name.all))
+  write_csv(data.list$all,
+            file = out.file.name.all)
+
+if (!file.exists(out.file.name.shift))
+  write_csv(data.list$shift,
+            file = out.file.name.shift)
+
+
+```
+
+
+
+## 1998
+
+```{r}
+Year <- 1998
+dir.name <- paste0("C_C ", Year)
+start.time <- "630"
+xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
+xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
+xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
+
+sheet.name.inshore <- "LOG"
+sheet.name.offshore <- "LOGS"
+
+col.names.inshore <- c("Date",	"Event Code",	"Time",	"Obs",
+                       "Vis (I/O)", "Sea State",	"c/c"	)
+
+col.types.inshore <- c("date", "numeric", "text", "numeric", 
+                       "numeric", "text", "numeric", "numeric", 
+                       "numeric", "text", "text", "text", 
+                       "text", "text")
+
+col.names.offshore <- c("Date",	"Event Code",	"Time",	"Obs",	
+                        "Vis",	"SeaState",	"c/c")
+
+col.types.offshore <- c("date", "numeric", "text", "numeric", 
+                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text",  "text", "text")
+
+
+data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                          col.types.inshore, col.types.offshore,
+                          col.names.inshore, col.names.offshore,
+                          Year, dir.name, 
+                          xls.file.name.inshore, xls.file.name.offshore,
+                          start.time)
+
+out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
+                            Year, ".csv")
+out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
+                              Year, ".csv")
+
+if (!file.exists(out.file.name.all))
+  write_csv(data.list$all,
+            file = out.file.name.all)
+
+if (!file.exists(out.file.name.shift))
+  write_csv(data.list$shift,
+            file = out.file.name.shift)
+
+
+```
+
+
+
+
+## 1999
+
+```{r}
+Year <- 1999
+dir.name <- paste0("C_C ", Year)
+start.time <- "630"
+xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
+xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
+xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
+
+sheet.name.inshore <- "DATA"
+sheet.name.offshore <- "DATA"
+
+col.names.inshore <- c("Date",	"Event Code",	"Time", 	"Obs. Code",
+                       "Vis", "Sea State", "C/C")
+
+col.types.inshore <- c("date", "numeric", "text", "numeric", 
+                       "numeric", "text", "numeric", "numeric", 
+                       "numeric", "text", "text", "text",
+                       "text", "text", "text")
+
+# data.out <- read_excel(xls.file.name.inshore,
+#                          sheet = sheet.name.inshore,
+#                          col_types = col.types.inshore)
+#                        
+# data.inshore <- get.data(Year = Year,
+#                            dir.name = dir.name,
+#                            xls.file.name = xls.file.name.inshore,
+#                            sheet.name = sheet.name.inshore,
+#                            col.types = col.types.inshore,
+#                            col.names = col.names.inshore,
+#                            area.name = "inshore",
+#                            start.time = start.time)
+
+col.names.offshore <- c("Date",	"Event Code",	"Time",	"Observer",	
+                        "Vis. Code",	"Sea State",	"C/C")
+
+col.types.offshore <- c("date", "numeric", "text", "numeric", 
+                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text",  "text", "text")
+
+
+data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                          col.types.inshore, col.types.offshore,
+                          col.names.inshore, col.names.offshore,
+                          Year, dir.name, 
+                          xls.file.name.inshore, xls.file.name.offshore,
+                          start.time)
+
+out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
+                            Year, ".csv")
+out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
+                              Year, ".csv")
+
+if (!file.exists(out.file.name.all))
+  write_csv(data.list$all,
+            file = out.file.name.all)
+
+if (!file.exists(out.file.name.shift))
+  write_csv(data.list$shift,
+            file = out.file.name.shift)
+
+
+```
+
+
+
+## 2000
+
+```{r}
+Year <- 2000
+dir.name <- paste0("C_C ", Year)
+start.time <- "630"
+xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
+xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
+xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
+
+sheet.name.inshore <- "DATA"
+sheet.name.offshore <- "LOGS"
+
+col.names.inshore <- c("DATE",	"EVENT",	"TIME",	"OBS.",	
+                       "VIS (IN/OUT)",	"SEA STATE",	"C/C")
+
+col.types.inshore <- c("date", "numeric", "text", "numeric", 
+                       "numeric", "text", "numeric", "numeric", 
+                       "text", "text", "text", "text",
+                       "text", "text")
+
+# data.out <- read_excel(xls.file.name.inshore,
+#                          sheet = sheet.name.inshore,
+#                          col_types = col.types.inshore)
+#                        
+# data.inshore <- get.data(Year = Year,
+#                            dir.name = dir.name,
+#                            xls.file.name = xls.file.name.inshore,
+#                            sheet.name = sheet.name.inshore,
+#                            col.types = col.types.inshore,
+#                            col.names = col.names.inshore,
+#                            area.name = "inshore",
+#                            start.time = start.time)
+
+col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS.",
+                        "VIS CODE",	"SEA STATE",	"C/C")
+
+col.types.offshore <- c("date", "numeric", "text", "numeric", 
+                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text",  "text")
+
+
+data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                          col.types.inshore, col.types.offshore,
+                          col.names.inshore, col.names.offshore,
+                          Year, dir.name, 
+                          xls.file.name.inshore, xls.file.name.offshore,
+                          start.time)
+
+out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
+                            Year, ".csv")
+out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
+                              Year, ".csv")
+
+if (!file.exists(out.file.name.all))
+  write_csv(data.list$all,
+            file = out.file.name.all)
+
+if (!file.exists(out.file.name.shift))
+  write_csv(data.list$shift,
+            file = out.file.name.shift)
+
+
+```
+
+
+
+## 2001
+
+```{r}
+Year <- 2001
+dir.name <- paste0("C_C ", Year)
+start.time <- "630"
+xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
+xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
+xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
+
+sheet.name.inshore <- "LOGS"
+sheet.name.offshore <- "LOGS"
+
+col.names.inshore <- c("DATE",	"EVENT",	"TIME",	"OBS.",
+                       "VIS I/O",	"SEA ST",	"C/C"	)
+
+col.types.inshore <- c("date", "numeric", "text", "numeric", 
+                       "numeric", "text", "numeric", "numeric", 
+                       "text", "text", "text", "text",
+                       "text", "text")
+
+# data.out <- read_excel(xls.file.name.inshore,
+#                          sheet = sheet.name.inshore,
+#                          col_types = col.types.inshore)
+#                        
+# data.inshore <- get.data(Year = Year,
+#                            dir.name = dir.name,
+#                            xls.file.name = xls.file.name.inshore,
+#                            sheet.name = sheet.name.inshore,
+#                            col.types = col.types.inshore,
+#                            col.names = col.names.inshore,
+#                            area.name = "inshore",
+#                            start.time = start.time)
+
+col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",
+                        "VIS",	"SEA STATE",	"C/C")
+
+col.types.offshore <- c("date", "numeric", "text", "numeric", 
+                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text",  "text", "text")
+
+
+data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                          col.types.inshore, col.types.offshore,
+                          col.names.inshore, col.names.offshore,
+                          Year, dir.name, 
+                          xls.file.name.inshore, xls.file.name.offshore,
+                          start.time)
+
+out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
+                            Year, ".csv")
+out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
+                              Year, ".csv")
+
+if (!file.exists(out.file.name.all))
+  write_csv(data.list$all,
+            file = out.file.name.all)
+
+if (!file.exists(out.file.name.shift))
+  write_csv(data.list$shift,
+            file = out.file.name.shift)
+
+
+```
+
+
+
+## 2002
+
+```{r}
+Year <- 2002
+dir.name <- paste0("C_C ", Year)
+start.time <- "630"
+xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
+xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
+xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
+
+sheet.name.inshore <- "LOGS"
+sheet.name.offshore <- "LOG"
+
+col.names.inshore <- c("DATE",	"EVENT",	"TIME", 	"OBS",
+                       "VIS (I/O)",	"SS",	"C/C")
+
+col.types.inshore <- c("date", "numeric", "text", "numeric", 
+                       "numeric", "text", "numeric", "numeric", 
+                       "text", "text", "text", "text",
+                       "text", "text")
+
+# data.inshore <- get.data(Year = Year,
+#                            dir.name = dir.name,
+#                            xls.file.name = xls.file.name.inshore,
+#                            sheet.name = sheet.name.inshore,
+#                            col.types = col.types.inshore,
+#                            col.names = col.names.inshore,
+#                            area.name = "inshore",
+#                            start.time = start.time)
+
+col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",
+                        "VIS",	"SS",	"C/C")
+
+col.types.offshore <- c("date", "numeric", "text", "numeric", 
+                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text",  "text", "text")
+
+
+data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                          col.types.inshore, col.types.offshore,
+                          col.names.inshore, col.names.offshore,
+                          Year, dir.name, 
+                          xls.file.name.inshore, xls.file.name.offshore,
+                          start.time)
+
+out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
+                            Year, ".csv")
+out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
+                              Year, ".csv")
+
+if (!file.exists(out.file.name.all))
+  write_csv(data.list$all,
+            file = out.file.name.all)
+
+if (!file.exists(out.file.name.shift))
+  write_csv(data.list$shift,
+            file = out.file.name.shift)
+
+
+```
+
+
+
+## 2003
+
+```{r}
+Year <- 2003
+dir.name <- paste0("C_C ", Year)
+start.time <- "630"
+xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
+xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
+xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
+
+sheet.name.inshore <- "Logs"
+sheet.name.offshore <- "logs"
+
+col.names.inshore <- c("DATE",	"EVENT",	"TIME", 	"OBS",
+                       "VIS (I/O)",	"SS",	"C/C")
+
+col.types.inshore <- c("date", "numeric", "text", "numeric", 
+                       "numeric", "text", "numeric", "numeric", 
+                       "text", "text", "text", "text",
+                       "text", "text")
+
+# data.inshore <- get.data(Year = Year,
+#                            dir.name = dir.name,
+#                            xls.file.name = xls.file.name.inshore,
+#                            sheet.name = sheet.name.inshore,
+#                            col.types = col.types.inshore,
+#                            col.names = col.names.inshore,
+#                            area.name = "inshore",
+#                            start.time = start.time)
+
+col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",
+                        "VIS",	"SS",	"C/C")
+
+col.types.offshore <- c("date", "numeric", "text", "numeric", 
+                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text",  "text", "text")
+
+
+data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                          col.types.inshore, col.types.offshore,
+                          col.names.inshore, col.names.offshore,
+                          Year, dir.name, 
+                          xls.file.name.inshore, xls.file.name.offshore,
+                          start.time)
+
+out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
+                            Year, ".csv")
+out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
+                              Year, ".csv")
+
+if (!file.exists(out.file.name.all))
+  write_csv(data.list$all,
+            file = out.file.name.all)
+
+if (!file.exists(out.file.name.shift))
+  write_csv(data.list$shift,
+            file = out.file.name.shift)
+
+
+```
+
+
+
+## 2004
+
+```{r}
+Year <- 2004
+dir.name <- paste0("C_C ", Year)
+start.time <- "630"
+xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
+xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[2])
+xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[3])
+
+sheet.name.inshore <- "DATA"
+sheet.name.offshore <- "DATA"
+
+col.names.inshore <- c("DATE",	"EVENT",	"TIME", 	"OBS",
+                       "VIS (I/O)",	"SS",	"C/C")
+
+col.types.inshore <- c("date", "numeric", "text", "numeric", 
+                       "numeric", "text", "numeric", "numeric", 
+                       "text", "text", "text", "text",
+                       "text", "text")
+
+# data.inshore <- get.data(Year = Year,
+#                            dir.name = dir.name,
+#                            xls.file.name = xls.file.name.inshore,
+#                            sheet.name = sheet.name.inshore,
+#                            col.types = col.types.inshore,
+#                            col.names = col.names.inshore,
+#                            area.name = "inshore",
+#                            start.time = start.time)
+
+col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",	
+                        "VIS",	"SS",	"C/C")
+
+col.types.offshore <- c("date", "numeric", "text", "numeric", 
+                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text",  "text", "text")
+
+data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                          col.types.inshore, col.types.offshore,
+                          col.names.inshore, col.names.offshore,
+                          Year, dir.name, 
+                          xls.file.name.inshore, xls.file.name.offshore,
+                          start.time)
+
+out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
+                            Year, ".csv")
+out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
+                              Year, ".csv")
+
+if (!file.exists(out.file.name.all))
+  write_csv(data.list$all,
+            file = out.file.name.all)
+
+if (!file.exists(out.file.name.shift))
+  write_csv(data.list$shift,
+            file = out.file.name.shift)
+
+
+```
+
+
+
+## 2005
+
+```{r}
+Year <- 2005
+dir.name <- paste0("C_C ", Year)
+start.time <- "630"
+xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
+xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[2])
+xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[3])
+
+sheet.name.inshore <- "DATA"
+sheet.name.offshore <- "DATA"
+
+col.names.inshore <- c("DATE",	"EVENT",	"TIME", 	"OBS",
+                       "VIS (I/O)",	"SS",	"C/C")
+
+col.types.inshore <- c("date", "numeric", "text", "numeric", 
+                       "numeric", "text", "numeric", "numeric", 
+                       "text", "text", "text", "text",
+                       "text", "text")
+
+# data.inshore <- get.data(Year = Year,
+#                            dir.name = dir.name,
+#                            xls.file.name = xls.file.name.inshore,
+#                            sheet.name = sheet.name.inshore,
+#                            col.types = col.types.inshore,
+#                            col.names = col.names.inshore,
+#                            area.name = "inshore",
+#                            start.time = start.time)
+
+col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",	
+                        "VIS",	"SS",	"C/C")
+
+col.types.offshore <- c("date", "numeric", "text", "numeric", 
+                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text",  "text", "text")
+
+data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                          col.types.inshore, col.types.offshore,
+                          col.names.inshore, col.names.offshore,
+                          Year, dir.name, 
+                          xls.file.name.inshore, xls.file.name.offshore,
+                          start.time)
+
+out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
+                            Year, ".csv")
+out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
+                              Year, ".csv")
+
+if (!file.exists(out.file.name.all))
+  write_csv(data.list$all,
+            file = out.file.name.all)
+
+if (!file.exists(out.file.name.shift))
+  write_csv(data.list$shift,
+            file = out.file.name.shift)
+
 
