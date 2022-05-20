@@ -75,12 +75,10 @@ get.data <- function(Year, dir.name, xls.file.name, sheet.name,
   
   # Some files contain wrong years...
   years <- year(data.out$Date)
-  dif.years <- sum(years - Year)
+  dif.years <- sum(years - Year, na.rm = T)
   if (dif.years != 0){
     year(data.out$Date) <- Year
-  } else {
-    
-  }
+  } 
 
   return(data.out)  
 }
