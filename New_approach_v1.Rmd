@@ -5,7 +5,9 @@ output: html_notebook
 
 In this document, I explain my logic for developing a new approach to analyzing the gray whale calf production dataset (Piedras Blancas). The previous approaches (Weller and Perryman 2012, Stewart and Weller 2021) had some unplausible assumptions. I explore the dataset first then develop a new approach that has fewer assumptions than the previous approaches. 
 
-This needs to get it done from the ground up as I don't have real raw data files... 2022-05-18
+This needs to get it done from the ground up as I don't have real raw data files... 
+
+A script (Extract Excel data.Rmd) was developed to extract raw data.
 
 
 
@@ -18,7 +20,7 @@ library(lubridate)
 library(bayesplot)
 
 #FILES <- list.files(pattern = ".csv$")
-data.path <- "data/Raw data/"
+data.path <- "data/Processed data/"
 FILES <- list.files(path = data.path, 
                     pattern = ".csv")
 
@@ -30,15 +32,23 @@ MCMC.params <- list(n.samples = 500000,
 n.samples <- MCMC.params$n.chains * ((MCMC.params$n.samples - MCMC.params$n.burnin)/MCMC.params$n.thin)
 
 # get data
-col.defs <- cols(Week = col_integer(),
-                 Date = col_character(), #col_date(format = "%d-%b-%y"),
-                 Effort = col_double(),
-                 Sightings = col_integer())
+col.defs <- cols(Date = col_date(format = "%Y-%m-%dT%H:%M:%SZ"), 
+                 Event = col_integer(), 
+                 Time = col_integer(), 
+                 Minutes_since_T0 = col_double(), 
+                 Minutes_since_0000 = col_double(),
+                 Shift = col_integer(), 
+                 Obs = col_character(),
+                 SeaState = col_integer(),
+                 Vis = col_integer(),
+                 Mother_Calf = col_integer(),
+                 Year = col_integer(),
+                 Area = col_character())
 
 count.obs <- effort <- week <- date <- n.obs <- n.weeks <- all.data <- list()
 years <- vector(mode = "numeric", length = length(FILES))
 
-i <- 6
+i <- 1
 for(i in 1:length(FILES)){
   
   data <- read_csv(paste0(data.path, FILES[i]), 
