@@ -3,9 +3,19 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-In this document, I explain my logic for developing a new approach to analyzing the gray whale calf production dataset (Piedras Blancas). The previous approaches (Weller and Perryman 2012, Stewart and Weller 2021) had some unplausible assumptions. I explore the dataset first then develop a new approach that has fewer assumptions than the previous approaches. 
+In this document, I explain my logic for developing a new approach to analyzing the gray whale calf production dataset (Piedras Blancas). The previous approaches (Weller and Perryman 2012, Stewart and Weller 2021) had some implausible assumptions. 
 
-This needs to get it done from the ground up as I don't have real raw data files... 
+The mean ($\lambda$) of the number of whales passing by the survey area is assumed to be the same within a week. There is no assumption about the mean except it is bounded between 0 and 40 ($ \lambda \sim UNIF(0,40)$). The weekly mean assumption is a bit arbitrary because whales don't care about the day of the week. It appears that the number increases at the beginning of each survey season and reaches a peak, then decreases thereafter. So, it may make sense to make an assumption about means that change daily. 
+
+The true number of whales in the survey area per 3-hr period is considered an independent Poisson random deviate ($n_{true} \sim POI(\lambda)$).  
+
+Furthermore, there should be some auto-correlations between two consecutive observation periods; they are arbitrarily separated by changes in observation shifts. Each shift is up to 3 hr long (1.5 hr x 2 for each observer). It's likely that the number of whales passing by the survey area would be similar between two consecutive shifts than those that are further apart. 
+
+The observed number of whales per shift is assumed to be a binomial random deviate ($n_{obs} \sim BIN(n_{true}, p_{obs})$), where $p_{obs}$ was estimated through a calibration study ($p_{obs} \sim N(0.889, 0.06375^2)$). Looking at the data, there are many zeros. So, it may be better to use some other distributions (e.g., zero-inflated Poisson, zero-inflated negative binomial) to model these data. It's not easy to get zero observations when the detection probability is close to 0.9. There are some other factors affecting the observations. Perhaps, the sighting conditions may be used to model "actual" sighting probability ($ p_{obs}$ = f(sighting condition) and $p_{obs}$ reaches 0.889 as the condition becomes ideal).
+
+I explore the dataset first then develop a new approach that has better assumptions than the previous approaches. 
+
+This needs to get it done from the ground up. 
 
 A script (Extract Excel data.Rmd) was developed to extract raw data.
 

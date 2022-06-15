@@ -52,10 +52,16 @@ get.all.data <- function(sheet.name.inshore, sheet.name.offshore,
 # col.names has to be in the same order of:
 # c("Date", "Event", "Time", "Obs. Code", 
 # "Sea State", "Vis. IN", "Cow  / Calf")
+# The exact names may be different in each file. Make sure to 
+# match them. 
+
 # T0 is the beginning of the first shift (start.time)
 
 get.data <- function(Year, dir.name, xls.file.name, sheet.name,
                      col.types, col.names, area.name, start.time){
+  # col.names <- c("Date", "Event", "Time", "Obs. Code", "Sea State", 
+  #                "Vis. IN", "Cow  / Calf")
+  
   data.out <- read_excel(xls.file.name,
                          sheet = sheet.name,
                          col_types = col.types) %>% 
