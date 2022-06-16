@@ -1764,7 +1764,7 @@ data.inshore <- get.data(Year = Year,
                          xls.file.name = xls.file.name.inshore,
                          sheet.name = sheet.name,
                          col.types = col.types,
-                         col.names = col.names,
+                         col.names = all_of(col.names),
                          area.name = "inshore",
                          start.time = start.time)
 
@@ -1785,18 +1785,62 @@ data.all %>%
             Time_T0 = min(Minutes_since_T0, na.rm = T),
             Time_0000 = min(Minutes_since_0000, na.rm = T)) -> data.shift
 
+all.weeks <- seq.Date(as.Date(min(data.shift$Date)),
+                      as.Date(max(data.shift$Date)),
+                      by = "week")
+
+data.shift %>% select(Shift, Date, Duration, Mother_Calf) %>%
+  mutate(Date = format(Date, "%Y-%m-%d"),
+         Effort = Duration/60,
+         Sightings = Mother_Calf) %>%
+  select(Date, Shift, Effort, Sightings) %>%
+  mutate(Date = as.Date(Date)) %>%
+  data.frame() -> raw.data
+
+# has to have four shifts per day... 
+all.dates <- seq.Date(as.Date(min(data.shift$Date)),
+                      as.Date(max(data.shift$Date)),
+                      by = "day")
+
+all.shifts <- data.frame(Date = rep(all.dates,
+                                    each = 4),
+                         Shift = rep(1:4, 
+                                     times = length(all.dates),
+                                     by = "day"))
+
+all.shifts %>% 
+  left_join(raw.data, by = c("Date", "Shift")) %>%
+  mutate(Week = ceiling(difftime(Date, min(all.dates), 
+                                 units = "weeks")) %>%
+           as.numeric()) %>%
+  select(Week, Date, Effort, Sightings) -> raw.all.data
+
+# need to change week = 0 to week = 1...
+raw.all.data[raw.all.data$Week == 0, "Week"] <- 1
+
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
                             Year, ".csv")
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
+out.file.name.raw <- paste0("data/Raw data/", Year, ".csv")
+
 if (!file.exists(out.file.name.all))
   write_csv(data.all,
-            file = out.file.name.all)
+            file = out.file.name.all,
+            quote = "none")
 
 if (!file.exists(out.file.name.shift))
   write_csv(data.shift,
-            file = out.file.name.shift)
+            file = out.file.name.shift, 
+            quote = "none")
+
+# Need to remove NA to be used in Collating and Formatting v2.R
+if (!file.exists(out.file.name.raw))
+  write_csv(raw.all.data,
+            file = out.file.name.raw, 
+            quote = "none",
+            na = "")
 
 ```
 

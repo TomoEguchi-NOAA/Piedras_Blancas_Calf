@@ -21,7 +21,8 @@ MCMC.params <- list(n.samples = 80000,
                     n.burnin = 40000,
                     n.chains = 3)
 
-n.samples <- MCMC.params$n.chains * ((MCMC.params$n.samples - MCMC.params$n.burnin)/MCMC.params$n.thin)
+n.samples <- MCMC.params$n.chains * 
+  ((MCMC.params$n.samples - MCMC.params$n.burnin)/MCMC.params$n.thin)
 
 jags.params <- c("count.true",
                 "lambda",
