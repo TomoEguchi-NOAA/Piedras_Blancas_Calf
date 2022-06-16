@@ -133,22 +133,23 @@ p.PvsV3 <- ggplot(data = estimates.PandV3) +
   labs(title = "Perryman vs V3 (weekly + Poisson)")
 
 if (save.figs)
-  ggsave(p.VvsV3, filename = "figures/PVsV3.png",
+  ggsave(p.PvsV3, filename = "figures/PVsV3.png",
          device = "png", dpi = 600)
 
 # compare to V1
-Estimates.samples.V1 <- read.csv("data/Updated Calf Estimates 1994-2019.csv")
+# Estimates.samples.V1 <- read.csv("data/Updated Calf Estimates 1994-2019.csv")
+# 
+# Estimates.V1 <- apply(Estimates.samples.V1, MARGIN = 2,
+#                       FUN = function(x) {
+#                         qtiles <- quantile(x, c(0.025, 0.5, 0.975))
+#                         mean <- mean(x)
+#                         return(c(mean, qtiles))}) %>%
+#   t() %>% data.frame() %>%
+#   mutate(Year = years,
+#          Method = "V1")
 
-Estimates.V1 <- apply(Estimates.samples.V1, MARGIN = 2,
-                      FUN = function(x) {
-                        qtiles <- quantile(x, c(0.025, 0.5, 0.975))
-                        mean <- mean(x)
-                        return(c(mean, qtiles))}) %>%
-  t() %>% data.frame() %>%
-  mutate(Year = years,
-         Method = "V1")
-
-colnames(Estimates.V1) <- c("Mean", "LCL", "Median", "UCL", "Year", "Method")
+Estimates.V1 <- read.csv("data/Calf Estimates v1.csv")
+# colnames(Estimates.V1) <- c("Mean", "LCL", "Median", "UCL", "Year", "Method")
 
 estimates.V1andV3 <- rbind(Estimates %>% select(Year, Mean, LCL, UCL, Method),
                            Estimates.V1 %>% select(Year, Mean, LCL, UCL, Method))
@@ -160,7 +161,7 @@ p.V1vsV3 <- ggplot(data = estimates.V1andV3) +
   geom_ribbon(aes(x = Year, 
                   ymin = LCL, ymax = UCL, fill = Method),
               alpha = 0.4) +
-  labs(title = "V1 (Stewwart) vs V3 (weekly + Poisson)")
+  labs(title = "V1 (Stewart) vs V3 (weekly + Poisson)")
 
 if (save.figs)
   ggsave(p.V1vsV3, filename = "figures/V1VsV3.png",

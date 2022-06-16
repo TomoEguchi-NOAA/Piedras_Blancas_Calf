@@ -2,8 +2,16 @@
 # This script is a modified version of "Running Individual Year Model.R"
 # I inherited it from Josh Stewart in early 2022.
 
-# In this version (v3), I try Poisson likelihood instead of binomial. 
+# In this version (v2), I added years into the model.
+# Strangely, the Total.Calves tally increase as the number of 
+# datasets increases... running n.years = 1 has the lowest
+# total counts. As n.years increases, the numbers increase for 
+# all years. I can't figure out what is going on here because
+# the years are independent of each other, as far as I can tell
+# in this model.
 
+# Decided to use v1 for each dataset. I have to get
+# to the bottom of this. 2022-05-04
 
 rm(list=ls())
 library(jagsUI)

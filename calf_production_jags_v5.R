@@ -2,7 +2,7 @@
 # This script is a modified version of "Running Individual Year Model.R"
 # I inherited it from Josh Stewart in early 2022.
 
-# In this version (v3), I try Poisson likelihood instead of binomial. 
+# In this version (v5), I try Poisson likelihood instead of binomial. 
 
 
 rm(list=ls())

@@ -121,10 +121,17 @@ WayneAll %>% filter(!is.na(Effort)) %>%
          Mean = Estimate) -> WayneShort
 
 estimates.PandV4 <- rbind(Estimates %>% select(Year, Mean, LCL, UCL, Method),
-                         WayneShort %>% select(Year, Mean, LCL, UCL, Method))
+                          WayneShort %>% select(Year, Mean, LCL, UCL, Method))
 
-WayneVsV4.lm.data <- data.frame(Mean.Wayne = WayneShort$Mean,
-                                Mean.V4 = Estimates$Mean)
+if (length(years) != nrow(WayneShort)){
+  WayneVsV4.lm.data <- data.frame(Mean.Wayne = WayneShort$Mean,
+                                  Mean.V4 = Estimates$Mean[1:nrow(WayneShort)])
+  
+} else {
+  WayneVsV4.lm.data <- data.frame(Mean.Wayne = WayneShort$Mean,
+                                  Mean.V4 = Estimates$Mean)
+  
+}
 
 WayneVsV4.lm <- lm(Mean.V4 ~ Mean.Wayne, data = WayneVsV4.lm.data)
 
@@ -142,18 +149,18 @@ if (save.figs)
          device = "png", dpi = 600)
 
 # compare to V1
-Estimates.samples.V1 <- read.csv("data/Updated Calf Estimates 1994-2019.csv")
+Estimates.V1 <- read.csv("data/Calf Estimates v1.csv")
 
-Estimates.V1 <- apply(Estimates.samples.V1, MARGIN = 2,
-                      FUN = function(x) {
-                        qtiles <- quantile(x, c(0.025, 0.5, 0.975))
-                        mean <- mean(x)
-                        return(c(mean, qtiles))}) %>%
-  t() %>% data.frame() %>%
-  mutate(Year = years,
-         Method = "v1")
-
-colnames(Estimates.V1) <- c("Mean", "LCL", "Median", "UCL", "Year", "Method")
+# Estimates.V1 <- apply(Estimates.samples.V1, MARGIN = 2,
+#                       FUN = function(x) {
+#                         qtiles <- quantile(x, c(0.025, 0.5, 0.975))
+#                         mean <- mean(x)
+#                         return(c(mean, qtiles))}) %>%
+#   t() %>% data.frame() %>%
+#   mutate(Year = years,
+#          Method = "v1")
+# 
+# colnames(Estimates.V1) <- c("Mean", "LCL", "Median", "UCL", "Year", "Method")
 
 estimates.V1andV4 <- rbind(Estimates %>% select(Year, Mean, LCL, UCL, Method),
                            Estimates.V1 %>% select(Year, Mean, LCL, UCL, Method))
@@ -178,8 +185,8 @@ if (save.figs)
 
 # They are identical (almost)
 
-WayneVsV1.lm.data <- data.frame(Mean.Wayne = WayneShort$Mean,
-                                Mean.V1 = Estimates.V1$Mean)
-
-WayneVsV1.lm <- lm(Mean.V1 ~ Mean.Wayne, data = WayneVsV1.lm.data)
+# WayneVsV1.lm.data <- data.frame(Mean.Wayne = WayneShort$Mean,
+#                                 Mean.V1 = Estimates.V1$Mean)
+# 
+# WayneVsV1.lm <- lm(Mean.V1 ~ Mean.Wayne, data = WayneVsV1.lm.data)
 

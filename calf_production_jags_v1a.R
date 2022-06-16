@@ -76,17 +76,18 @@ for(i in 1:length(FILES)){
   }
 }
 
-stats.total.calves <- lapply(jm.out, FUN = function(x){
-  Mean <- x$jm$mean$Total.Calves
-  Median <- x$jm$q50$Total.Calves
-  LCL <- x$jm$q2.5$Total.Calves
-  UCL <- x$jm$q97.5$Total.Calves
-  
-  return(data.frame(Mean = Mean,
-                    Median = Median,
-                    LCL = LCL,
-                    UCL = UCL))
-})
+stats.total.calves <- lapply(jm.out, 
+                             FUN = function(x){
+                               Mean <- x$jm$mean$Total.Calves
+                               Median <- x$jm$q50$Total.Calves
+                               LCL <- x$jm$q2.5$Total.Calves
+                               UCL <- x$jm$q97.5$Total.Calves
+                               
+                               return(data.frame(Mean = Mean,
+                                                 Median = Median,
+                                                 LCL = LCL,
+                                                 UCL = UCL))
+                             })
 
 Estimates <- do.call(rbind, stats.total.calves)
 Estimates$Year <- years

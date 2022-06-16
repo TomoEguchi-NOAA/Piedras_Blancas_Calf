@@ -180,13 +180,14 @@ for(i in 1:length(FILES)){
 ```
 
 
-In the Weller/Perryman method, the observed number of whales was "corrected" for the estimated sighting probability when there was at least one pair was sighted. When no whale was sighted, however, zero whale was considered to be recorded without error. In reality, however, there was non zero probability of recording zero, when at least one whale was present in the study area. Consequently, there was negative bias in the Weller/Perryman method. 
+In the P method, the observed number of whales was "corrected" for the estimated sighting probability when at least one pair was sighted. When no whale was sighted, however, zero whale was considered to be recorded without error. In reality, however, there was non zero probability of recording zero, when at least one whale was present in the study area. Consequently, there was negative bias in the P method. 
 
 For the comparison between using daily and weekly counts, they should be close to identical because the "true" daily counts within a week are treated as independent observations from a Poisson distribution with the same mean. A sum of independent Poisson random variables is also a Poisson distribution. 
 
 A better approach may be to treat the true count as an autoregressive parameter? 
 
 Numerically compare different approaches:
+
 ```{r}
 
 # get data
