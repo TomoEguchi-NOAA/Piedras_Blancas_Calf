@@ -1735,6 +1735,8 @@ if (!file.exists(out.file.name.shift))
 
 ## 2022
 
+For 2022 and beyond, I added some code here to skip using Collating and Formatting v2.R. It's much easier to get all necessary steps done here, directly out of Excel input files than going through many scripts. 
+
 ```{r}
 Year <- 2022
 dir.name <- paste0("C_C ", Year)
@@ -1746,7 +1748,9 @@ sheet.name <- "MomCalf Logs 2022"
 # c("Date", "Event", "Time", "Obs. Code", 
 #  "Sea State", "Vis. IN", "Cow  / Calf")
 
-
+# These are not the names of all columns. These are the names of columns in the
+# spreadsheet that are needed. These names change among years, so they need to
+# be specified for each year.
 col.names <- c("DATE", 	"EVENT", 	"TIME",	"OBS #",
                "SEA ST", "VIS IN", "M/C")
 
@@ -1797,14 +1801,14 @@ data.shift %>% select(Shift, Date, Duration, Mother_Calf) %>%
   mutate(Date = as.Date(Date)) %>%
   data.frame() -> raw.data
 
-# has to have four shifts per day... 
+# has to have four shifts per day... and additional four shifts for evening.
 all.dates <- seq.Date(as.Date(min(data.shift$Date)),
                       as.Date(max(data.shift$Date)),
                       by = "day")
 
 all.shifts <- data.frame(Date = rep(all.dates,
-                                    each = 4),
-                         Shift = rep(1:4, 
+                                    each = 8),
+                         Shift = rep(1:8, 
                                      times = length(all.dates),
                                      by = "day"))
 
@@ -1813,17 +1817,20 @@ all.shifts %>%
   mutate(Week = ceiling(difftime(Date, min(all.dates), 
                                  units = "weeks")) %>%
            as.numeric()) %>%
-  select(Week, Date, Effort, Sightings) -> raw.all.data
+  select(Week, Date, Effort, Sightings) -> formatted.all.data
 
 # need to change week = 0 to week = 1...
-raw.all.data[raw.all.data$Week == 0, "Week"] <- 1
+formatted.all.data[formatted.all.data$Week == 0, "Week"] <- 1
+
+# Change NAs to 0s
+formatted.all.data[is.na(formatted.all.data)] <- 0
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
                             Year, ".csv")
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.raw <- paste0("data/Raw data/", Year, ".csv")
+out.file.name.formatted <- paste0("data/Formatted Annual Data/", Year, " Formatted.csv")
 
 if (!file.exists(out.file.name.all))
   write_csv(data.all,
@@ -1837,8 +1844,8 @@ if (!file.exists(out.file.name.shift))
 
 # Need to remove NA to be used in Collating and Formatting v2.R
 if (!file.exists(out.file.name.raw))
-  write_csv(raw.all.data,
-            file = out.file.name.raw, 
+  write_csv(formatted.all.data,
+            file = out.file.name.formatted, 
             quote = "none",
             na = "")
 

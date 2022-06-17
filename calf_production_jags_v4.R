@@ -177,7 +177,7 @@ p.V1vsV4 <- ggplot(data = estimates.V1andV4) +
   geom_ribbon(aes(x = Year, 
                   ymin = LCL, ymax = UCL, fill = Method),
               alpha = 0.4) +
-  labs(title = "V1 (Stewwart) vs V4 (weekly + binomial)")
+  labs(title = "V1 (Stewart) vs V4 (weekly + binomial)")
 
 if (save.figs)
   ggsave(p.V1vsV4, filename = "figures/V1VsV4.png",
