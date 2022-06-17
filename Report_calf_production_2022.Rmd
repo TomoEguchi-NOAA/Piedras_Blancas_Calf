@@ -1,0 +1,222 @@
+---
+title: "Eastern North Pacific gray whale calf production 1994-2022"
+author: "Tomo Eguchi"
+date: "`r Sys.Date()`"
+output: 
+  bookdown::word_document2: default
+---
+
+
+```{r setup, include=FALSE}
+rm(list = ls())
+knitr::opts_chunk$set(echo = TRUE)
+save.fig <- T
+
+source("Piedras_Blancas_fcns.R")
+library(tidyverse)
+library(lubridate)
+library(flextable)
+library(readr)
+
+format.big.number <- function(x) {
+  format(x, scientific = F, digits = 6, big.mark = ",")
+}
+
+set_flextable_defaults(font.size = 9,
+                       font.family = "Cambria")
+
+data.path <- "data/Formatted Annual Data/"
+
+FILES <- list.files(path = data.path, 
+                    pattern = "Formatted.csv")
+
+years <- vector(mode = "numeric", length = length(FILES))
+
+jm.out <- list()
+
+for(i in 1:length(FILES)){
+  years[i] <- as.numeric(str_split(FILES[i], " Formatted.csv")[[1]][1])
+  
+  data <- read.csv(paste0(data.path, FILES[i]))
+  jm.out[[i]] <- readRDS(paste0("RData/calf_estimates_v1_", years[i], ".rds"))
+    #jm <- jm.out$jm
+}
+
+Mean <- Median <- LCL <- UCL <- vector(mode = "numeric", length = length(FILES))
+stats.total.calves <- lapply(jm.out, FUN = function(x){
+  Mean <- x$jm$mean$Total.Calves
+  Median <- x$jm$q50$Total.Calves
+  LCL <- x$jm$q2.5$Total.Calves
+  UCL <- x$jm$q97.5$Total.Calves
+  
+  return(data.frame(Mean = Mean,
+                    Median = Median,
+                    LCL = LCL,
+                    UCL = UCL))
+})
+
+Estimates <- do.call(rbind, stats.total.calves)
+Estimates$Year <- years
+Estimates$Method <- "Stewart&Weller"
+
+#Compare Wayne's estimates and new estimates
+WayneAll <- read.csv("data/Calf Production Wayne Estimates.csv")
+WayneAll %>% filter(!is.na(Effort)) %>%
+  mutate(Method = "Perryman",
+         LCL = Estimate - SE * 1.96,
+         UCL = Estimate + SE * 1.96,
+         Mean = Estimate) -> WayneShort
+
+estimates.PandV1 <- rbind(Estimates %>% select(Year, Mean, LCL, UCL, Method),
+                         WayneShort %>% select(Year, Mean, LCL, UCL, Method))
+
+```
+
+## INTRODUCTION {-}
+Eastern North Pacific (ENP) gray whales (*Eschrichtius robustus*) migrate annually between foraging grounds in the arctic and wintering grounds in Baja California (Rice and Wolman 1971). Females give birth in protected lagoons in Baja California Sur, Mexico, and migrate north with their calves in the spring of each year. Shore-based counts of female gray whales accompanying their calves (i.e. mother-calf pairs) have been conducted annually from the Piedras Blancas Lighthouse Station in central California since 1994. Survey methods were evaluated in detail at the outset of the study (Perryman et al. 2002) and both survey methods and the analytical approach used to estimate total annual calf production have remained consistent since 1994 (Weller and Perryman 2019). 
+
+In 2021, Stewart and Weller (2021) presented a new Bayesian modeling approach to estimate annual calf production of ENP gray whales. Their approach accounted for uncertainty during unsampled periods (i.e., when there was no sampling effort; evenings, weekends, and bad weather days). Here we provide estimates of calf production for the 1994-2022 period using the Bayesian approach and compare them to estimates using the previous method. 
+
+## METHODS {-}
+Data for this analysis were collected between 1994-2022 using standardized methods and processed to be consistent with previous analyses (Perryman et al. 2002, Weller and Perryman 2019, Stewart and Weller 2021). Briefly, a rotating pair of observers conducted counts of mother-calf pairs from a shore station during a watch period of, typically, a maximum
+of 12 hours per day. Watches were terminated by poor weather (inclement weather, such as rain, fog, etc.), visibility or sea conditions, resulting in total daily effort frequently below the maximum of 12 hours. 
+
+The annual survey was not conducted in 2020 due to COVID-19. In 2021, the survey was completed under COVID-related staffing restrictions, which included a three-person rather than four-person observer rotation during some weeks to reduce the number of people in a close proximity. During periods when the three-person rotation was in place, the maximum survey effort in a given day was limited to 9 hours rather than the typical 12 hours for a four-person rotation.
+
+The previous analysis using the method of Perryman et al. (2002) was based on the following observations and assumptions. Perryman et al. (2002) determined that: (a) the number of calves passing offshore and outside of the range of shore-based observers was negligible (data from aerial surveys) and (b) the passage rates of mother-calf pairs were consistent between daytime and nighttime periods (based on recording from infrared sensors). Independent replicate counts from two different shore-based observation stations conducted over seven consecutive years (1994-2000) suggested a detection probability of 0.889 (SE 0.06375) (Perryman et al. 2002). All of these assumptions were maintained for the method of Stewart and Weller (2021). 
+
+Raw data were processed to reflect the total number of calves passing within four 3-hour periods per day and the survey effort per 3-hour period following Weller and Perryman (2019). 
+The method of Perryman et al (2002) used direct corrections for detection probability and effort to generate total calf production estimates. For example, if 2 calves were observed passing during a 3-hour period, that would be corrected for detection probability by dividing the total observed calves 0.889, for a total estimate of 2.247 calves for that 3-hour period. The detection probability-corrected calf counts were then summed for each 1-week period.
+Then, to account for both the portions of 3-hour watches that were terminated by poor conditions, and the unobserved night and weekend periods, the weekly total counts were multiplied by the number of hours in a week (168) divided by the total weekly effort. In 2016, for example, 22 calves were counted during the third week of survey effort (April 12-16). This was corrected to 24.747 calves to account for detection probability. There were
+39.6 total hours of survey effort during that week, so the final estimate was 24.747 * (168/39.6) = 104.99. The same calculation was made for each week of the survey, and summed across weeks for a total calf estimate. Variance was incorporated via Taylor series expansion from the variance in estimated detection probability, the number of survey days, and the variance in the corrected total number of animals passing per 3-hour period (Weller and Perryman 2019).
+
+
+In Stewart and Weller (2021), a Bayesian model was developed to account for uncertainty associated with detection probability, effort and unsampled periods. In addition, we estimate a passage rate that varies by week, which then helps inform the undetected calf estimates from unsampled periods. The model is based on a binomial sampling process, 
+
+$O_i \sim BIN(T_i, p_i)$
+
+Where $O_i$ is the number of calves observed during each 3-hour survey period $i$ (including unobserved nights and weekends), $T_i$ is the number of calves that actually passed the study area during each 3-hour survey period $i$, and $p_i$ is the effort-corrected detection probability for each survey period. We calculated $p_i$ as,
+
+$p_i = \hat{p} \times \frac{E_i}{3}$
+
+$\hat{p} \sim N(0.889, 0.06375)$
+
+where $\hat{p}$ is the detection probability estimated by Perryman et al. (2002), and $E_i$ is the number of hours of reported effort in each 3-hour survey period $i$. Detection probability is therefore scaled by the proportion of time within a 3-hour survey period that observers were on watch. We make the assumption that, for example, if observers are only on watch for 1.5 out of 3 hours, then the probability of detecting a whale that passes during the 3-hour
+period is 0.889 * 1.5/3 = 0.4445. Similarly, nights and weekends are broken into 3-hour periods, each of which has 0 sightings and 0 effort. Any missing watch periods, either due to poor conditions or observer limitations during the 2021 survey that was impacted by COVID, were also logged as having 0 sightings and 0 effort. The detection probability during unobserved periods is therefore 0. Finally, we use a Poisson distribution to estimate the mean
+passage rate of whales within each 3-hour period during a given week, 
+
+$T_i \sim POI(\lambda_{w_i})$
+
+where $\lambda$ is the mean passage rate for each week, and $w_i$ is the week during which survey period $i$ occurred. This allows the estimated true number of whales passing during an unobserved 3-hour period to be informed by the mean passage rate during observed periods within the same week, with associated uncertainty. Finally, the total number of
+calves throughout the study period is calculated as 
+
+$N = \sum_{i} T_i$
+
+or the estimated true number of calves passing in each 3-hour period, summed across all periods $i$.
+
+
+In some years, a survey was concluded mid-week after three consecutive days of 0 sightings of calves. In these cases, we populated the remainder of the final week with 0 sighting and 0 effort survey periods to maintain consistency across weeks. Migration start and end dates differed across years, and therefore the number of weeks surveyed were not consistent across years, but were instead designed to capture the full northbound migration from start to finish.
+
+## RESULTS and DISCUSSION {-}
+
+```{r data.2022, echo=FALSE, include=FALSE, cache=TRUE, message=FALSE}
+
+data.2022 <- read.csv(paste0(data.path, FILES[length(FILES)]))
+
+data.2022 %>% group_by(Date) %>%
+  summarise(Daily_Sightings = sum(Sightings)) %>%
+  mutate(Date = as.Date(Date)) -> data.2022.by.day 
+
+p.daily.sightings <- ggplot(data.2022.by.day) +
+  geom_point(aes(x = Date, y = Daily_Sightings)) +
+  xlab("") + ylab("Observed number of mother-calf pairs per day")
+
+if (save.fig)
+  ggsave(filename = "figures/daily_sightings_2022.png",
+         plot = p.daily.sightings,
+         device = "png", 
+         dpi = 600)
+
+```
+
+
+From `r min(as.Date(data.2022$Date, format = "%Y-%m-%d"))` to `r max(as.Date(data.2022$Date, format = "%Y-%m-%d"))`, `r signif(sum(data.2022$Effort),3)` hours of survey were completed.  A total of `r sum(data.2022$Sightings)` mother-calf pairs of gray whales were counted, with the highest daily count of `r max(data.2022.by.day$Daily_Sightings)` pairs on `r data.2022.by.day[data.2022.by.day$Daily_Sightings == max(data.2022.by.day$Daily_Sightings), "Date"] %>% pull()`.  (Figure \@ref(fig:Figure-daily-sightings)). 
+
+
+```{r Figure-daily-sightings, echo=FALSE, message=FALSE, fig.cap="Observed numbers of mother-calf pairs of gray whales migrating through the sampling area off Piedras Blancas during the 2022 survey period. "}
+
+knitr::include_graphics("figures/daily_sightings_2022.png")
+
+```
+
+
+```{r Nhats, echo=FALSE, include=FALSE, message=FALSE}
+p.Nhats <- ggplot(data = Estimates) +
+  geom_point(aes(x = Year, y = Mean)) + 
+  geom_errorbar(aes(x = Year, ymin = LCL, ymax = UCL)) +
+  xlab("") + ylab("Mean and 95% CI")
+
+if (save.fig)
+  ggsave(filename = "figures/Nhats_2022.png",
+         plot = p.Nhats, device = "png", dpi = 600)
+
+
+p.PvsV1 <- ggplot(estimates.PandV1) + 
+  geom_ribbon(aes(x = Year, ymin = LCL, ymax = UCL, fill = Method),
+              alpha = 0.3) +
+  geom_point(aes(x = Year, y = Mean, color = Method)) +
+  xlab("") + ylab("Mean and 95% CI") +
+  theme(legend.position = "top")
+
+if (save.fig)
+  ggsave(filename = "figures/PvsV1.png",
+         plot = p.PvsV1, device = "png", dpi = 600)
+  
+```
+
+
+The estimated number of mother-calf pairs during the 2022 migration season was `r signif(Estimates[Estimates$Year == 2022, "Mean"], 4)` (95%CI = `r signif(Estimates[Estimates$Year == 2022, "LCL"], 4)` - `r signif(Estimates[Estimates$Year == 2022, "UCL"], 4)`), which was one of the lowest estimates since the survey started in 1994 (Figure \@ref(fig:Figure-Nhats)).
+
+
+```{r Figure-Nhats, echo=FALSE, message=FALSE, fig.cap="Estimated means and 95% CIs of the number of mother-calf pairs of north-bound gray whales off Piedras Blancas since 1994. "}
+
+knitr::include_graphics("figures/Nhats_2022.png")
+
+```
+
+
+As Stewart and Weller (2021) reported, the Bayesian approach resulted in generally greater estimates than the method by Perryman et al. (2002) (Figure \@ref(fig:Figure-PvsV1). In addition to the discussion in Stewart and WEller (2021), the estimator in Perryman et al. (2002) was negatively biased because it did not account for whales that were not sighted when no whales were observed. Because the observed number of whales was divided by the sighting probability (0.889) to calculate "corrected" number of whales, when there was no whales (zero whales), the correction resulted in zero, even though it was possible that the observers missed one or more whales. The Bayesian approach somewhat alleviated the problem by assuming the binomial likelihood of observation. 
+
+
+```{r Figure-PvsV1, echo=FALSE, message=FALSE, fig.cap="Differences in estimated abundances between the methods of Perryman et al. (2002) and Stewart and Weller (2021)."}
+
+knitr::include_graphics("figures/PvsV1.png")
+
+```
+
+
+
+```{r compare_with_Nhats, echo=FALSE, include=FALSE, cache=TRUE}
+Nhats <- read.csv(file = "~/R/Granite_Canyon_Counts/Data/all_estimates_2022.csv") %>%
+  filter(Year > 1993) %>% na.omit()
+
+Estimates %>% left_join(Nhats, by = "Year") -> MC_Nhats
+
+ggplot(MC_Nhats %>% na.omit()) +
+  geom_point(aes(x = Nhat, 
+                 y = Mean, 
+                 color = factor(Year))) +
+  geom_errorbar(aes(x = Nhat, 
+                    y = Mean, 
+                    ymin = LCL.x, 
+                    ymax = UCL.x, 
+                    color = factor(Year))) +
+  geom_errorbarh(aes(x = Nhat, 
+                     y = Mean, 
+                     xmin = LCL.y, 
+                     xmax = UCL.y, 
+                     color = factor(Year))) +
+  xlab("Abundance") + ylab("Calf production")
+```
+
+
