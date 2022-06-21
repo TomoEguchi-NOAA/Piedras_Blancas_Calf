@@ -190,6 +190,17 @@ knitr::include_graphics("figures/Nhats_2022.png")
 As Stewart and Weller (2021) reported, the Bayesian approach resulted in generally greater estimates than the method by Perryman et al. (2002) (Figure \@ref(fig:Figure-PvsV1). In addition to the discussion in Stewart and WEller (2021), the estimator in Perryman et al. (2002) was negatively biased because it did not account for whales that were not sighted when no whales were observed. Because the observed number of whales was divided by the sighting probability (0.889) to calculate "corrected" number of whales, when there was no whales (zero whales), the correction resulted in zero, even though it was possible that the observers missed one or more whales. The Bayesian approach somewhat alleviated the problem by assuming the binomial likelihood of observation. 
 
 
+
+```{r Table-nhats-v1, echo=FALSE, warning=FALSE}
+flextable(Estimates %>% dplyr::relocate(Year) %>% dplyr::select(- Method)) %>%
+  set_caption(paste0("Estimated abundance (Mean and Median) and 95% lower (LCL) and upper (UCL) confidence limits of gray whale calves from the visual surveys off the Piedras Blancas Lighthouse Station, CA. "))  %>%
+  colformat_double(j = "Year", big.mark = "",
+                   digits = 0) %>%
+  colformat_double(j = c("Mean", "Median", "LCL", "UCL"), digits = 1) %>%
+  set_table_properties(width = 0.5, layout = "autofit")
+```
+
+
 ```{r Figure-PvsV1, echo=FALSE, message=FALSE, fig.cap="Differences in estimated abundances between the methods of Perryman et al. (2002) and Stewart and Weller (2021)."}
 
 knitr::include_graphics("figures/PvsV1.png")
