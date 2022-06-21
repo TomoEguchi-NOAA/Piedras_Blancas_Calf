@@ -10,7 +10,7 @@ output:
 ```{r setup, include=FALSE}
 rm(list = ls())
 knitr::opts_chunk$set(echo = TRUE)
-save.fig <- T
+save.fig <- F
 
 source("Piedras_Blancas_fcns.R")
 library(tidyverse)
@@ -124,12 +124,14 @@ In some years, a survey was concluded mid-week after three consecutive days of 0
 data.2022 <- read.csv(paste0(data.path, FILES[length(FILES)]))
 
 data.2022 %>% group_by(Date) %>%
-  summarise(Daily_Sightings = sum(Sightings)) %>%
-  mutate(Date = as.Date(Date)) -> data.2022.by.day 
+  summarise(Daily_Sightings = sum(Sightings),
+            Daily_Effort = sum(Effort)) %>%
+  mutate(Date = as.Date(Date),
+         Sightings_per_Effort = Daily_Sightings/Daily_Effort) -> data.2022.by.day 
 
 p.daily.sightings <- ggplot(data.2022.by.day) +
-  geom_point(aes(x = Date, y = Daily_Sightings)) +
-  xlab("") + ylab("Observed number of mother-calf pairs per day")
+  geom_point(aes(x = Date, y = Sightings_per_Effort)) +
+  xlab("") + ylab("Daily observed number of mother-calf pairs per effor hour")
 
 if (save.fig)
   ggsave(filename = "figures/daily_sightings_2022.png",
@@ -140,10 +142,10 @@ if (save.fig)
 ```
 
 
-From `r min(as.Date(data.2022$Date, format = "%Y-%m-%d"))` to `r max(as.Date(data.2022$Date, format = "%Y-%m-%d"))`, `r signif(sum(data.2022$Effort),3)` hours of survey were completed.  A total of `r sum(data.2022$Sightings)` mother-calf pairs of gray whales were counted, with the highest daily count of `r max(data.2022.by.day$Daily_Sightings)` pairs on `r data.2022.by.day[data.2022.by.day$Daily_Sightings == max(data.2022.by.day$Daily_Sightings), "Date"] %>% pull()`.  (Figure \@ref(fig:Figure-daily-sightings)). 
+From `r min(as.Date(data.2022$Date, format = "%Y-%m-%d"))` to `r max(as.Date(data.2022$Date, format = "%Y-%m-%d"))`, `r signif(sum(data.2022$Effort),3)` hours of survey were completed. Daily survey effort ranged from zero to `r signif(max(data.2022.by.day$Daily_Effort), 3)`. A total of `r sum(data.2022$Sightings)` mother-calf pairs of gray whales were counted, with the highest daily count of `r max(data.2022.by.day$Daily_Sightings)` pairs on `r data.2022.by.day[data.2022.by.day$Daily_Sightings == max(data.2022.by.day$Daily_Sightings), "Date"] %>% pull()`.  (`r data.2022.by.day[data.2022.by.day$Daily_Sightings == max(data.2022.by.day$Daily_Sightings), "Sightings_per_Effort"] %>% pull()` per survey effort hour, Figure \@ref(fig:Figure-daily-sightings)). 
 
 
-```{r Figure-daily-sightings, echo=FALSE, message=FALSE, fig.cap="Observed numbers of mother-calf pairs of gray whales migrating through the sampling area off Piedras Blancas during the 2022 survey period. "}
+```{r Figure-daily-sightings, echo=FALSE, message=FALSE, fig.cap="Observation rate (mumbers per hour of survey effort) of mother-calf pairs of gray whales migrating through the sampling area off Piedras Blancas during the 2022 survey period. "}
 
 knitr::include_graphics("figures/daily_sightings_2022.png")
 
@@ -196,27 +198,58 @@ knitr::include_graphics("figures/PvsV1.png")
 
 
 
-```{r compare_with_Nhats, echo=FALSE, include=FALSE, cache=TRUE}
+```{r compare-with-Nhats, echo=FALSE, include=FALSE, cache=TRUE}
 Nhats <- read.csv(file = "~/R/Granite_Canyon_Counts/Data/all_estimates_2022.csv") %>%
   filter(Year > 1993) %>% na.omit()
 
 Estimates %>% left_join(Nhats, by = "Year") -> MC_Nhats
 
-ggplot(MC_Nhats %>% na.omit()) +
+MC_Nhats %>%
+  transmute(log.Mean = log(Mean),
+            log.Median = log(Median),
+            log.LCL.x = log(LCL.x),
+            log.UCL.x = log(UCL.x),
+            Year = Year,
+            Method.x = Method.x,
+            Season = Season,
+            log.Nhat = log(Nhat),
+            log.LCL.y = log(LCL.y),
+            log.UCL.y = log(UCL.y),
+            Method.y = Method.y) -> log.MC_Nhats
+
+p.NvsCalves <- ggplot(MC_Nhats %>% na.omit()) +
   geom_point(aes(x = Nhat, 
                  y = Mean, 
                  color = factor(Year))) +
   geom_errorbar(aes(x = Nhat, 
-                    y = Mean, 
                     ymin = LCL.x, 
                     ymax = UCL.x, 
                     color = factor(Year))) +
-  geom_errorbarh(aes(x = Nhat, 
-                     y = Mean, 
+  geom_errorbarh(aes(y = Mean, 
                      xmin = LCL.y, 
                      xmax = UCL.y, 
                      color = factor(Year))) +
   xlab("Abundance") + ylab("Calf production")
 ```
 
+
+```{r compare-with-Nhats-log, echo=FALSE, include=FALSE, cache=TRUE}
+p.NvsCalves.log <- ggplot(log.MC_Nhats %>% na.omit()) +
+  geom_point(aes(x = log.Nhat, 
+                 y = log.Mean, 
+                 color = factor(Year))) +
+  geom_errorbar(aes(x = log.Nhat, 
+                    ymin = log.LCL.x, 
+                    ymax = log.UCL.x, 
+                    color = factor(Year))) +
+  geom_errorbarh(aes(y = log.Mean, 
+                     xmin = log.LCL.y, 
+                     xmax = log.UCL.y, 
+                     color = factor(Year))) +
+  xlab("log(Abundance)") + ylab("log(Calf production)")
+
+```
+
+
+When the estimated number of calves was compared with the estimated abundance of gray whales from the surveys at Granite Canyon, CA, a linear relationship was found in the log-log scale (Figure \@ref(fig:), Table \@ref(tab:))
 
