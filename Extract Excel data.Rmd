@@ -1744,7 +1744,7 @@ start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 
-sheet.name <- "MomCalf Logs 2022"
+sheet.name <- "MomCalf Logs 2022 postQC"
 # c("Date", "Event", "Time", "Obs. Code", 
 #  "Sea State", "Vis. IN", "Cow  / Calf")
 
@@ -1754,6 +1754,7 @@ sheet.name <- "MomCalf Logs 2022"
 col.names <- c("DATE", 	"EVENT", 	"TIME",	"OBS #",
                "SEA ST", "VIS IN", "M/C")
 
+# these are column types of all columns in the spreadsheet. 
 col.types <- c("date", "numeric", "numeric", "text", "text", 
                "numeric", "numeric", "numeric", "numeric", "text", 
                "text", "text", "text", "numeric", "text", 
@@ -1843,7 +1844,7 @@ if (!file.exists(out.file.name.shift))
             quote = "none")
 
 # Need to remove NA to be used in Collating and Formatting v2.R
-if (!file.exists(out.file.name.raw))
+if (!file.exists(out.file.name.formatted))
   write_csv(formatted.all.data,
             file = out.file.name.formatted, 
             quote = "none",

@@ -22,8 +22,9 @@ format.big.number <- function(x) {
   format(x, scientific = F, digits = 6, big.mark = ",")
 }
 
-set_flextable_defaults(font.size = 9,
-                       font.family = "Cambria")
+set_flextable_defaults(font.size = 8,
+                       font.family = "Cambria",
+                       line_spacing = 1)
 
 data.path <- "data/Formatted Annual Data/"
 
@@ -142,7 +143,7 @@ if (save.fig)
 ```
 
 
-From `r min(as.Date(data.2022$Date, format = "%Y-%m-%d"))` to `r max(as.Date(data.2022$Date, format = "%Y-%m-%d"))`, `r signif(sum(data.2022$Effort),3)` hours of survey were completed. Daily survey effort ranged from zero to `r signif(max(data.2022.by.day$Daily_Effort), 3)`. A total of `r sum(data.2022$Sightings)` mother-calf pairs of gray whales were counted, with the highest daily count of `r max(data.2022.by.day$Daily_Sightings)` pairs on `r data.2022.by.day[data.2022.by.day$Daily_Sightings == max(data.2022.by.day$Daily_Sightings), "Date"] %>% pull()`.  (`r data.2022.by.day[data.2022.by.day$Daily_Sightings == max(data.2022.by.day$Daily_Sightings), "Sightings_per_Effort"] %>% pull()` per survey effort hour, Figure \@ref(fig:Figure-daily-sightings)). 
+From `r min(as.Date(data.2022$Date, format = "%Y-%m-%d")) %>% format("%d %B %Y")` to `r max(as.Date(data.2022$Date, format = "%Y-%m-%d")) %>% format("%d %B %Y")`, `r signif(sum(data.2022$Effort),3)` hours of survey were completed. Daily survey effort ranged from zero to `r signif(max(data.2022.by.day$Daily_Effort), 3)` hours. A total of `r sum(data.2022$Sightings)` mother-calf pairs of gray whales were counted, with the highest daily count of `r max(data.2022.by.day$Daily_Sightings)` pairs on `r data.2022.by.day[data.2022.by.day$Daily_Sightings == max(data.2022.by.day$Daily_Sightings), "Date"] %>% pull() %>% format("%d %B %Y")`.  (`r  data.2022.by.day[data.2022.by.day$Daily_Sightings == max(data.2022.by.day$Daily_Sightings), "Sightings_per_Effort"] %>% pull() %>% signif(3)` per survey effort hour, Figure \@ref(fig:Figure-daily-sightings)). 
 
 
 ```{r Figure-daily-sightings, echo=FALSE, message=FALSE, fig.cap="Observation rate (mumbers per hour of survey effort) of mother-calf pairs of gray whales migrating through the sampling area off Piedras Blancas during the 2022 survey period. "}
@@ -156,7 +157,7 @@ knitr::include_graphics("figures/daily_sightings_2022.png")
 p.Nhats <- ggplot(data = Estimates) +
   geom_point(aes(x = Year, y = Mean)) + 
   geom_errorbar(aes(x = Year, ymin = LCL, ymax = UCL)) +
-  xlab("") + ylab("Mean and 95% CI")
+  xlab("") + ylab("Mean and 95% CI") 
 
 if (save.fig)
   ggsave(filename = "figures/Nhats_2022.png",
@@ -187,7 +188,7 @@ knitr::include_graphics("figures/Nhats_2022.png")
 ```
 
 
-As Stewart and Weller (2021) reported, the Bayesian approach resulted in generally greater estimates than the method by Perryman et al. (2002) (Figure \@ref(fig:Figure-PvsV1). In addition to the discussion in Stewart and WEller (2021), the estimator in Perryman et al. (2002) was negatively biased because it did not account for whales that were not sighted when no whales were observed. Because the observed number of whales was divided by the sighting probability (0.889) to calculate "corrected" number of whales, when there was no whales (zero whales), the correction resulted in zero, even though it was possible that the observers missed one or more whales. The Bayesian approach somewhat alleviated the problem by assuming the binomial likelihood of observation. 
+As Stewart and Weller (2021) reported, the Bayesian approach resulted in generally greater estimates than the method by Perryman et al. (2002) (Figure \@ref(fig:Figure-PvsV1)). In addition to the discussion in Stewart and Weller (2021), the estimator in Perryman et al. (2002) was negatively biased because it did not account for whales that were not sighted when no whales were observed. Because the observed number of whales was divided by the sighting probability (0.889) to calculate "corrected" number of whales, when there was no whales (zero whales), the correction resulted in zero, even though it was possible that the observers missed one or more whales. The Bayesian approach somewhat alleviated the problem by assuming the binomial likelihood of observation. 
 
 
 
