@@ -1738,6 +1738,10 @@ if (!file.exists(out.file.name.shift))
 For 2022 and beyond, I added some code here to skip using Collating and Formatting v2.R. It's much easier to get all necessary steps done here, directly out of Excel input files than going through many scripts. 
 
 ```{r}
+PROBLEM WITH AT LEAST ONE SHIFT 2022-03-28 ENDING/STARTING AT NOT EXACTLY AT THE 
+TOP OF THE HOUR (1558 INSTEAD OF 1600). THIS SHOULD BE EDITED IN THE DATA FILE. 
+CONTINUE HERE 2022-06-22
+
 Year <- 2022
 dir.name <- paste0("C_C ", Year)
 start.time <- "700"
@@ -1771,7 +1775,8 @@ data.inshore <- get.data(Year = Year,
                          col.types = col.types,
                          col.names = all_of(col.names),
                          area.name = "inshore",
-                         start.time = start.time)
+                         start.time = start.time,
+                         max.shift = 4)
 
 data.all <- data.inshore %>% 
     filter(!is.na(Date)) %>%
@@ -1779,24 +1784,33 @@ data.all <- data.inshore %>%
     filter(!is.na(Shift)) %>%
     arrange(Date, Minutes_since_T0)
   
+data.all.effort <- find.effort(data.all, max.shift = 4)
+
 data.all %>% 
   group_by(Date, Shift) %>%
   summarise(Date = min(Date),
             Sea_State = max(SeaState, na.rm = T),
             Vis = max(Vis, na.rm = T),
             Mother_Calf = sum(Mother_Calf, na.rm = T),
-            Duration = max(Minutes_since_0000, na.rm = T) - 
-              min(Minutes_since_0000, na.rm = T),
             Time_T0 = min(Minutes_since_T0, na.rm = T),
             Time_0000 = min(Minutes_since_0000, na.rm = T)) -> data.shift
 
+day.shifts <- data.frame(Date = rep(unique(data.shift$Date),
+                                    each = 4),
+                         Shift = rep(1:4, 
+                                     times = length(unique(data.shift$Date))))
+
+day.shifts %>% 
+  left_join(data.shift, by = c("Date", "Shift")) -> all.day.shifts
+  
 all.weeks <- seq.Date(as.Date(min(data.shift$Date)),
                       as.Date(max(data.shift$Date)),
                       by = "week")
 
-data.shift %>% select(Shift, Date, Duration, Mother_Calf) %>%
+data.shift %>% 
+  select(Shift, Date, Duration_hr, Mother_Calf) %>%
   mutate(Date = format(Date, "%Y-%m-%d"),
-         Effort = Duration/60,
+         Effort = Duration_hr,
          Sightings = Mother_Calf) %>%
   select(Date, Shift, Effort, Sightings) %>%
   mutate(Date = as.Date(Date)) %>%
@@ -1831,7 +1845,8 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data/", Year, " Formatted.csv")
+out.file.name.formatted <- paste0("data/Formatted Annual Data/", 
+                                  Year, " Formatted.csv")
 
 if (!file.exists(out.file.name.all))
   write_csv(data.all,

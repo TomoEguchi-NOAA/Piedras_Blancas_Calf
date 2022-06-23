@@ -58,7 +58,8 @@ get.all.data <- function(sheet.name.inshore, sheet.name.offshore,
 # T0 is the beginning of the first shift (start.time)
 
 get.data <- function(Year, dir.name, xls.file.name, sheet.name,
-                     col.types, col.names, area.name, start.time){
+                     col.types, col.names, area.name, start.time,
+                     max.shift){
   # col.names <- c("Date", "Event", "Time", "Obs. Code", "Sea State", 
   #                "Vis. IN", "Cow  / Calf")
   
@@ -71,7 +72,7 @@ get.data <- function(Year, dir.name, xls.file.name, sheet.name,
               Time = .data[[col.names[[3]]]],
               Minutes_since_T0 = sapply(Time, FUN = char_time2min, start.time),
               Minutes_since_0000 = sapply(Time, FUN = char_time2min),
-              Shift = sapply(Minutes_since_0000, FUN = find.shift),
+              Shift = sapply(Minutes_since_0000, FUN = find.shift, max.shift = max.shift),
               Obs = .data[[col.names[[4]]]],
               SeaState = .data[[col.names[[5]]]],
               Vis = .data[[col.names[[6]]]],
@@ -156,19 +157,32 @@ char_time2min <- function(x, origin = "0000"){
   return(out)
 }
 
-find.shift <- function(x0){
+# change max.shift if needed. max.shift can be up to 5
+find.shift <- function(x0, max.shift = 4){
   x <- as.numeric(x0)
   if (!is.na(x)){
-    if (x <= 600){
-      shift <- 1
-    } else if (x > 600 & x <= 780) {
-      shift <- 2
-    } else if (x > 780 & x <= 960){
-      shift <- 3
-    } else if (x > 960 & x <= 1140){
-      shift <- 4
+    if (x < 600){
+      shift <- "1"
+    } else if (x == 600) {
+      shift <- "1/2"
+    } else if (x > 600 & x < 780) {
+      shift <- "2"
+    } else if (x == 780){
+      shift <- "2/3"
+    } else if (x > 780 & x < 960){
+      shift <- "3"
+    } else if (x == 960){
+      shift <- "3/4"
+    } else if (x > 960 & x < 1140){
+      shift <- "4"
+    } else if (x == 1140){
+      if (max.shift > 4){
+        shift <- "4/5"        
+      } else {
+        shift <- "4"
+      }
     } else if (x > 1140 & x <= 1320){ 
-      shift <- 5
+      shift <- "5"
     } else {
       shift <- NA
     }
@@ -176,4 +190,61 @@ find.shift <- function(x0){
     shift <- NA
   }
   return(shift)
+}
+
+# x is a data.frame with at least two fields: Minutes_since_0000
+# and Shift - find.shift is used to come up with this
+# 1 = START EFFORT
+#2 = CHANGE OBSERVERS
+#3 = CHANGE SIGHTING CONDITIONS
+#4 = GRAY WHALE SIGHTING
+#5 = END EFFORT
+#6 = OTHER SPECIES SIGHTING
+
+find.effort <- function(x, max.shift){
+  all.dates <- unique(x$Date) %>% as.character()
+  
+  if (max.shift == 4){
+    shifts <- c("1", "2", "3", "4")
+    shifts.1 <- c("1/2", "2/3", "3/4", NA)
+  } else if (max.shift == 5){
+    shifts <- c("1", "2", "3", "4", "5")
+    shifts.1 <- c("1/2", "2/3", "3/4", "4/5", NA)
+  }
+  
+  out.df <- data.frame(Date = rep(all.dates,
+                                  each = length(shifts)),
+                       Shift = rep(shifts, 
+                                   times = length(unique(data.shift$Date))),
+                       Effort = NA)
+  
+  for (d in 1:length(all.dates)){
+    one.day <- filter(x, as.character(Date) == all.dates[d])
+    shifts.one.day <- unique(one.day$Shift)
+    for (k in 1:length(shifts.one.day)){
+      shifts.1.one.day <- shifts.1[str_detect(shifts.1, shifts.one.day[k])]
+      if (shifts.one.day[k] < max.shift){
+        if (as.numeric(shifts.one.day[k]) > 1){
+          one.shift <- one.day %>% filter(Shift == shifts.one.day[k] | 
+                                            Shift == shifts.1.one.day[1] | 
+                                            Shift == shifts.1.one.day[2])
+        } else{
+          one.shift <- one.day %>% filter(Shift == shifts.one.day[k] | 
+                                            Shift == shifts.1.one.day[1])
+        }
+      } else {
+        one.shift <- one.day %>% filter(Shift == shifts.one.day[k])
+      }
+      
+      if (nrow(one.shift) != 0){
+        out.df[as.character(out.df$Date) == all.dates[d] & 
+               out.df$Shift == shifts.one.day[k], "Effort"] <- max(one.shift$Minutes_since_0000, na.rm = T) - 
+          min(one.shift$Minutes_since_0000, na.rm = T)
+        
+      }
+      
+    }
+    
+  }
+  return(out.df)
 }
