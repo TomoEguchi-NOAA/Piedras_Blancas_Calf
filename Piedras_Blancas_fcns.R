@@ -192,7 +192,8 @@ find.shift <- function(x0, max.shift = 4){
   return(shift)
 }
 
-# x is a data.frame with at least two fields: Minutes_since_0000
+# x is a data.frame with at least three fields: Date (character), 
+# Minutes_since_0000
 # and Shift - find.shift is used to come up with this
 # 1 = START EFFORT
 #2 = CHANGE OBSERVERS
@@ -202,7 +203,8 @@ find.shift <- function(x0, max.shift = 4){
 #6 = OTHER SPECIES SIGHTING
 
 find.effort <- function(x, max.shift){
-  all.dates <- unique(x$Date) %>% as.character()
+  # this turns dates in to character
+  all.dates <- unique(x$Date.date)
   
   if (max.shift == 4){
     shifts <- c("1", "2", "3", "4")
@@ -212,18 +214,24 @@ find.effort <- function(x, max.shift){
     shifts.1 <- c("1/2", "2/3", "3/4", "4/5", NA)
   }
   
-  out.df <- data.frame(Date = rep(all.dates,
-                                  each = length(shifts)),
+  out.df <- data.frame(Date.char = rep(all.dates,
+                                       each = length(shifts)),
                        Shift = rep(shifts, 
-                                   times = length(unique(data.shift$Date))),
-                       Effort = NA)
+                                   times = length(all.dates)),
+                       Effort = NA,
+                       Mother_Calf = 0,
+                       Sea_State = NA,
+                       Vis = NA,
+                       Time_T0 = NA,
+                       Time_0000 = NA)
   
   for (d in 1:length(all.dates)){
-    one.day <- filter(x, as.character(Date) == all.dates[d])
+    one.day <- filter(x, Date.char == all.dates[d])
     shifts.one.day <- unique(one.day$Shift)
+    shifts.one.day <- shifts.one.day[-grep("/", shifts.one.day)]
     for (k in 1:length(shifts.one.day)){
       shifts.1.one.day <- shifts.1[str_detect(shifts.1, shifts.one.day[k])]
-      if (shifts.one.day[k] < max.shift){
+      if (as.numeric(shifts.one.day[k]) < max.shift){
         if (as.numeric(shifts.one.day[k]) > 1){
           one.shift <- one.day %>% filter(Shift == shifts.one.day[k] | 
                                             Shift == shifts.1.one.day[1] | 
@@ -237,14 +245,36 @@ find.effort <- function(x, max.shift){
       }
       
       if (nrow(one.shift) != 0){
-        out.df[as.character(out.df$Date) == all.dates[d] & 
-               out.df$Shift == shifts.one.day[k], "Effort"] <- max(one.shift$Minutes_since_0000, na.rm = T) - 
-          min(one.shift$Minutes_since_0000, na.rm = T)
+        out.df[out.df$Date == all.dates[d] & 
+               out.df$Shift == shifts.one.day[k], "Effort"] <- max(one.shift$Minutes_since_0000, 
+                                                                   na.rm = T) - 
+          min(one.shift$Minutes_since_0000, 
+              na.rm = T)
         
+        out.df[out.df$Date == all.dates[d] & 
+                 out.df$Shift == shifts.one.day[k], "Mother_Calf"] <- sum(one.shift$Mother_Calf, na.rm = T) 
+
+        out.df[out.df$Date == all.dates[d] & 
+                 out.df$Shift == shifts.one.day[k], "Sea_State"] <- max(one.shift$SeaState, na.rm = T) 
+        
+        out.df[out.df$Date == all.dates[d] & 
+                 out.df$Shift == shifts.one.day[k], "Vis"] <- max(one.shift$Vis, na.rm = T) 
+        
+        out.df[out.df$Date == all.dates[d] & 
+                 out.df$Shift == shifts.one.day[k], "Time_T0"] <- min(one.shift$Minutes_since_T0, 
+                                                                      na.rm = T) 
+        out.df[out.df$Date == all.dates[d] & 
+                 out.df$Shift == shifts.one.day[k], "Time_0000"] <- min(one.shift$Minutes_since_0000, 
+                                                                        na.rm = T) 
       }
       
     }
     
   }
-  return(out.df)
+  
+  out.df %>% 
+    mutate(Date.date = as.Date(Date.char, 
+                               format = "%Y-%m-%d")) -> out.df.1
+  return(out.df.1)
 }
+

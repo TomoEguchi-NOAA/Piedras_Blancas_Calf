@@ -1738,9 +1738,9 @@ if (!file.exists(out.file.name.shift))
 For 2022 and beyond, I added some code here to skip using Collating and Formatting v2.R. It's much easier to get all necessary steps done here, directly out of Excel input files than going through many scripts. 
 
 ```{r}
-PROBLEM WITH AT LEAST ONE SHIFT 2022-03-28 ENDING/STARTING AT NOT EXACTLY AT THE 
-TOP OF THE HOUR (1558 INSTEAD OF 1600). THIS SHOULD BE EDITED IN THE DATA FILE. 
-CONTINUE HERE 2022-06-22
+# PROBLEM WITH AT LEAST ONE SHIFT 2022-03-28 ENDING/STARTING AT NOT EXACTLY AT THE 
+# TOP OF THE HOUR (1558 INSTEAD OF 1600). THIS SHOULD BE EDITED IN THE DATA FILE. 
+# CONTINUE HERE 2022-06-22  -> IT HAS BEEN EDITED TO 1600 2022-06-23
 
 Year <- 2022
 dir.name <- paste0("C_C ", Year)
@@ -1779,60 +1779,58 @@ data.inshore <- get.data(Year = Year,
                          max.shift = 4)
 
 data.all <- data.inshore %>% 
-    filter(!is.na(Date)) %>%
-    filter(!is.na(Event)) %>%
-    filter(!is.na(Shift)) %>%
-    arrange(Date, Minutes_since_T0)
+  filter(!is.na(Date)) %>%
+  filter(!is.na(Event)) %>%
+  filter(!is.na(Shift)) %>%
+  arrange(Date, Minutes_since_T0) %>%
+  mutate(Date.date = format(Date, "%Y-%m-%d"),
+         Date.char = as.character(Date)) %>%
+  select(-Date) %>%
+  relocate(Date.date)
   
-data.all.effort <- find.effort(data.all, max.shift = 4)
+data.shift <- find.effort(data.all, max.shift = 4)
 
-data.all %>% 
-  group_by(Date, Shift) %>%
-  summarise(Date = min(Date),
-            Sea_State = max(SeaState, na.rm = T),
-            Vis = max(Vis, na.rm = T),
-            Mother_Calf = sum(Mother_Calf, na.rm = T),
-            Time_T0 = min(Minutes_since_T0, na.rm = T),
-            Time_0000 = min(Minutes_since_0000, na.rm = T)) -> data.shift
-
-day.shifts <- data.frame(Date = rep(unique(data.shift$Date),
+day.shifts <- data.frame(Date.char = rep(unique(data.shift$Date.char),
                                     each = 4),
-                         Shift = rep(1:4, 
-                                     times = length(unique(data.shift$Date))))
+                         Shift = rep(c("1", "2", "3", "4"), 
+                                     times = length(unique(data.shift$Date.char))))
 
 day.shifts %>% 
-  left_join(data.shift, by = c("Date", "Shift")) -> all.day.shifts
+  left_join(data.shift, by = c("Date.char", "Shift")) -> all.day.shifts
   
-all.weeks <- seq.Date(as.Date(min(data.shift$Date)),
-                      as.Date(max(data.shift$Date)),
+all.weeks <- seq.Date(as.Date(min(data.shift$Date.char)),
+                      as.Date(max(data.shift$Date.char)),
                       by = "week")
 
 data.shift %>% 
-  select(Shift, Date, Duration_hr, Mother_Calf) %>%
-  mutate(Date = format(Date, "%Y-%m-%d"),
-         Effort = Duration_hr,
+  select(Shift, Date.char, Date.date, Effort, Mother_Calf) %>%
+  mutate(Date.char = Date.char,
+         Effort = Effort/60,
          Sightings = Mother_Calf) %>%
-  select(Date, Shift, Effort, Sightings) %>%
-  mutate(Date = as.Date(Date)) %>%
+  select(Date.char, Shift, Effort, Sightings) %>%
+  mutate(Date.date = as.Date(Date.char)) %>%
   data.frame() -> raw.data
 
 # has to have four shifts per day... and additional four shifts for evening.
-all.dates <- seq.Date(as.Date(min(data.shift$Date)),
-                      as.Date(max(data.shift$Date)),
+all.dates <- seq.Date(as.Date(min(data.shift$Date.char)),
+                      as.Date(max(data.shift$Date.char)),
                       by = "day")
 
-all.shifts <- data.frame(Date = rep(all.dates,
-                                    each = 8),
-                         Shift = rep(1:8, 
+all.shifts <- data.frame(Date.date = rep(all.dates,
+                                         each = 8),
+                         Shift = rep(c("1", "2", "3", "4",
+                                       "5", "6", "7", "8"), 
                                      times = length(all.dates),
                                      by = "day"))
 
+START HERE... SOME ISSUES BELOW. 2022-06-23
 all.shifts %>% 
-  left_join(raw.data, by = c("Date", "Shift")) %>%
-  mutate(Week = ceiling(difftime(Date, min(all.dates), 
-                                 units = "weeks")) %>%
-           as.numeric()) %>%
-  select(Week, Date, Effort, Sightings) -> formatted.all.data
+  left_join(raw.data, by = c("Date.date", "Shift")) %>%
+  mutate(Week = ceiling(difftime(as.Date(Date.char), min(all.dates)), 
+                        units = "weeks") %>%
+           as.numeric(),
+         Date = Date.char) %>%
+  select(Week, Date, Shift, Effort, Sightings) -> formatted.all.data
 
 # need to change week = 0 to week = 1...
 formatted.all.data[formatted.all.data$Week == 0, "Week"] <- 1
