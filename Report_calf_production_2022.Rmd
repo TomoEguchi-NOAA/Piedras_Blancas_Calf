@@ -1,6 +1,6 @@
 ---
 title: "Eastern North Pacific gray whale calf production 1994-2022"
-author: "Tomo Eguchi"
+author: "Tomo Eguchi, Aimee Lang, David Weller"
 date: "`r Sys.Date()`"
 output: 
   bookdown::word_document2: default
@@ -76,7 +76,7 @@ estimates.PandV1 <- rbind(Estimates %>% select(Year, Mean, LCL, UCL, Method),
 ## INTRODUCTION {-}
 Eastern North Pacific (ENP) gray whales (*Eschrichtius robustus*) migrate annually between foraging grounds in the arctic and wintering grounds in Baja California (Rice and Wolman 1971). Females give birth in protected lagoons in Baja California Sur, Mexico, and migrate north with their calves in the spring of each year. Shore-based counts of female gray whales accompanying their calves (i.e. mother-calf pairs) have been conducted annually from the Piedras Blancas Lighthouse Station in central California since 1994. Survey methods were evaluated in detail at the outset of the study (Perryman et al. 2002) and both survey methods and the analytical approach used to estimate total annual calf production have remained consistent since 1994 (Weller and Perryman 2019). 
 
-In 2021, Stewart and Weller (2021) presented a new Bayesian modeling approach to estimate annual calf production of ENP gray whales. Their approach accounted for uncertainty during unsampled periods (i.e., when there was no sampling effort; evenings, weekends, and bad weather days). Here we provide estimates of calf production for the 1994-2022 period using the Bayesian approach and compare them to estimates using the previous method. 
+In 2021, Stewart and Weller (2021) presented a new Bayesian modeling approach to estimate annual calf production of ENP gray whales. Their approach accounted for uncertainty during unsampled periods (i.e., when there was no sampling effort; evenings, weekends, and bad weather days). Here we provide estimates of calf production for the 1994-2022 period using the Bayesian approach. 
 
 ## METHODS {-}
 Data for this analysis were collected between 1994-2022 using standardized methods and processed to be consistent with previous analyses (Perryman et al. 2002, Weller and Perryman 2019, Stewart and Weller 2021). Briefly, a rotating pair of observers conducted counts of mother-calf pairs from a shore station during a watch period of, typically, a maximum
@@ -143,6 +143,8 @@ if (save.fig)
 ```
 
 
+### Calf production {-}
+
 From `r min(as.Date(data.2022$Date, format = "%Y-%m-%d")) %>% format("%d %B %Y")` to `r max(as.Date(data.2022$Date, format = "%Y-%m-%d")) %>% format("%d %B %Y")`, `r signif(sum(data.2022$Effort),3)` hours of survey were completed. Daily survey effort ranged from zero to `r signif(max(data.2022.by.day$Daily_Effort), 3)` hours. A total of `r sum(data.2022$Sightings)` mother-calf pairs of gray whales were counted, with the highest daily count of `r max(data.2022.by.day$Daily_Sightings)` pairs on `r data.2022.by.day[data.2022.by.day$Daily_Sightings == max(data.2022.by.day$Daily_Sightings), "Date"] %>% pull() %>% format("%d %B %Y")`.  (`r  data.2022.by.day[data.2022.by.day$Daily_Sightings == max(data.2022.by.day$Daily_Sightings), "Sightings_per_Effort"] %>% pull() %>% signif(3)` per survey effort hour, Figure \@ref(fig:Figure-daily-sightings)). 
 
 
@@ -191,9 +193,10 @@ knitr::include_graphics("figures/Nhats_2022.png")
 As Stewart and Weller (2021) reported, the Bayesian approach resulted in generally greater estimates than the method by Perryman et al. (2002) (Figure \@ref(fig:Figure-PvsV1)). In addition to the discussion in Stewart and Weller (2021), the estimator in Perryman et al. (2002) was negatively biased because it did not account for whales that were not sighted when no whales were observed. Because the observed number of whales was divided by the sighting probability (0.889) to calculate "corrected" number of whales, when there was no whales (zero whales), the correction resulted in zero, even though it was possible that the observers missed one or more whales. The Bayesian approach somewhat alleviated the problem by assuming the binomial likelihood of observation. 
 
 
-
 ```{r Table-nhats-v1, echo=FALSE, warning=FALSE}
-flextable(Estimates %>% dplyr::relocate(Year) %>% dplyr::select(- Method)) %>%
+flextable(Estimates %>% 
+            dplyr::relocate(Year) %>% 
+            dplyr::select(- Method)) %>%
   set_caption(paste0("Estimated abundance (Mean and Median) and 95% lower (LCL) and upper (UCL) confidence limits of gray whale calves from the visual surveys off the Piedras Blancas Lighthouse Station, CA. "))  %>%
   colformat_double(j = "Year", big.mark = "",
                    digits = 0) %>%
@@ -208,13 +211,16 @@ knitr::include_graphics("figures/PvsV1.png")
 
 ```
 
+### Calf production relative to abundance {-}
 
 
 ```{r compare-with-Nhats, echo=FALSE, include=FALSE, cache=TRUE}
 Nhats <- read.csv(file = "~/R/Granite_Canyon_Counts/Data/all_estimates_2022.csv") %>%
   filter(Year > 1993) %>% na.omit()
 
-Estimates %>% left_join(Nhats, by = "Year") -> MC_Nhats
+Estimates %>% left_join(Nhats, by = "Year") %>%
+  na.omit() %>%
+  mutate(p.MC = Mean/Nhat) -> MC_Nhats
 
 MC_Nhats %>%
   transmute(log.Mean = log(Mean),
@@ -241,11 +247,14 @@ p.NvsCalves <- ggplot(MC_Nhats %>% na.omit()) +
                      xmin = LCL.y, 
                      xmax = UCL.y, 
                      color = factor(Year))) +
-  xlab("Abundance") + ylab("Calf production")
-```
+  xlab("Abundance") + ylab("Mother calf pair") +
+  labs(color = "Year")
 
+if (save.fig)
+  ggsave(filename = "figures/NvsCalves.png",
+         plot = p.NvsCalves, 
+         device = "png", dpi = 600)
 
-```{r compare-with-Nhats-log, echo=FALSE, include=FALSE, cache=TRUE}
 p.NvsCalves.log <- ggplot(log.MC_Nhats %>% na.omit()) +
   geom_point(aes(x = log.Nhat, 
                  y = log.Mean, 
@@ -258,10 +267,79 @@ p.NvsCalves.log <- ggplot(log.MC_Nhats %>% na.omit()) +
                      xmin = log.LCL.y, 
                      xmax = log.UCL.y, 
                      color = factor(Year))) +
-  xlab("log(Abundance)") + ylab("log(Calf production)")
+  xlab("log(Abundance)") + 
+  ylab("log(Calf production)") + 
+   labs(color = "Year")
+
+if (save.fig)
+  ggsave(filename = "figures/NvsCalves_log.png",
+         plot = p.NvsCalves.log, device = "png", dpi = 600)
 
 ```
 
+We compared estimated calf production with estimated abundance of gray whales from the surveys at Granite Canyon, CA. The estimated abundance between `r min(MC_Nhats$Year)` and `r max(MC_Nhats$Year)` ranged from `r format.big.number(min(MC_Nhats$Nhat))` in `r filter(MC_Nhats, Nhat == min(Nhat)) %>% select(Year) %>% pull()` to `r format.big.number(max(MC_Nhats$Nhat))` in `r filter(MC_Nhats, Nhat == max(Nhat)) %>% select(Year) %>% pull()` (Table \@ref(tab:Table-prop-Nhats-v1)). Proportion of mother-calf pairs to total abundance ranged from `r signif(min(MC_Nhats$p.MC), 4)` in `r filter(MC_Nhats, p.MC == min(p.MC)) %>% select(Year) %>% pull()` to `r signif(max(MC_Nhats$p.MC), 4)` in `r filter(MC_Nhats, p.MC == max(p.MC)) %>% select(Year) %>% pull()`. 
 
-When the estimated number of calves was compared with the estimated abundance of gray whales from the surveys at Granite Canyon, CA, a linear relationship was found in the log-log scale (Figure \@ref(fig:), Table \@ref(tab:))
+```{r Table-prop-Nhats-v1, echo=FALSE, warning=FALSE}
+flextable(MC_Nhats %>% 
+#            dplyr::relocate(Season) %>% 
+            dplyr::select(Season, Nhat, LCL.y, UCL.y,
+                          Mean, LCL.x, UCL.x, p.MC) %>%
+            transmute(Season = Season,
+                      Abundace = Nhat,
+                      LCL_N = LCL.y,
+                      UCL_N = UCL.y,
+                      Mother_Calf = Mean,
+                      LCL_MC = LCL.x,
+                      UCL_MC = UCL.x,
+                      prop_MC = p.MC)) %>%
+  set_caption(paste0("Estimates (Abundance and Mother_Calf) and 95% lower (LCL) and upper (UCL) confidence limits of gray whale total abundance and mother-calf pairs. prop_MC is the proportion of mother-calf pairs to the total abundance."))  %>%
+  colformat_double(j = c("Mother_Calf", "LCL_N", "UCL_N",
+                         "LCL_MC", "UCL_MC"), 
+                   digits = 1) %>%
+  colformat_double(j = "prop_MC", digits = 3) %>%
+  set_table_properties(width = 0.5, layout = "autofit")
+```
+
+
+```{r proportion-to-Nhats, echo=FALSE, include=FALSE, cache=TRUE}
+
+p.propMC <- ggplot(MC_Nhats) + 
+  geom_point(aes(x = Nhat, y = p.MC, color = Season)) +
+  geom_path(aes(x = Nhat, y = p.MC)) +
+  #geom_errorbar(aes(x = p.MC, ymin = LCL.y, ymax = UCL.y))
+  xlab("Estimated abundance") + 
+  ylab("Proportion of mother/calf pairs to estimated abundance")
+  
+if (save.fig)
+  ggsave(plot = p.propMC,
+         filename = "figures/propMC.png",
+         device = "png", dpi = 600)
+```
+
+There was a linear relationship between estimated abundance and the number of mother-calf pairs (Figure \@ref(fig:Figure-NvsV1)). 
+
+```{r Figure-NvsV1, echo=FALSE, message=FALSE, fig.cap="The relationship between estimated abundance and estimated calf production."}
+
+knitr::include_graphics("figures/NvsCalves.png")
+
+```
+
+## Acknowledgements {-}
+Our shore-based surveys of gray whales conducted from the Piedras Blancas Light Station would not be possible without the support and hospitality provided by U.S. Department of Interior's Bureau of Land Management. We are particularly indebted to the support provided by John Bogacki, Jim Boucher, Ryan Cooper, and Jodie Nelson. A long list
+of talented field biologists contributed to this data set but the contributions by Richard Rowlett, Susan Chivers, Morgan Lynn, and Jim Gilpatrick stand out because of their talents and dedication over 20 years of survey effort reported herein. Wayne Perryman pioneered this study in 1994 and lead the field effort for more than 20 years. His contributions to the science and fun of the project have everything to do with its enduring quality and success.
+
+## Literature Cited {-}
+Dorazio RM, Johnson FA (2003) Bayesian inference and decision theory - a framework for decision making in natural resource management. Ecol Appl 13:556–563.
+
+Durban JW, Weller DW, Lang AR, Perryman WL (2015) Estimating gray whale abundance from shore-based Counts using a multilevel Bayesian model. J Cetacean Res Manag 15:61–67.
+
+Ellison AM (2004) Bayesian inference in ecology. Ecol Lett 7:509–520. doi: 10.1111/j.1461-0248.2004.00603.x
+
+Perryman WL, Donahue MA, Perkins PC, Reilly SB (2002) Gray whale calf production 1994-2000: Are observed fluctuations related to changes in seasonal ice cover? Mar Mammal Sci 18:121–144. doi: 10.1111/j.1748-7692.2002.tb01023.x
+
+Rice DW, Wolman AA (1971) Life history and ecology of the gray whale (Eschrichtius robustus). Am Soc Mammal (special issue) 3:1–142.
+
+Stewart JD, Weller DW (2021) Abundance of eastern North Pacific gray whales 2019/2020. US Dept Commer, NOAA Tech Memo NMFS-SWFSC-639. doi: https://doi.org/10.25923/bmam-pe91
+
+Weller DW, Perryman WL (2019) Eastern North Pacific gray whale calf production estimates 1994-2018. Present to Sci Comm Int Whal Comm 4.
 
