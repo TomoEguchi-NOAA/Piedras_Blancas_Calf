@@ -242,6 +242,7 @@ find.effort <- function(x, start.hr = 7, end.hr = 19, max.shift = 4){
                        Time_T0 = NA,
                        Time_0000 = NA)
   
+  d <- k1 <- 1
   for (d in 1:length(all.dates)){
     # pick just one day's worth of data
     one.day <- filter(x, Date.char == all.dates[d])
@@ -269,6 +270,13 @@ find.effort <- function(x, start.hr = 7, end.hr = 19, max.shift = 4){
         # find out how many on/off effort existed
         row.1 <- which(one.shift.eft$Event == 1)
         row.5 <- which(one.shift.eft$Event == 5)
+        
+        # if they don't match, take the fewer one.
+        if (length(row.1) != length(row.5)){
+          nrow <- min(length(row.1), length(row.5))
+          row.1 <- row.1[1:nrow]
+          row.5 <- row.5[1:nrow]
+        }
         
         # calculate effort for each on period per shift
         tmp.eft <- 0
