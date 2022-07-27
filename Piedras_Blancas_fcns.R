@@ -283,20 +283,32 @@ find.effort <- function(x, start.hr = 7, end.hr = 19, max.shift = 4){
         out.df[out.df$Date.char == all.dates[d] & 
                  out.df$Shift == shifts[k1], "Mother_Calf"] <- sum(one.shift$Mother_Calf, 
                                                                   na.rm = T) 
+        max.sea.state <- max(one.shift$SeaState, na.rm = T)
+        if (!is.infinite(max.sea.state)){
+          out.df[out.df$Date.char == all.dates[d] & 
+                   out.df$Shift == shifts[k1], "Sea_State"] <- max.sea.state
+          
+        } else {
+          out.df[out.df$Date.char == all.dates[d] & 
+                   out.df$Shift == shifts[k1], "Sea_State"] <- NA
+        }
         
-        out.df[out.df$Date.char == all.dates[d] & 
-                 out.df$Shift == shifts[k1], "Sea_State"] <- max(one.shift$SeaState, 
-                                                                na.rm = T) 
-        
-        out.df[out.df$Date.char == all.dates[d] & 
-                 out.df$Shift == shifts[k1], "Vis"] <- max(one.shift$Vis, na.rm = T) 
+        max.Vis <- max(one.shift$Vis, na.rm = T) 
+        if (!is.infinite(max.Vis)){
+          out.df[out.df$Date.char == all.dates[d] & 
+                   out.df$Shift == shifts[k1], "Vis"] <- max.Vis
+            
+        } else {
+          out.df[out.df$Date.char == all.dates[d] & 
+                   out.df$Shift == shifts[k1], "Vis"] <- NA
+        }
         
         out.df[out.df$Date.char == all.dates[d] & 
                  out.df$Shift == shifts[k1], "Time_T0"] <- min(one.shift$Minutes_since_T0, 
-                                                              na.rm = T) 
+                                                               na.rm = T) 
         out.df[out.df$Date.char == all.dates[d] & 
                  out.df$Shift == shifts[k1], "Time_0000"] <- min(one.shift$Minutes_since_0000, 
-                                                                na.rm = T) 
+                                                                 na.rm = T) 
       }
     }
     

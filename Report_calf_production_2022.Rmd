@@ -28,6 +28,11 @@ set_flextable_defaults(font.size = 8,
 
 data.path <- "data/Formatted Annual Data/"
 
+# UMEs
+UMEs <- data.frame(Season = c("1999/2000", "2019/2020", 
+                              "2020/2021", "2021/2022"),
+                   Year = c(1999, 2019, 2020, 2021))
+
 FILES <- list.files(path = data.path, 
                     pattern = "Formatted.csv")
 
@@ -132,6 +137,7 @@ data.2022 %>% group_by(Date) %>%
 
 p.daily.sightings <- ggplot(data.2022.by.day) +
   geom_point(aes(x = Date, y = Sightings_per_Effort)) +
+  geom_path(aes(x = Date, y = Sightings_per_Effort)) +
   xlab("") + ylab("Daily observed number of mother-calf pairs per effor hour")
 
 if (save.fig)
@@ -159,6 +165,10 @@ knitr::include_graphics("figures/daily_sightings_2022.png")
 p.Nhats <- ggplot(data = Estimates) +
   geom_point(aes(x = Year, y = Mean)) + 
   geom_errorbar(aes(x = Year, ymin = LCL, ymax = UCL)) +
+  geom_rect(data = UMEs, 
+            aes(xmin = Year, xmax = Year+1,
+                ymin = 0, ymax = 2000),
+            fill = "gold", alpha = 0.4) +
   xlab("") + ylab("Mean and 95% CI") 
 
 if (save.fig)
@@ -170,6 +180,10 @@ p.PvsV1 <- ggplot(estimates.PandV1) +
   geom_ribbon(aes(x = Year, ymin = LCL, ymax = UCL, fill = Method),
               alpha = 0.3) +
   geom_point(aes(x = Year, y = Mean, color = Method)) +
+  geom_rect(data = UMEs, 
+            aes(xmin = Year, xmax = Year+1,
+                ymin = 0, ymax = 2000),
+            fill = "gold", alpha = 0.2) +
   xlab("") + ylab("Mean and 95% CI") +
   theme(legend.position = "top")
 
@@ -215,10 +229,22 @@ knitr::include_graphics("figures/PvsV1.png")
 
 
 ```{r compare-with-Nhats, echo=FALSE, include=FALSE, cache=TRUE}
-Nhats <- read.csv(file = "~/R/Granite_Canyon_Counts/Data/all_estimates_2022.csv") %>%
-  filter(Year > 1993) %>% na.omit()
+#Nhats are not necessarily the numbers out of analysis because we decided to keep the past estimates intact and not update as we add more data. So... estimates from Durban's approach need to be entered manually.
 
-Estimates %>% left_join(Nhats, by = "Year") %>%
+Durban_estim <- data.frame(Year = c(2007, 2008, 2010, 2011, 2015, 2016, 2022),
+                           Season = c("2006/2007", "2007/2008", "2009/2010",
+                                      "2010/2011", "2014/2015", "2015/2016",
+                                       "2021/2022"),
+                           Nhat = c(20750, 17820, 21210, 20990, 23530, 26960, 16650),
+                           LCL = c(18860, 16150, 19420, 19230, 21270, 24420, 15170),
+                           UCL = c(23320, 19920, 23250, 22900, 25945, 29830, 18335),
+                           Method = "Durban")+-
+
+Nhats <- read.csv(file = "~/R/Granite_Canyon_Counts/Data/all_estimates_2022.csv") %>%
+  filter(Method == "Laake" & Year > 1993 & Year < 2007) %>% 
+  dplyr::select(!X) %>% na.omit()
+
+Estimates %>% left_join(rbind(Nhats, Durban_estim), by = "Year") %>%
   na.omit() %>%
   mutate(p.MC = Mean/Nhat) -> MC_Nhats
 
@@ -288,12 +314,12 @@ flextable(MC_Nhats %>%
                       Abundace = Nhat,
                       LCL_N = LCL.y,
                       UCL_N = UCL.y,
-                      Mother_Calf = Mean,
+                      Calf = Mean,
                       LCL_MC = LCL.x,
                       UCL_MC = UCL.x,
                       prop_MC = p.MC)) %>%
   set_caption(paste0("Estimates (Abundance and Mother_Calf) and 95% lower (LCL) and upper (UCL) confidence limits of gray whale total abundance and mother-calf pairs. prop_MC is the proportion of mother-calf pairs to the total abundance."))  %>%
-  colformat_double(j = c("Mother_Calf", "LCL_N", "UCL_N",
+  colformat_double(j = c("Calf", "LCL_N", "UCL_N",
                          "LCL_MC", "UCL_MC"), 
                    digits = 1) %>%
   colformat_double(j = "prop_MC", digits = 3) %>%

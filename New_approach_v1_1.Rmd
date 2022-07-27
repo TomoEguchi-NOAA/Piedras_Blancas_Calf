@@ -47,21 +47,35 @@ col.defs <- cols(Date = col_date(format = "%Y-%m-%dT%H:%M:%SZ"),
                  Sea_State = col_integer(),
                  Vis = col_integer(),
                  Mother_Calf = col_integer(),
-                 Curation = col_double(), 
+                 Duration = col_double(), 
                  Time_T0 = col_double(), 
                  Time_0000 = col_double())
 
 count.obs <- effort <- week <- date <- n.obs <- n.weeks <- all.data <- list()
 years <- vector(mode = "numeric", length = length(FILES))
 
-ERROR IN THE FOLLOWING LOOP; PARSER ERROR. 2022-07-26.
 i <- 1
 for(i in 1:length(FILES)){
-  
+  # Sea_State and Vis have -Inf from missing data, which turns into parsing issues
+  # These can be ignored.
   data <- read_csv(paste0(data.path, FILES[i]), 
                    col_types = col.defs)
 
+  # 2022 data have a different date format... 
+  if (is.na(data$Date[1])){
+    col.defs <- cols(Date = col_character(), #(format = "%d-%b-%y"), 
+                     Shift = col_integer(), 
+                     Sea_State = col_integer(),
+                     Vis = col_integer(),
+                     Mother_Calf = col_integer(),
+                     Duration = col_double(), 
+                     Time_T0 = col_double(), 
+                     Time_0000 = col_double())
   
+    data <- read_csv(paste0(data.path, FILES[i]), 
+                   col_types = col.defs)
+  
+  }
   all.dates <- seq.Date(from = min(data$Date), 
                         to = max(data$Date),
                         by = "day") 

@@ -17,6 +17,8 @@ out.dir <- "data/Processed data/"
 ```
 
 
+THIS FILE NEEDS TO BE UPDATED AND ANNOTATED BETTER. EACH YEAR HAS A DIFFERENT FORMAT SO ALL THE DIFFERENCES NEED TO BE DESCRIBED IN DETAILS. COMMON FUNCTIONS MAY NOT WORK SO WELL. CURRENTLY IT DOES NOT RUN. 2022-07-27
+
 ## 1994
 
 ```{r}
@@ -41,17 +43,29 @@ col.types.offshore <- c("date", "numeric", "text", "numeric", "numeric",
 col.names.offshore <- c("Date", "Event", "Time", "Obs.", "Sea State",
                         "Vis. Code", "Cow/Calf", "Ad./Juv.")
 
-data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                           col.types.inshore, col.types.offshore,
                           col.names.inshore, col.names.offshore,
-                          Year, dir.name, 
-                          xls.file.name.inshore, xls.file.name.offshore,
-                          start.time)
+                          Year, xls.file.name.inshore, xls.file.name.offshore,
+                          start.time, max.shift = 4)
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
                             Year, ".csv")
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
+
+
+# calculate effort and other statistics per 3-hr shift, using find.effort
+# function in Piedras_Blancas_fcns.R
+data.shift <- find.effort(data.all, 
+                          start.hr = 7, 
+                          end.hr = 19, 
+                          max.shift = 4)
+
+formatted.all.data <- format.output(data.shift, max.shift = 4)
+
+out.file.name.formatted <- paste0("data/Formatted Annual Data/", 
+                                  Year, " Formatted.csv")
 
 if (!file.exists(out.file.name.all))
   write_csv(data.list$all,
@@ -95,9 +109,9 @@ col.names.offshore <- c("Date",	"Event",	"Time",	"OBS.",
 data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                           col.types.inshore, col.types.offshore,
                           col.names.inshore, col.names.offshore,
-                          Year, dir.name, 
+                          Year, 
                           xls.file.name.inshore, xls.file.name.offshore,
-                          start.time)
+                          start.time, max.shift = 4)
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
                             Year, ".csv")
@@ -148,9 +162,9 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
 data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                           col.types.inshore, col.types.offshore,
                           col.names.inshore, col.names.offshore,
-                          Year, dir.name, 
+                          Year, 
                           xls.file.name.inshore, xls.file.name.offshore,
-                          start.time)
+                          start.time, max.shift = 4)
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
                             Year, ".csv")
@@ -202,9 +216,9 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
 data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                           col.types.inshore, col.types.offshore,
                           col.names.inshore, col.names.offshore,
-                          Year, dir.name, 
+                          Year, 
                           xls.file.name.inshore, xls.file.name.offshore,
-                          start.time)
+                          start.time, max.shift = 4)
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
                             Year, ".csv")
@@ -256,9 +270,9 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
 data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                           col.types.inshore, col.types.offshore,
                           col.names.inshore, col.names.offshore,
-                          Year, dir.name, 
+                          Year, 
                           xls.file.name.inshore, xls.file.name.offshore,
-                          start.time)
+                          start.time, max.shift = 4)
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
                             Year, ".csv")
@@ -324,9 +338,9 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
 data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                           col.types.inshore, col.types.offshore,
                           col.names.inshore, col.names.offshore,
-                          Year, dir.name, 
+                          Year,
                           xls.file.name.inshore, xls.file.name.offshore,
-                          start.time)
+                          start.time, max.shift = 4)
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
                             Year, ".csv")
@@ -391,9 +405,9 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
 data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                           col.types.inshore, col.types.offshore,
                           col.names.inshore, col.names.offshore,
-                          Year, dir.name, 
+                          Year, 
                           xls.file.name.inshore, xls.file.name.offshore,
-                          start.time)
+                          start.time, max.shift = 4)
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
                             Year, ".csv")
@@ -458,9 +472,9 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
 data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                           col.types.inshore, col.types.offshore,
                           col.names.inshore, col.names.offshore,
-                          Year, dir.name, 
+                          Year, 
                           xls.file.name.inshore, xls.file.name.offshore,
-                          start.time)
+                          start.time, max.shift = 4)
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
                             Year, ".csv")
@@ -521,9 +535,9 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
 data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                           col.types.inshore, col.types.offshore,
                           col.names.inshore, col.names.offshore,
-                          Year, dir.name, 
+                          Year, 
                           xls.file.name.inshore, xls.file.name.offshore,
-                          start.time)
+                          start.time, max.shift = 4)
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
                             Year, ".csv")
@@ -584,9 +598,9 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
 data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                           col.types.inshore, col.types.offshore,
                           col.names.inshore, col.names.offshore,
-                          Year, dir.name, 
+                          Year, 
                           xls.file.name.inshore, xls.file.name.offshore,
-                          start.time)
+                          start.time, max.shift = 4)
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
                             Year, ".csv")
@@ -646,9 +660,9 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
 data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                           col.types.inshore, col.types.offshore,
                           col.names.inshore, col.names.offshore,
-                          Year, dir.name, 
+                          Year, 
                           xls.file.name.inshore, xls.file.name.offshore,
-                          start.time)
+                          start.time, max.shift = 4)
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
                             Year, ".csv")
@@ -712,9 +726,9 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
 data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                           col.types.inshore, col.types.offshore,
                           col.names.inshore, col.names.offshore,
-                          Year, dir.name, 
+                          Year, 
                           xls.file.name.inshore, xls.file.name.offshore,
-                          start.time)
+                          start.time, max.shift = 4)
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
                             Year, ".csv")
@@ -778,9 +792,9 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
 data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                           col.types.inshore, col.types.offshore,
                           col.names.inshore, col.names.offshore,
-                          Year, dir.name, 
+                          Year, 
                           xls.file.name.inshore, xls.file.name.offshore,
-                          start.time)
+                          start.time, max.shift = 4)
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
                             Year, ".csv")
@@ -844,9 +858,9 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
 data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                           col.types.inshore, col.types.offshore,
                           col.names.inshore, col.names.offshore,
-                          Year, dir.name, 
+                          Year, 
                           xls.file.name.inshore, xls.file.name.offshore,
-                          start.time)
+                          start.time, max.shift = 4)
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
                             Year, ".csv")
@@ -911,9 +925,9 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
 data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                           col.types.inshore, col.types.offshore,
                           col.names.inshore, col.names.offshore,
-                          Year, dir.name, 
+                          Year, 
                           xls.file.name.inshore, xls.file.name.offshore,
-                          start.time)
+                          start.time, max.shift = 4)
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
                             Year, ".csv")
@@ -976,9 +990,9 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
 data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                           col.types.inshore, col.types.offshore,
                           col.names.inshore, col.names.offshore,
-                          Year, dir.name, 
+                          Year, 
                           xls.file.name.inshore, xls.file.name.offshore,
-                          start.time)
+                          start.time, max.shift = 4)
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
                             Year, ".csv")
@@ -1045,9 +1059,9 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
 data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                           col.types.inshore, col.types.offshore,
                           col.names.inshore, col.names.offshore,
-                          Year, dir.name, 
+                          Year, 
                           xls.file.name.inshore, xls.file.name.offshore,
-                          start.time)
+                          start.time, max.shift = 4)
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
                             Year, ".csv")
@@ -1111,9 +1125,9 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
 data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                           col.types.inshore, col.types.offshore,
                           col.names.inshore, col.names.offshore,
-                          Year, dir.name, 
+                          Year, 
                           xls.file.name.inshore, xls.file.name.offshore,
-                          start.time)
+                          start.time, max.shift = 4)
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
                             Year, ".csv")
@@ -1177,9 +1191,9 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
 data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                           col.types.inshore, col.types.offshore,
                           col.names.inshore, col.names.offshore,
-                          Year, dir.name, 
+                          Year, 
                           xls.file.name.inshore, xls.file.name.offshore,
-                          start.time)
+                          start.time, max.shift = 4)
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
                             Year, ".csv")
@@ -1243,9 +1257,9 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
 data.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                           col.types.inshore, col.types.offshore,
                           col.names.inshore, col.names.offshore,
-                          Year, dir.name, 
+                          Year, 
                           xls.file.name.inshore, xls.file.name.offshore,
-                          start.time)
+                          start.time, max.shift = 4)
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
                             Year, ".csv")
