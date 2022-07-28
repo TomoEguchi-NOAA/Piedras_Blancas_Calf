@@ -219,7 +219,7 @@ find.shift <- function(x0, max.shift = 4){
 # and 1900), and the maximum number of shift per day (default to 4).
 find.effort <- function(x, start.hr = 7, end.hr = 19, max.shift = 4){
   # this turns dates in to character
-  all.dates <- unique(x$Date.date)
+  all.dates <- unique(x$Date)
   
   if (max.shift == 4){
     shifts <- c("1", "2", "3", "4")
@@ -245,7 +245,7 @@ find.effort <- function(x, start.hr = 7, end.hr = 19, max.shift = 4){
   d <- k1 <- 1
   for (d in 1:length(all.dates)){
     # pick just one day's worth of data
-    one.day <- filter(x, Date.char == all.dates[d])
+    one.day <- filter(x, Date == all.dates[d])
     
     for (k1 in 1:length(shifts)){
       one.day %>%
@@ -285,36 +285,36 @@ find.effort <- function(x, start.hr = 7, end.hr = 19, max.shift = 4){
           tmp.eft <- tmp.eft + (max(tmp$Minutes_since_0000) - min(tmp$Minutes_since_0000))  
         }
 
-        out.df[out.df$Date.char == all.dates[d] & 
+        out.df[out.df$Date == all.dates[d] & 
                  out.df$Shift == shifts[k1], "Effort"] <- tmp.eft
         
-        out.df[out.df$Date.char == all.dates[d] & 
+        out.df[out.df$Date == all.dates[d] & 
                  out.df$Shift == shifts[k1], "Mother_Calf"] <- sum(one.shift$Mother_Calf, 
                                                                   na.rm = T) 
         max.sea.state <- max(one.shift$SeaState, na.rm = T)
         if (!is.infinite(max.sea.state)){
-          out.df[out.df$Date.char == all.dates[d] & 
+          out.df[out.df$Date == all.dates[d] & 
                    out.df$Shift == shifts[k1], "Sea_State"] <- max.sea.state
           
         } else {
-          out.df[out.df$Date.char == all.dates[d] & 
+          out.df[out.df$Date == all.dates[d] & 
                    out.df$Shift == shifts[k1], "Sea_State"] <- NA
         }
         
         max.Vis <- max(one.shift$Vis, na.rm = T) 
         if (!is.infinite(max.Vis)){
-          out.df[out.df$Date.char == all.dates[d] & 
+          out.df[out.df$Date == all.dates[d] & 
                    out.df$Shift == shifts[k1], "Vis"] <- max.Vis
             
         } else {
-          out.df[out.df$Date.char == all.dates[d] & 
+          out.df[out.df$Date == all.dates[d] & 
                    out.df$Shift == shifts[k1], "Vis"] <- NA
         }
         
-        out.df[out.df$Date.char == all.dates[d] & 
+        out.df[out.df$Date == all.dates[d] & 
                  out.df$Shift == shifts[k1], "Time_T0"] <- min(one.shift$Minutes_since_T0, 
                                                                na.rm = T) 
-        out.df[out.df$Date.char == all.dates[d] & 
+        out.df[out.df$Date == all.dates[d] & 
                  out.df$Shift == shifts[k1], "Time_0000"] <- min(one.shift$Minutes_since_0000, 
                                                                  na.rm = T) 
       }
@@ -322,50 +322,50 @@ find.effort <- function(x, start.hr = 7, end.hr = 19, max.shift = 4){
     
   }
   
-  out.df %>% 
-    mutate(Date.date = as.Date(Date.char, 
-                               format = "%Y-%m-%d")) -> out.df.1
-  return(out.df.1)
+  # out.df %>% 
+  #   mutate(Date = as.Date(Date.char, 
+  #                              format = "%Y-%m-%d")) -> out.df.1
+  return(out.df)
 }
 
 format.output <- function(data.shift, max.shift){
   # create a data frame with the full set of date/shift for dates with observations
-  day.shifts <- data.frame(Date.char = rep(unique(data.shift$Date.char),
+  day.shifts <- data.frame(Date = rep(unique(data.shift$Date),
                                            each = max.shift),
                            Shift = ifelse(max.shift == 4, 
                                           rep(c("1", "2", "3", "4"), 
-                                              times = length(unique(data.shift$Date.char))),
+                                              times = length(unique(data.shift$Date))),
                                           rep(c("1", "2", "3", "4", "5"), 
-                                              times = length(unique(data.shift$Date.char)))))
+                                              times = length(unique(data.shift$Date)))))
   # Combine the full set of date/shift with the observed - some shifts are NAs because
   # they were not in the dataset
   day.shifts %>% 
-    left_join(data.shift, by = c("Date.char", "Shift")) -> all.day.shifts
+    left_join(data.shift, by = c("Date", "Shift")) -> all.day.shifts
   
   
   # create a vector with sequential weeks
-  all.weeks <- seq.Date(as.Date(min(data.shift$Date.char)),
-                        as.Date(max(data.shift$Date.char)),
+  all.weeks <- seq.Date(as.Date(min(data.shift$Date)),
+                        as.Date(max(data.shift$Date)),
                         by = "week")
   
   # select necessary data from per-shift data frame, mutate the column names
   # the create a new data frame
   data.shift %>% 
-    select(Shift, Date.char, Date.date, Effort, Mother_Calf) %>%
-    mutate(Date.char = Date.char,
+    select(Shift, Date, Effort, Mother_Calf) %>%
+    mutate(Date = Date,
            Effort = Effort/60,
            Sightings = Mother_Calf) %>%
-    select(Date.char, Shift, Effort, Sightings) %>%
-    mutate(Date.date = as.Date(Date.char)) %>%
+    select(Date, Shift, Effort, Sightings) %>%
+    #mutate(Date = as.Date(Date)) %>%
     data.frame() -> raw.data
   
   # Create all dates, including weekends
-  all.dates <- seq.Date(as.Date(min(data.shift$Date.char)),
-                        as.Date(max(data.shift$Date.char)),
+  all.dates <- seq.Date(as.Date(min(data.shift$Date)),
+                        as.Date(max(data.shift$Date)),
                         by = "day")
   
   # create all shists, incluyding nights
-  all.shifts <- data.frame(Date.date = rep(all.dates,
+  all.shifts <- data.frame(Date = rep(all.dates,
                                            each = 8),
                            Shift = rep(c("1", "2", "3", "4",
                                          "5", "6", "7", "8"), 
@@ -373,11 +373,11 @@ format.output <- function(data.shift, max.shift){
                                        by = "day"))
   
   all.shifts %>% 
-    left_join(raw.data, by = c("Date.date", "Shift")) %>%
-    mutate(Week = ceiling(difftime(Date.date, min(all.dates), 
+    left_join(raw.data, by = c("Date", "Shift")) %>%
+    mutate(Week = ceiling(difftime(Date, min(all.dates), 
                                    units = "weeks")) %>%
              as.numeric(),
-           Date = Date.date) %>%
+           Date = Date) %>%
     select(Week, Date, Shift, Effort, Sightings) -> formatted.all.data
   
   # need to change week = 0 to week = 1...

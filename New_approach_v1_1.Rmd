@@ -30,7 +30,7 @@ library(lubridate)
 library(bayesplot)
 
 #FILES <- list.files(pattern = ".csv$")
-data.path <- "data/Processed data/"
+data.path <- "data/Processed data v2/"
 FILES <- list.files(path = data.path, 
                     pattern = "Processed_by_shift_data")
 
@@ -42,14 +42,12 @@ MCMC.params <- list(n.samples = 500000,
 n.samples <- MCMC.params$n.chains * ((MCMC.params$n.samples - MCMC.params$n.burnin)/MCMC.params$n.thin)
 
 # get data
-col.defs <- cols(Date = col_date(format = "%Y-%m-%dT%H:%M:%SZ"), 
+col.defs <- cols(Date = col_date(format = "%Y-%m-%d"), 
                  Shift = col_integer(), 
                  Sea_State = col_integer(),
                  Vis = col_integer(),
-                 Mother_Calf = col_integer(),
-                 Duration = col_double(), 
-                 Time_T0 = col_double(), 
-                 Time_0000 = col_double())
+                 Effort = col_double(),
+                 Mother_Calf = col_integer())
 
 count.obs <- effort <- week <- date <- n.obs <- n.weeks <- all.data <- list()
 years <- vector(mode = "numeric", length = length(FILES))
@@ -62,20 +60,20 @@ for(i in 1:length(FILES)){
                    col_types = col.defs)
 
   # 2022 data have a different date format... 
-  if (is.na(data$Date[1])){
-    col.defs <- cols(Date = col_character(), #(format = "%d-%b-%y"), 
-                     Shift = col_integer(), 
-                     Sea_State = col_integer(),
-                     Vis = col_integer(),
-                     Mother_Calf = col_integer(),
-                     Duration = col_double(), 
-                     Time_T0 = col_double(), 
-                     Time_0000 = col_double())
-  
-    data <- read_csv(paste0(data.path, FILES[i]), 
-                   col_types = col.defs)
-  
-  }
+  # if (is.na(data$Date[1])){
+  #   col.defs <- cols(Date = col_character(), #(format = "%d-%b-%y"), 
+  #                    Shift = col_integer(), 
+  #                    Sea_State = col_integer(),
+  #                    Vis = col_integer(),
+  #                    Mother_Calf = col_integer(),
+  #                    Duration = col_double(), 
+  #                    Time_T0 = col_double(), 
+  #                    Time_0000 = col_double())
+  # 
+  #   data <- read_csv(paste0(data.path, FILES[i]), 
+  #                  col_types = col.defs)
+  # 
+  # }
   all.dates <- seq.Date(from = min(data$Date), 
                         to = max(data$Date),
                         by = "day") 
@@ -105,7 +103,7 @@ for(i in 1:length(FILES)){
 
 all.data.2 <- lapply(all.data, FUN = function(x){
   x %>% mutate(Year = year(Date),
-               n.hat = (Mother_Calf * (Duration/60))/3) -> tmp
+               n.hat = (Mother_Calf * (Effort/60))/3) -> tmp
   
   tmp[is.na(tmp)] <- 0
   
@@ -218,7 +216,7 @@ ggplot(count.long.df %>% filter(Year > 2011, Year < 2022, Effort > 0)) +
 
 ```{r plot-n-nonzero-effort-1990s}
 ggplot(count.long.df %>% filter(Year < 2000, Effort > 0)) +
-  geom_point(aes(x = Effort, y = Count, color = DOY)) +
+  geom_point(aes(x = Effort, y = n.hat, color = DOY)) +
   facet_wrap(Year ~., nrow = 3)
 
 
@@ -227,7 +225,7 @@ ggplot(count.long.df %>% filter(Year < 2000, Effort > 0)) +
 
 ```{r plot-n-nonzero-effort-2000-1}
 ggplot(count.long.df %>% filter(Year > 1999, Year < 2012, Effort > 0)) +
-  geom_point(aes(x = Effort, y = Count, color = DOY)) +
+  geom_point(aes(x = Effort, y = n.hat, color = DOY)) +
   facet_wrap(Year ~., nrow = 3)
 
 ```
@@ -235,7 +233,7 @@ ggplot(count.long.df %>% filter(Year > 1999, Year < 2012, Effort > 0)) +
 ```{r}
 
 ggplot(count.long.df %>% filter(Year > 2011, Year < 2022, Effort > 0)) +
-  geom_point(aes(x = Effort, y = Count, color = DOY)) +
+  geom_point(aes(x = Effort, y = n.hat, color = DOY)) +
   facet_wrap(Year ~., nrow = 3)
 
 ```
@@ -249,15 +247,20 @@ From what I have so far, how do DOY and the shift duration affect the number of 
 library(mgcv)
 library(tidymv)
 
-gam.1 <- gam(log(Count+1) ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
+gam.1 <- gam(log(Mother_Calf+1) ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
              data = count.long.df, 
              family = "tw")
 
 summary(gam.1)
 ```
 
+```{r}
+plot(gam.1)
+```
+
+
 ```{r gam.1.1, cache=T}
-gam.1.1 <- gam(log(Count+1) ~ s(Effort) + s(DOY, Year) + s(Week), 
+gam.1.1 <- gam(log(Mother_Calf+1) ~ s(Effort) + s(DOY, Year) + s(Week), 
              data = count.long.df, 
              family = "tw")
 
@@ -266,8 +269,15 @@ summary(gam.1.1)
 ```
 
 
+```{r}
+plot(gam.1.1)
+```
+
+
+Week doesn't do much so drop it... 
+
 ```{r gam.1.2, cache=T}
-gam.1.2 <- gam(log(Count+1) ~ s(Effort) + s(DOY, Year, Week), 
+gam.1.2 <- gam(log(Mother_Calf+1) ~ s(Effort) + s(DOY, Year), 
              data = count.long.df, 
              family = "tw")
 
@@ -275,18 +285,28 @@ summary(gam.1.2)
 
 ```
 
+```{r}
+plot(gam.1.2)
+```
 
 
 ```{r gam.1.3, cache=T}
 count.long.df %>% mutate(Year.f = factor(Year)) -> count.long.df
 
-gam.1.3 <- gam(log(Count+1) ~ Year.f + s(Effort) + s(DOY, by = Year.f) + s(Week), 
+gam.1.3 <- gam(log(Mother_Calf+1) ~ Year.f + s(Effort) + s(DOY, by = Year.f), 
              data = count.long.df, 
              family = "tw")
 
 summary(gam.1.3)
 
 ```
+
+```{r}
+plot(gam.1.3)
+```
+
+Not much variation in DOY among years. 
+
 <!-- Is it related to ENSO events? Extract MEI.v2 values (https://psl.noaa.gov/enso/mei/) -->
 
 <!-- ```{r} -->
@@ -318,23 +338,60 @@ summary(gam.1.3)
 
 
 ```{r gam.2, cache=T}
-gam.2 <- gam(Count ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
+gam.2 <- gam(Mother_Calf ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
              data = count.long.df, family = "ziP")
 
 summary(gam.2)
+```
+
+
+```{r}
+plot_smooths(model = gam.2, 
+             series = Year, 
+             transform = exp)
 ```
 
 Tweedie seems to fit better. 
 
 
 ```{r gam.3, cache=T}
-gam.3 <- gam(Count ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
+gam.3 <- gam(Mother_Calf ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
              data = count.long.df, family = "nb")
 
 summary(gam.3)
 ```
 
-Negative binomial seems to fit even better. 
+Negative binomial seems to fit even better. >77% of deviance explained. 
+
+
+```{r}
+plot_smooths(model = gam.3,
+             series = Effort,
+             transform = exp) 
+             
+```
+
+
+```{r}
+plot_smooths(model = gam.3,
+             series = DOY, transform = exp)
+```
+
+
+
+```{r}
+plot_smooths(model = gam.3,
+             series = Year, transform = exp)
+```
+
+
+
+
+```{r}
+plot_smooths(model = gam.3,
+             series = Week, transform = exp)
+```
+
 
 
 
