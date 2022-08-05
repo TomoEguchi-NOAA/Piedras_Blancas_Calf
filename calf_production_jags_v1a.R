@@ -12,7 +12,7 @@ library(bayesplot)
 source("Piedras_Blancas_fcns.R")
 
 #FILES <- list.files(pattern = ".csv$")
-data.path <- "data/Formatted Annual Data/"
+data.path <- "data/Formatted Annual Data v2/"
 FILES <- list.files(path = data.path, 
                     pattern = "Formatted.csv")
 
@@ -47,7 +47,7 @@ for(i in 1:length(FILES)){
                     n.obs = length(data$Sightings),
                     n.weeks = max(data$Week))
   
-  if (!file.exists(paste0("RData/calf_estimates_v1_", years[i], ".rds"))){
+  if (!file.exists(paste0("RData/calf_estimates_v1_", years[i], "_Aug2022.rds"))){
     jm <- jags(jags.data,
                inits = NULL,
                parameters.to.save= jags.params,
@@ -68,10 +68,10 @@ for(i in 1:length(FILES)){
                         run.date = Sys.Date())     
     
     saveRDS(jm.out[[i]],
-            file = paste0("RData/calf_estimates_v1_", years[i], ".rds"))
+            file = paste0("RData/calf_estimates_v1_", years[i], "_Aug2022.rds"))
     
   } else {
-    jm.out[[i]] <- readRDS(paste0("RData/calf_estimates_v1_", years[i], ".rds"))
+    jm.out[[i]] <- readRDS(paste0("RData/calf_estimates_v1_", years[i], "_Aug2022.rds"))
     #jm <- jm.out$jm
   }
 }
@@ -94,7 +94,7 @@ Estimates$Year <- years
 Estimates$Method <- "v1"
 
 write.csv(Estimates,
-          "data/Calf Estimates v1.csv",
+          "data/Calf Estimates v1 Aug2022.csv",
           row.names = F)
 
 

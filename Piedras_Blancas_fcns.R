@@ -170,6 +170,16 @@ char_time2min <- function(x, origin = "0000"){
   return(out)
 }
 
+# converts minutes since 0000 in integer to time in character
+# minute2time_char(420) will return "700"
+minutes2time_char <- function(min_0000){
+  H <- trunc(min_0000/60)
+  M <- formatC(((min_0000/60 - H) * 60), width = 2, flag = "0")
+  
+  out <- paste0(H, M)
+  return(out)
+}
+
 # change max.shift if needed. max.shift can be up to 5
 find.shift <- function(x0, max.shift = 4){
   x <- as.numeric(x0)
@@ -229,7 +239,10 @@ find.effort <- function(x, start.hr = 7, end.hr = 19, max.shift = 4){
   }
   
   start.shift <- seq(start.hr*60, (end.hr*60-180), by = 180)
+  start.Time <- minutes2time_char(start.shift)
+  
   end.shift <- seq((start.hr*60 + 180), (end.hr*60), by = 180)
+  end.Time <- minutes2time_char(end.shift)
   
   out.df <- data.frame(Date.char = rep(all.dates,
                                        each = length(shifts)),
@@ -258,6 +271,7 @@ find.effort <- function(x, start.hr = 7, end.hr = 19, max.shift = 4){
         if (one.shift[1,"Event"] != 1){
           one.shift.eft <- rbind(one.shift[1,], one.shift)
           one.shift.eft[1, "Event"] <- 1
+          one.shift.eft[1, "Time"] <- start.Time[k1]
         } else {
           one.shift.eft <- one.shift
         }
@@ -265,24 +279,51 @@ find.effort <- function(x, start.hr = 7, end.hr = 19, max.shift = 4){
         if (one.shift[nrow(one.shift), "Event"] != 5){
           one.shift.eft <- rbind(one.shift.eft, one.shift[nrow(one.shift),])
           one.shift.eft[nrow(one.shift.eft), "Event"] <- 5
+          one.shift.eft[nrow(one.shift.eft), "Time"] <- end.Time[k1]
         }
 
         # find out how many on/off effort existed
         row.1 <- which(one.shift.eft$Event == 1)
         row.5 <- which(one.shift.eft$Event == 5)
         
-        # if they don't match, take the fewer one.
-        if (length(row.1) != length(row.5)){
-          nrow <- min(length(row.1), length(row.5))
-          row.1 <- row.1[1:nrow]
-          row.5 <- row.5[1:nrow]
+        # sometimes too many event == 1 and event == 5
+        if (length(row.1) > 1 & length(row.5) > 1){
+          for (k3 in 2:length(row.1)){
+            if (row.1[k3] < row.5[k3-1]){
+              row.1[k3] <- NA
+            } 
+            
+          }
+          row.1 <- row.1[!is.na(row.1)]
+          
         }
         
-        # calculate effort for each on period per shift
+        # if they don't match, adjust accordingly.
+        if (length(row.1) != length(row.5)){
+          nrow <- min(length(row.1), length(row.5))
+          row.1.1 <- vector(mode = "numeric", length = nrow)
+          row.5.1 <- vector(mode = "numeric", length = nrow)
+          for (k2 in 1:nrow){
+            if (k2 == 1){
+              row.1.1[k2] <- row.1[k2]
+              row.5.1[k2] <- row.5[k2]
+            } else {
+              row.1.1[k2] <- first(row.1[row.1 > row.5.1[k2-1]])
+              row.5.1[k2] <- first(row.5[row.5 > row.1.1[k2]])
+            }
+            
+          }
+          row.1 <- row.1.1[!is.na(row.1.1)]
+          row.5 <- row.5.1[!is.na(row.5.1)]
+        }
+
+
+        # calculate effort for each "on" period per shift
         tmp.eft <- 0
         for (k2 in 1:length(row.1)){
           tmp <- one.shift.eft[row.1[k2]:row.5[k2],] 
           tmp.eft <- tmp.eft + (max(tmp$Minutes_since_0000) - min(tmp$Minutes_since_0000))  
+          
         }
 
         out.df[out.df$Date == all.dates[d] & 

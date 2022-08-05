@@ -88,7 +88,8 @@ THIS FILE NEEDS TO BE UPDATED AND ANNOTATED BETTER. EACH YEAR HAS A DIFFERENT FO
 ```{r}
 Year <- 1994
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+#start.time <- "630"
+start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -128,7 +129,7 @@ out.file.name.formatted <- paste0("data/Formatted Annual Data v2/",
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
 data.shift <- find.effort(data.all, 
-                          start.hr = 6.5, 
+                          start.hr = 7, 
                           end.hr = 19, 
                           max.shift = 4) %>% extract.shift.vars()
 
@@ -454,7 +455,7 @@ if (!file.exists(out.file.name.formatted))
 ```{r}
 Year <- 1999
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -511,7 +512,7 @@ out.file.name.formatted <- paste0("data/Formatted Annual Data v2/",
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
 data.shift <- find.effort(data.all, 
-                          start.hr = 6.5, 
+                          start.hr = 7, 
                           end.hr = 19, 
                           max.shift = 4)%>% extract.shift.vars()
 
@@ -541,7 +542,7 @@ if (!file.exists(out.file.name.formatted))
 ```{r}
 Year <- 2000
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -598,7 +599,7 @@ out.file.name.formatted <- paste0("data/Formatted Annual Data v2/",
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
 data.shift <- find.effort(data.all, 
-                          start.hr = 6.5, 
+                          start.hr = 7, 
                           end.hr = 19, 
                           max.shift = 4)%>% extract.shift.vars()
 
@@ -629,7 +630,7 @@ if (!file.exists(out.file.name.formatted))
 ```{r}
 Year <- 2001
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -686,7 +687,7 @@ out.file.name.formatted <- paste0("data/Formatted Annual Data v2/",
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
 data.shift <- find.effort(data.all, 
-                          start.hr = 6.5, 
+                          start.hr = 7, 
                           end.hr = 19, 
                           max.shift = 4)%>% extract.shift.vars()
 
@@ -717,7 +718,7 @@ if (!file.exists(out.file.name.formatted))
 ```{r}
 Year <- 2002
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -770,7 +771,7 @@ out.file.name.formatted <- paste0("data/Formatted Annual Data v2/",
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
 data.shift <- find.effort(data.all, 
-                          start.hr = 6.5, 
+                          start.hr = 7, 
                           end.hr = 19, 
                           max.shift = 4)%>% extract.shift.vars()
 
@@ -799,7 +800,7 @@ if (!file.exists(out.file.name.formatted))
 ```{r}
 Year <- 2003
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -852,7 +853,7 @@ out.file.name.formatted <- paste0("data/Formatted Annual Data v2/",
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
 data.shift <- find.effort(data.all, 
-                          start.hr = 6.5, 
+                          start.hr = 7, 
                           end.hr = 19, 
                           max.shift = 4)%>% extract.shift.vars()
 
@@ -884,7 +885,7 @@ if (!file.exists(out.file.name.formatted))
 ```{r}
 Year <- 2004
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[3])
@@ -937,7 +938,7 @@ out.file.name.formatted <- paste0("data/Formatted Annual Data v2/",
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
 data.shift <- find.effort(data.all, 
-                          start.hr = 6.5, 
+                          start.hr = 7, 
                           end.hr = 19, 
                           max.shift = 4)%>% extract.shift.vars()
 
@@ -968,7 +969,7 @@ if (!file.exists(out.file.name.formatted))
 ```{r}
 Year <- 2005
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -1025,7 +1026,7 @@ out.file.name.formatted <- paste0("data/Formatted Annual Data v2/",
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
 data.shift <- find.effort(data.all, 
-                          start.hr = 6.5, 
+                          start.hr = 7, 
                           end.hr = 19, 
                           max.shift = 4)%>% extract.shift.vars()
 
@@ -1054,7 +1055,7 @@ if (!file.exists(out.file.name.formatted))
 ```{r}
 Year <- 2006
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -1098,7 +1099,7 @@ out.file.name.formatted <- paste0("data/Formatted Annual Data v2/",
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
 data.shift <- find.effort(data.all, 
-                          start.hr = 6.5, 
+                          start.hr = 7, 
                           end.hr = 19, 
                           max.shift = 4)%>% extract.shift.vars()
 
@@ -1129,7 +1130,7 @@ if (!file.exists(out.file.name.formatted))
 ```{r}
 Year <- 2007
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -1187,7 +1188,7 @@ out.file.name.formatted <- paste0("data/Formatted Annual Data v2/",
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
 data.shift <- find.effort(data.all, 
-                          start.hr = 6.5, 
+                          start.hr = 7, 
                           end.hr = 19, 
                           max.shift = 4)%>% extract.shift.vars()
 
@@ -1219,7 +1220,7 @@ if (!file.exists(out.file.name.formatted))
 ```{r}
 Year <- 2008
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -1263,7 +1264,7 @@ out.file.name.formatted <- paste0("data/Formatted Annual Data v2/",
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
 data.shift <- find.effort(data.all, 
-                          start.hr = 6.5, 
+                          start.hr = 7, 
                           end.hr = 19, 
                           max.shift = 4)%>% extract.shift.vars()
 
@@ -1293,7 +1294,7 @@ if (!file.exists(out.file.name.formatted))
 ```{r}
 Year <- 2009
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -1338,7 +1339,7 @@ out.file.name.formatted <- paste0("data/Formatted Annual Data v2/",
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
 data.shift <- find.effort(data.all, 
-                          start.hr = 6.5, 
+                          start.hr = 7, 
                           end.hr = 19, 
                           max.shift = 4)%>% extract.shift.vars()
 
@@ -1370,7 +1371,7 @@ Files seem to be about the same from these years...
 ```{r}
 Year <- 2010
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[3])
@@ -1415,7 +1416,7 @@ out.file.name.formatted <- paste0("data/Formatted Annual Data v2/",
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
 data.shift <- find.effort(data.all, 
-                          start.hr = 6.5, 
+                          start.hr = 7, 
                           end.hr = 19, 
                           max.shift = 4)%>% extract.shift.vars()
 
@@ -1445,7 +1446,7 @@ if (!file.exists(out.file.name.formatted))
 ```{r}
 Year <- 2011
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[3])
@@ -1490,7 +1491,7 @@ out.file.name.formatted <- paste0("data/Formatted Annual Data v2/",
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
 data.shift <- find.effort(data.all, 
-                          start.hr = 6.5, 
+                          start.hr = 7, 
                           end.hr = 19, 
                           max.shift = 4)%>% extract.shift.vars()
 
@@ -1521,7 +1522,7 @@ if (!file.exists(out.file.name.formatted))
 ```{r}
 Year <- 2012
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[3])
@@ -1566,7 +1567,7 @@ out.file.name.formatted <- paste0("data/Formatted Annual Data v2/",
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
 data.shift <- find.effort(data.all, 
-                          start.hr = 6.5, 
+                          start.hr = 7, 
                           end.hr = 19, 
                           max.shift = 4)%>% extract.shift.vars()
 
@@ -1597,7 +1598,7 @@ if (!file.exists(out.file.name.formatted))
 ```{r}
 Year <- 2013
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -1642,7 +1643,7 @@ out.file.name.formatted <- paste0("data/Formatted Annual Data v2/",
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
 data.shift <- find.effort(data.all, 
-                          start.hr = 6.5, 
+                          start.hr = 7, 
                           end.hr = 19, 
                           max.shift = 4)%>% extract.shift.vars()
 
