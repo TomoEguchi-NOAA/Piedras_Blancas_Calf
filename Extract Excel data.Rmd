@@ -15,6 +15,7 @@ source("Piedras_Blancas_fcns.R")
 data.dir <- "data/All data/"
 #out.dir <- "data/Processed data/"    # completed in May 2022 but needs revisions
 out.dir <- "data/Processed data v2/"  # for revising outputs
+out.formatted.dir <- "data/Formatted Annual Data v2/"
 
 extract.all.vars <- function(x) {
   x %>%
@@ -105,7 +106,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data v2/", 
+out.file.name.formatted <- paste0(out.formatted.dir, 
                                   Year, " Formatted.csv")
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
@@ -200,7 +201,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data v2/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
@@ -301,7 +302,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data v2/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
@@ -399,7 +400,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data v2/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
@@ -499,7 +500,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data v2/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
@@ -611,7 +612,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data v2/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
@@ -721,7 +722,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data v2/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
@@ -832,7 +833,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data v2/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
@@ -939,7 +940,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data v2/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
@@ -1044,7 +1045,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data v2/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
@@ -1154,7 +1155,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data v2/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
@@ -1265,7 +1266,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data v2/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
@@ -1362,7 +1363,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data v2/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
@@ -1475,7 +1476,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data v2/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
@@ -1574,7 +1575,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data v2/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
@@ -1674,7 +1675,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data v2/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
@@ -1775,7 +1776,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data v2/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
@@ -1874,7 +1875,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data v2/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
@@ -1974,7 +1975,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data v2/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
@@ -2075,7 +2076,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data v2/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
@@ -2176,7 +2177,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 if (!file.exists(out.file.name.all))
@@ -2268,7 +2269,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 if (!file.exists(out.file.name.all))
@@ -2386,7 +2387,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 if (!file.exists(out.file.name.all))
@@ -2457,7 +2458,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 if (!file.exists(out.file.name.all))
@@ -2532,7 +2533,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 if (!file.exists(out.file.name.all))
@@ -2614,7 +2615,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 if (!file.exists(out.file.name.all))
@@ -2685,7 +2686,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 if (!file.exists(out.file.name.all))
@@ -2763,7 +2764,7 @@ out.file.name.all <- paste0(out.dir, "Processed_all_data_",
 out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
                               Year, ".csv")
 
-out.file.name.formatted <- paste0("data/Formatted Annual Data/", 
+out.file.name.formatted <- paste0(out.formatted.dir,
                                   Year, " Formatted.csv")
 
 if (!file.exists(out.file.name.all))
