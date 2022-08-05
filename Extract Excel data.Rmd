@@ -3,50 +3,6 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-EFFORT IS >180 MINUTES IN THE FOLLOWING OCCASIONS. THESE NEED TO BE EXAMINED FOR THE CAUSE OF THIS PROBLEM - PROBABLY IN THE EFFORT COMPUTING FUNCTION. 2022-07-28 
-
-         Date Shift Week Seq.idx Sea_State Vis Effort Mother_Calf Year    n.hat cumsum.nhat DOY Year.f
-1  1994-04-02     1    3     129         4   6    240           0 1994 0.000000   2.0000000  91   1994
-2  1994-04-06     1    3     161         3   6    273           0 1994 0.000000   3.6222222  95   1994
-3  1994-05-14     1    9     465         3   6    285           0 1994 0.000000 241.6444444 133   1994
-4  1995-03-21     4    1      28         3   4    240           0 1995 0.000000   0.0000000  79   1995
-5  1995-04-18     1    5     249         7   6    284           1 1995 1.577778  81.4055556 107   1995
-6  1995-04-24     4    6     300         5   5    330           4 1995 7.333333 127.6277778 113   1995
-7  1995-05-10     1    8     425         2   6    212           0 1995 0.000000 181.6500000 129   1995
-8  1996-04-22     1   14     777         3   5    205           1 1996 1.138889 102.6722222 112   1996
-9  1996-05-14     2   18     954         3   6    360           1 1996 2.000000 400.2166667 134   1996
-10 1996-05-14     4   18     956         5   6    185           0 1996 0.000000 400.2166667 134   1996
-11 1996-05-16     1   18     969         5   5    260           0 1996 0.000000 400.2166667 136   1996
-12 1996-05-28     4   20    1068         4   5    360           0 1996 0.000000 402.2166667 148   1996
-13 1997-04-19     2    6     322         6   2    193           2 1997 2.144444  45.8000000 108   1997
-14 1998-03-27     1    1      33         4   4    315           0 1998 0.000000   2.3500000  85   1998
-15 1998-03-31     3    2      67         4   4    200           1 1998 1.111111   4.0888889  89   1998
-16 1998-04-03     4    2      92         4   4    250           2 1998 2.777778  12.3722222  92   1998
-17 1999-06-02     1   11     577         4   4    270           1 1999 1.500000  98.3333333 152   1999
-18 2001-04-20     1    5     257         3   4    300           0 2001 0.000000   7.0277778 109   2001
-19 2001-04-20     4    5     260         4   5    215           0 2001 0.000000   7.0277778 109   2001
-20 2002-04-09     1    4     177         3   3    236           1 2002 1.311111   5.3111111  98   2002
-21 2003-03-22     2    1      42         5   4    290           0 2003 0.000000   0.0000000  80   2003
-22 2003-03-28     4    2      92         2   3    207           0 2003 0.000000   0.9166667  86   2003
-23 2003-04-02     1    3     129         0   2    200           0 2003 0.000000   4.7500000  91   2003
-24 2003-04-12     1    4     209         4   4    252           0 2003 0.000000  33.6222222 101   2003
-25 2003-04-22     1    6     289         3   4    240           0 2003 0.000000 103.2722222 111   2003
-26 2003-05-03     1    7     377         5   5    276           2 2003 3.066667 177.8388889 122   2003
-27 2003-05-24     1   10     545         5   2    224           0 2003 0.000000 203.9444444 143   2003
-28 2005-04-22     1    5     257         6   4    247           1 2005 1.372222  92.9833333 111   2005
-29 2006-05-15     1   10     505         5   2    290           1 2006 1.611111 209.9222222 134   2006
-30 2007-04-30     2    6     282         5   2    338           0 2007 0.000000  46.8000000 119   2007
-31 2009-04-07     1    3     121         4   3    288           0 2009 0.000000   2.5555556  96   2009
-32 2009-04-14     1    4     177         5   7    240           1 2009 1.333333   8.7666667 103   2009
-33 2011-04-19     3    4     179         6   4    264           3 2011 4.400000  20.0666667 108   2011
-34 2012-03-30     2    1      34         3   3    280           0 2012 0.000000   0.0000000  89   2012
-35 2013-04-12     1    3     145         4   4    300           0 2013 0.000000   5.1833333 101   2013
-36 2013-04-26     1    5     257         5   3    201           0 2013 0.000000  76.7055556 115   2013
-37 2013-05-13     1    8     393         5   2    240           0 2013 0.000000 204.5166667 132   2013
-38 2013-05-13     2    8     394         5   3    190           0 2013 0.000000 204.5166667 132   2013
-39 2014-04-16     2    4     186         5   3    186           4 2014 4.133333  36.5666667 105   2014
-
-
 This notebook is used to extract data from original data files in the Excel format. Because the file format changes over time, each year is done separately. 
 
 ```{r setup}
@@ -108,12 +64,38 @@ col.types.offshore <- c("date", "numeric", "text", "numeric", "numeric",
 col.names.offshore <- c("Date", "Event", "Time", "Obs.", "Sea State",
                         "Vis. Code", "Cow/Calf", "Ad./Juv.")
 
-data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                          col.types.inshore, col.types.offshore,
-                          col.names.inshore, col.names.offshore,
-                          Year, xls.file.name.inshore, xls.file.name.offshore,
-                          start.time, max.shift = 4) %>% 
-  extract.all.vars()
+# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+#                           col.types.inshore, col.types.offshore,
+#                           col.names.inshore, col.names.offshore,
+#                           Year, xls.file.name.inshore, xls.file.name.offshore,
+#                           start.time, max.shift = 4) %>% 
+#   extract.all.vars()
+
+data.inshore <- get.data(Year = Year, 
+                         xls.file.name = xls.file.name.inshore, 
+                         sheet.name = sheet.name.inshore,
+                         col.types = col.types.inshore, 
+                         col.names = col.names.inshore, 
+                         start.time = start.time,
+                         max.shift = 4) %>%
+  mutate(Area = "in")
+
+data.offshore <- get.data(Year = Year,
+                          xls.file.name = xls.file.name.offshore,
+                          sheet.name = sheet.name.offshore,
+                          col.types = col.types.offshore,
+                          col.names = all_of(col.names.offshore),
+                          start.time = start.time, 
+                          max.shift = 4) %>%
+  mutate(Area = "off")
+
+data.offshore %>% 
+  filter(Mother_Calf > 0) %>%
+  rbind(data.inshore) %>%
+  arrange(Date.date, Minutes_since_0000) %>% 
+  extract.all.vars() -> data.all
+
+
 # There are some characters, e.g., ?, in columns that don't expect them. 
 # Warnings return - Line 665
 
@@ -179,14 +161,38 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
 col.names.offshore <- c("Date",	"Event",	"Time",	"OBS.",
                         "Sea",	"Vis.",	"Cow/Calf")
 
-data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                          col.types.inshore, col.types.offshore,
-                          col.names.inshore, col.names.offshore,
-                          Year, xls.file.name.inshore, xls.file.name.offshore,
-                          start.time, max.shift = 4)%>% 
-  extract.all.vars()
+# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+#                           col.types.inshore, col.types.offshore,
+#                           col.names.inshore, col.names.offshore,
+#                           Year, xls.file.name.inshore, xls.file.name.offshore,
+#                           start.time, max.shift = 4)%>% 
+#   extract.all.vars()
 # There are some characters, e.g., SN, step for observers, in columns that don't expect them. 
 # Warnings return - quite a few. 
+
+data.inshore <- get.data(Year = Year, 
+                         xls.file.name = xls.file.name.inshore, 
+                         sheet.name = sheet.name.inshore,
+                         col.types = col.types.inshore, 
+                         col.names = col.names.inshore, 
+                         start.time = start.time,
+                         max.shift = 4) %>%
+  mutate(Area = "in")
+  
+data.offshore <- get.data(Year = Year,
+                          xls.file.name = xls.file.name.offshore,
+                          sheet.name = sheet.name.offshore,
+                          col.types = col.types.offshore,
+                          col.names = all_of(col.names.offshore),
+                          start.time = start.time, 
+                          max.shift = 4)
+
+data.offshore %>% 
+  filter(Mother_Calf > 0) %>%
+  rbind(data.inshore) %>%
+  arrange(Date.date, Minutes_since_0000) %>% 
+  extract.all.vars() -> data.all
+
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
                             Year, ".csv")
@@ -228,6 +234,7 @@ if (!file.exists(out.file.name.formatted))
 
 ## 1996
 
+Some dates were wrong in the inshore file. They were fixed. See the spreadsheet's note column for details. 
 ```{r}
 Year <- 1996
 dir.name <- paste0("C_C ", Year)
@@ -253,14 +260,40 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "numeric", "numeric", "numeric", 
                         "numeric", "text",  "text")
 
-data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                          col.types.inshore, col.types.offshore,
-                          col.names.inshore, col.names.offshore,
-                          Year, xls.file.name.inshore, xls.file.name.offshore,
-                          start.time, max.shift = 4)%>% 
-  extract.all.vars()
+# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+#                           col.types.inshore, col.types.offshore,
+#                           col.names.inshore, col.names.offshore,
+#                           Year, xls.file.name.inshore, xls.file.name.offshore,
+#                           start.time, max.shift = 4)%>% 
+#   extract.all.vars()
 # There are some characters, e.g., SN, step for observers, in columns that don't expect them. 
 # Warnings return - quite a few. 
+
+data.inshore <- get.data(Year = Year, 
+                         xls.file.name = xls.file.name.inshore, 
+                         sheet.name = sheet.name.inshore,
+                         col.types = col.types.inshore, 
+                         col.names = col.names.inshore, 
+                         start.time = start.time,
+                         max.shift = 4)  %>%
+  mutate(Area = "in")
+  
+
+
+data.offshore <- get.data(Year = Year,
+                          xls.file.name = xls.file.name.offshore,
+                          sheet.name = sheet.name.offshore,
+                          col.types = col.types.offshore,
+                          col.names = all_of(col.names.offshore),
+                          start.time = start.time, 
+                          max.shift = 4)
+
+data.offshore %>% 
+  filter(Mother_Calf > 0) %>%
+  rbind(data.inshore) %>%
+  arrange(Date.date, Minutes_since_0000) %>% 
+  extract.all.vars() -> data.all
+
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
                             Year, ".csv")
@@ -304,7 +337,7 @@ if (!file.exists(out.file.name.formatted))
 ```{r}
 Year <- 1997
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -327,12 +360,38 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "text", "numeric", 
                         "text", "text",  "numeric", "text")
 
-data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                          col.types.inshore, col.types.offshore,
-                          col.names.inshore, col.names.offshore,
-                          Year, xls.file.name.inshore, xls.file.name.offshore,
-                          start.time, max.shift = 4)%>% 
-  extract.all.vars()
+# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+#                           col.types.inshore, col.types.offshore,
+#                           col.names.inshore, col.names.offshore,
+#                           Year, xls.file.name.inshore, xls.file.name.offshore,
+#                           start.time, max.shift = 4)%>% 
+#   extract.all.vars()
+
+data.inshore <- get.data(Year = Year, 
+                         xls.file.name = xls.file.name.inshore, 
+                         sheet.name = sheet.name.inshore,
+                         col.types = col.types.inshore, 
+                         col.names = col.names.inshore, 
+                         start.time = start.time,
+                         max.shift = 4)  %>%
+  mutate(Area = "in")
+  
+
+
+data.offshore <- get.data(Year = Year,
+                          xls.file.name = xls.file.name.offshore,
+                          sheet.name = sheet.name.offshore,
+                          col.types = col.types.offshore,
+                          col.names = all_of(col.names.offshore),
+                          start.time = start.time, 
+                          max.shift = 4)
+
+data.offshore %>% 
+  filter(Mother_Calf > 0) %>%
+  rbind(data.inshore) %>%
+  arrange(Date.date, Minutes_since_0000) %>% 
+  extract.all.vars() -> data.all
+
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
                             Year, ".csv")
@@ -379,7 +438,7 @@ if (!file.exists(out.file.name.formatted))
 ```{r}
 Year <- 1998
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -403,12 +462,35 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "text", "text",  "text", "text")
 
 
-data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                          col.types.inshore, col.types.offshore,
-                          col.names.inshore, col.names.offshore,
-                          Year, xls.file.name.inshore, xls.file.name.offshore,
-                          start.time, max.shift = 4)%>% 
-  extract.all.vars()
+# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+#                           col.types.inshore, col.types.offshore,
+#                           col.names.inshore, col.names.offshore,
+#                           Year, xls.file.name.inshore, xls.file.name.offshore,
+#                           start.time, max.shift = 4)%>% 
+#   extract.all.vars()
+
+data.inshore <- get.data(Year = Year, 
+                         xls.file.name = xls.file.name.inshore, 
+                         sheet.name = sheet.name.inshore,
+                         col.types = col.types.inshore, 
+                         col.names = col.names.inshore, 
+                         start.time = start.time,
+                         max.shift = 4)  %>%
+  mutate(Area = "in")
+  
+data.offshore <- get.data(Year = Year,
+                          xls.file.name = xls.file.name.offshore,
+                          sheet.name = sheet.name.offshore,
+                          col.types = col.types.offshore,
+                          col.names = all_of(col.names.offshore),
+                          start.time = start.time, 
+                          max.shift = 4)
+
+data.offshore %>% 
+  filter(Mother_Calf > 0) %>%
+  rbind(data.inshore) %>%
+  arrange(Date.date, Minutes_since_0000) %>% 
+  extract.all.vars() -> data.all
 
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
@@ -491,13 +573,36 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+# 
+# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+#                           col.types.inshore, col.types.offshore,
+#                           col.names.inshore, col.names.offshore,
+#                           Year, xls.file.name.inshore, xls.file.name.offshore,
+#                           start.time, max.shift = 4)%>% 
+#   extract.all.vars()
 
-data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                          col.types.inshore, col.types.offshore,
-                          col.names.inshore, col.names.offshore,
-                          Year, xls.file.name.inshore, xls.file.name.offshore,
-                          start.time, max.shift = 4)%>% 
-  extract.all.vars()
+data.inshore <- get.data(Year = Year, 
+                         xls.file.name = xls.file.name.inshore, 
+                         sheet.name = sheet.name.inshore,
+                         col.types = col.types.inshore, 
+                         col.names = col.names.inshore, 
+                         start.time = start.time,
+                         max.shift = 4)  %>%
+  mutate(Area = "in")
+  
+data.offshore <- get.data(Year = Year,
+                          xls.file.name = xls.file.name.offshore,
+                          sheet.name = sheet.name.offshore,
+                          col.types = col.types.offshore,
+                          col.names = all_of(col.names.offshore),
+                          start.time = start.time, 
+                          max.shift = 4)
+
+data.offshore %>% 
+  filter(Mother_Calf > 0) %>%
+  rbind(data.inshore) %>%
+  arrange(Date.date, Minutes_since_0000) %>% 
+  extract.all.vars() -> data.all
 
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
@@ -579,12 +684,35 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "text", "text",  "text")
 
 
-data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                          col.types.inshore, col.types.offshore,
-                          col.names.inshore, col.names.offshore,
-                          Year, xls.file.name.inshore, xls.file.name.offshore,
-                          start.time, max.shift = 4)%>% 
-  extract.all.vars()
+# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+#                           col.types.inshore, col.types.offshore,
+#                           col.names.inshore, col.names.offshore,
+#                           Year, xls.file.name.inshore, xls.file.name.offshore,
+#                           start.time, max.shift = 4)%>% 
+#   extract.all.vars()
+
+data.inshore <- get.data(Year = Year, 
+                         xls.file.name = xls.file.name.inshore, 
+                         sheet.name = sheet.name.inshore,
+                         col.types = col.types.inshore, 
+                         col.names = col.names.inshore, 
+                         start.time = start.time,
+                         max.shift = 4)  %>%
+  mutate(Area = "in")
+  
+data.offshore <- get.data(Year = Year,
+                          xls.file.name = xls.file.name.offshore,
+                          sheet.name = sheet.name.offshore,
+                          col.types = col.types.offshore,
+                          col.names = all_of(col.names.offshore),
+                          start.time = start.time, 
+                          max.shift = 4)
+
+data.offshore %>% 
+  filter(Mother_Calf > 0) %>%
+  rbind(data.inshore) %>%
+  arrange(Date.date, Minutes_since_0000) %>% 
+  extract.all.vars() -> data.all
 
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
@@ -667,12 +795,35 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "text", "text",  "text", "text")
 
 
-data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                          col.types.inshore, col.types.offshore,
-                          col.names.inshore, col.names.offshore,
-                          Year, xls.file.name.inshore, xls.file.name.offshore,
-                          start.time, max.shift = 4)%>% 
-  extract.all.vars()
+# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+#                           col.types.inshore, col.types.offshore,
+#                           col.names.inshore, col.names.offshore,
+#                           Year, xls.file.name.inshore, xls.file.name.offshore,
+#                           start.time, max.shift = 4)%>% 
+#   extract.all.vars()
+
+data.inshore <- get.data(Year = Year, 
+                         xls.file.name = xls.file.name.inshore, 
+                         sheet.name = sheet.name.inshore,
+                         col.types = col.types.inshore, 
+                         col.names = col.names.inshore, 
+                         start.time = start.time,
+                         max.shift = 4) %>%
+  mutate(Area = "in")
+  
+data.offshore <- get.data(Year = Year,
+                          xls.file.name = xls.file.name.offshore,
+                          sheet.name = sheet.name.offshore,
+                          col.types = col.types.offshore,
+                          col.names = all_of(col.names.offshore),
+                          start.time = start.time, 
+                          max.shift = 4)
+
+data.offshore %>% 
+  filter(Mother_Calf > 0) %>%
+  rbind(data.inshore) %>%
+  arrange(Date.date, Minutes_since_0000) %>% 
+  extract.all.vars() -> data.all
 
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
@@ -750,13 +901,36 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+# 
+# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+#                           col.types.inshore, col.types.offshore,
+#                           col.names.inshore, col.names.offshore,
+#                           Year, xls.file.name.inshore, xls.file.name.offshore,
+#                           start.time, max.shift = 4)%>% 
+#   extract.all.vars()
 
-data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                          col.types.inshore, col.types.offshore,
-                          col.names.inshore, col.names.offshore,
-                          Year, xls.file.name.inshore, xls.file.name.offshore,
-                          start.time, max.shift = 4)%>% 
-  extract.all.vars()
+data.inshore <- get.data(Year = Year, 
+                         xls.file.name = xls.file.name.inshore, 
+                         sheet.name = sheet.name.inshore,
+                         col.types = col.types.inshore, 
+                         col.names = col.names.inshore, 
+                         start.time = start.time,
+                         max.shift = 4) %>%
+  mutate(Area = "in")
+  
+data.offshore <- get.data(Year = Year,
+                          xls.file.name = xls.file.name.offshore,
+                          sheet.name = sheet.name.offshore,
+                          col.types = col.types.offshore,
+                          col.names = all_of(col.names.offshore),
+                          start.time = start.time, 
+                          max.shift = 4)
+
+data.offshore %>% 
+  filter(Mother_Calf > 0) %>%
+  rbind(data.inshore) %>%
+  arrange(Date.date, Minutes_since_0000) %>% 
+  extract.all.vars() -> data.all
 
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
@@ -832,13 +1006,36 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+# 
+# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+#                           col.types.inshore, col.types.offshore,
+#                           col.names.inshore, col.names.offshore,
+#                           Year, xls.file.name.inshore, xls.file.name.offshore,
+#                           start.time, max.shift = 4)%>% 
+#   extract.all.vars()
 
-data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                          col.types.inshore, col.types.offshore,
-                          col.names.inshore, col.names.offshore,
-                          Year, xls.file.name.inshore, xls.file.name.offshore,
-                          start.time, max.shift = 4)%>% 
-  extract.all.vars()
+data.inshore <- get.data(Year = Year, 
+                         xls.file.name = xls.file.name.inshore, 
+                         sheet.name = sheet.name.inshore,
+                         col.types = col.types.inshore, 
+                         col.names = col.names.inshore, 
+                         start.time = start.time,
+                         max.shift = 4) %>%
+  mutate(Area = "in")
+  
+data.offshore <- get.data(Year = Year,
+                          xls.file.name = xls.file.name.offshore,
+                          sheet.name = sheet.name.offshore,
+                          col.types = col.types.offshore,
+                          col.names = all_of(col.names.offshore),
+                          start.time = start.time, 
+                          max.shift = 4)
+
+data.offshore %>% 
+  filter(Mother_Calf > 0) %>%
+  rbind(data.inshore) %>%
+  arrange(Date.date, Minutes_since_0000) %>% 
+  extract.all.vars() -> data.all
 
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
@@ -917,13 +1114,38 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+# 
+# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+#                           col.types.inshore, col.types.offshore,
+#                           col.names.inshore, col.names.offshore,
+#                           Year, xls.file.name.inshore, xls.file.name.offshore,
+#                           start.time, max.shift = 4)%>% 
+#   extract.all.vars()
 
-data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                          col.types.inshore, col.types.offshore,
-                          col.names.inshore, col.names.offshore,
-                          Year, xls.file.name.inshore, xls.file.name.offshore,
-                          start.time, max.shift = 4)%>% 
-  extract.all.vars()
+data.inshore <- get.data(Year = Year, 
+                         xls.file.name = xls.file.name.inshore, 
+                         sheet.name = sheet.name.inshore,
+                         col.types = col.types.inshore, 
+                         col.names = col.names.inshore, 
+                         start.time = start.time,
+                         max.shift = 4) %>%
+  mutate(Area = "in")
+  
+
+data.offshore <- get.data(Year = Year,
+                          xls.file.name = xls.file.name.offshore,
+                          sheet.name = sheet.name.offshore,
+                          col.types = col.types.offshore,
+                          col.names = all_of(col.names.offshore),
+                          start.time = start.time, 
+                          max.shift = 4)
+
+data.offshore %>% 
+  filter(Mother_Calf > 0) %>%
+  rbind(data.inshore) %>%
+  arrange(Date.date, Minutes_since_0000) %>% 
+  extract.all.vars() -> data.all
+
 
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
@@ -1005,13 +1227,36 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+# 
+# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+#                           col.types.inshore, col.types.offshore,
+#                           col.names.inshore, col.names.offshore,
+#                           Year, xls.file.name.inshore, xls.file.name.offshore,
+#                           start.time, max.shift = 4)%>% 
+#   extract.all.vars()
 
-data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                          col.types.inshore, col.types.offshore,
-                          col.names.inshore, col.names.offshore,
-                          Year, xls.file.name.inshore, xls.file.name.offshore,
-                          start.time, max.shift = 4)%>% 
-  extract.all.vars()
+data.inshore <- get.data(Year = Year, 
+                         xls.file.name = xls.file.name.inshore, 
+                         sheet.name = sheet.name.inshore,
+                         col.types = col.types.inshore, 
+                         col.names = col.names.inshore, 
+                         start.time = start.time,
+                         max.shift = 4)  %>%
+  mutate(Area = "in")
+  
+data.offshore <- get.data(Year = Year,
+                          xls.file.name = xls.file.name.offshore,
+                          sheet.name = sheet.name.offshore,
+                          col.types = col.types.offshore,
+                          col.names = all_of(col.names.offshore),
+                          start.time = start.time, 
+                          max.shift = 4)
+
+data.offshore %>% 
+  filter(Mother_Calf > 0) %>%
+  rbind(data.inshore) %>%
+  arrange(Date.date, Minutes_since_0000) %>% 
+  extract.all.vars() -> data.all
 
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
@@ -1078,13 +1323,37 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+# 
+# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+#                           col.types.inshore, col.types.offshore,
+#                           col.names.inshore, col.names.offshore,
+#                           Year, xls.file.name.inshore, xls.file.name.offshore,
+#                           start.time, max.shift = 4)%>% 
+#   extract.all.vars()
 
-data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                          col.types.inshore, col.types.offshore,
-                          col.names.inshore, col.names.offshore,
-                          Year, xls.file.name.inshore, xls.file.name.offshore,
-                          start.time, max.shift = 4)%>% 
-  extract.all.vars()
+data.inshore <- get.data(Year = Year, 
+                         xls.file.name = xls.file.name.inshore, 
+                         sheet.name = sheet.name.inshore,
+                         col.types = col.types.inshore, 
+                         col.names = col.names.inshore, 
+                         start.time = start.time,
+                         max.shift = 4) %>%
+  mutate(Area = "in")
+  
+
+data.offshore <- get.data(Year = Year,
+                          xls.file.name = xls.file.name.offshore,
+                          sheet.name = sheet.name.offshore,
+                          col.types = col.types.offshore,
+                          col.names = all_of(col.names.offshore),
+                          start.time = start.time, 
+                          max.shift = 4)
+
+data.offshore %>% 
+  filter(Mother_Calf > 0) %>%
+  rbind(data.inshore) %>%
+  arrange(Date.date, Minutes_since_0000) %>% 
+  extract.all.vars() -> data.all
 
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
@@ -1167,13 +1436,37 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+# 
+# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+#                           col.types.inshore, col.types.offshore,
+#                           col.names.inshore, col.names.offshore,
+#                           Year, xls.file.name.inshore, xls.file.name.offshore,
+#                           start.time, max.shift = 4)%>% 
+#   extract.all.vars()
 
-data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                          col.types.inshore, col.types.offshore,
-                          col.names.inshore, col.names.offshore,
-                          Year, xls.file.name.inshore, xls.file.name.offshore,
-                          start.time, max.shift = 4)%>% 
-  extract.all.vars()
+data.inshore <- get.data(Year = Year, 
+                         xls.file.name = xls.file.name.inshore, 
+                         sheet.name = sheet.name.inshore,
+                         col.types = col.types.inshore, 
+                         col.names = col.names.inshore, 
+                         start.time = start.time,
+                         max.shift = 4) %>%
+  mutate(Area = "in")
+  
+
+data.offshore <- get.data(Year = Year,
+                          xls.file.name = xls.file.name.offshore,
+                          sheet.name = sheet.name.offshore,
+                          col.types = col.types.offshore,
+                          col.names = all_of(col.names.offshore),
+                          start.time = start.time, 
+                          max.shift = 4)
+
+data.offshore %>% 
+  filter(Mother_Calf > 0) %>%
+  rbind(data.inshore) %>%
+  arrange(Date.date, Minutes_since_0000) %>% 
+  extract.all.vars() -> data.all
 
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
@@ -1243,13 +1536,36 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+# 
+# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+#                           col.types.inshore, col.types.offshore,
+#                           col.names.inshore, col.names.offshore,
+#                           Year, xls.file.name.inshore, xls.file.name.offshore,
+#                           start.time, max.shift = 4)%>% 
+#   extract.all.vars()
 
-data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                          col.types.inshore, col.types.offshore,
-                          col.names.inshore, col.names.offshore,
-                          Year, xls.file.name.inshore, xls.file.name.offshore,
-                          start.time, max.shift = 4)%>% 
-  extract.all.vars()
+data.inshore <- get.data(Year = Year, 
+                         xls.file.name = xls.file.name.inshore, 
+                         sheet.name = sheet.name.inshore,
+                         col.types = col.types.inshore, 
+                         col.names = col.names.inshore, 
+                         start.time = start.time,
+                         max.shift = 4) %>%
+  mutate(Area = "in")
+  
+data.offshore <- get.data(Year = Year,
+                          xls.file.name = xls.file.name.offshore,
+                          sheet.name = sheet.name.offshore,
+                          col.types = col.types.offshore,
+                          col.names = all_of(col.names.offshore),
+                          start.time = start.time, 
+                          max.shift = 4)
+
+data.offshore %>% 
+  filter(Mother_Calf > 0) %>%
+  rbind(data.inshore) %>%
+  arrange(Date.date, Minutes_since_0000) %>% 
+  extract.all.vars() -> data.all
 
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
@@ -1318,13 +1634,38 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+# 
+# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+#                           col.types.inshore, col.types.offshore,
+#                           col.names.inshore, col.names.offshore,
+#                           Year, xls.file.name.inshore, xls.file.name.offshore,
+#                           start.time, max.shift = 4)%>% 
+#   extract.all.vars()
 
-data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                          col.types.inshore, col.types.offshore,
-                          col.names.inshore, col.names.offshore,
-                          Year, xls.file.name.inshore, xls.file.name.offshore,
-                          start.time, max.shift = 4)%>% 
-  extract.all.vars()
+data.inshore <- get.data(Year = Year, 
+                         xls.file.name = xls.file.name.inshore, 
+                         sheet.name = sheet.name.inshore,
+                         col.types = col.types.inshore, 
+                         col.names = col.names.inshore, 
+                         start.time = start.time,
+                         max.shift = 4) %>%
+  mutate(Area = "in")
+  
+
+data.offshore <- get.data(Year = Year,
+                          xls.file.name = xls.file.name.offshore,
+                          sheet.name = sheet.name.offshore,
+                          col.types = col.types.offshore,
+                          col.names = all_of(col.names.offshore),
+                          start.time = start.time, 
+                          max.shift = 4)
+
+data.offshore %>% 
+  filter(Mother_Calf > 0) %>%
+  rbind(data.inshore) %>%
+  arrange(Date.date, Minutes_since_0000) %>% 
+  extract.all.vars() -> data.all
+
 
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
@@ -1395,13 +1736,37 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+# 
+# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+#                           col.types.inshore, col.types.offshore,
+#                           col.names.inshore, col.names.offshore,
+#                           Year, xls.file.name.inshore, xls.file.name.offshore,
+#                           start.time, max.shift = 4)%>% 
+#   extract.all.vars()
 
-data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                          col.types.inshore, col.types.offshore,
-                          col.names.inshore, col.names.offshore,
-                          Year, xls.file.name.inshore, xls.file.name.offshore,
-                          start.time, max.shift = 4)%>% 
-  extract.all.vars()
+data.inshore <- get.data(Year = Year, 
+                         xls.file.name = xls.file.name.inshore, 
+                         sheet.name = sheet.name.inshore,
+                         col.types = col.types.inshore, 
+                         col.names = col.names.inshore, 
+                         start.time = start.time,
+                         max.shift = 4) %>%
+  mutate(Area = "in")
+  
+data.offshore <- get.data(Year = Year,
+                          xls.file.name = xls.file.name.offshore,
+                          sheet.name = sheet.name.offshore,
+                          col.types = col.types.offshore,
+                          col.names = all_of(col.names.offshore),
+                          start.time = start.time, 
+                          max.shift = 4)
+
+data.offshore %>% 
+  filter(Mother_Calf > 0) %>%
+  rbind(data.inshore) %>%
+  arrange(Date.date, Minutes_since_0000) %>% 
+  extract.all.vars() -> data.all
+
 
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
@@ -1470,13 +1835,37 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+# 
+# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+#                           col.types.inshore, col.types.offshore,
+#                           col.names.inshore, col.names.offshore,
+#                           Year, xls.file.name.inshore, xls.file.name.offshore,
+#                           start.time, max.shift = 4)%>% 
+#   extract.all.vars()
 
-data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                          col.types.inshore, col.types.offshore,
-                          col.names.inshore, col.names.offshore,
-                          Year, xls.file.name.inshore, xls.file.name.offshore,
-                          start.time, max.shift = 4)%>% 
-  extract.all.vars()
+data.inshore <- get.data(Year = Year, 
+                         xls.file.name = xls.file.name.inshore, 
+                         sheet.name = sheet.name.inshore,
+                         col.types = col.types.inshore, 
+                         col.names = col.names.inshore, 
+                         start.time = start.time,
+                         max.shift = 4) %>%
+  mutate(Area = "in")
+  
+data.offshore <- get.data(Year = Year,
+                          xls.file.name = xls.file.name.offshore,
+                          sheet.name = sheet.name.offshore,
+                          col.types = col.types.offshore,
+                          col.names = all_of(col.names.offshore),
+                          start.time = start.time, 
+                          max.shift = 4)
+
+data.offshore %>% 
+  filter(Mother_Calf > 0) %>%
+  rbind(data.inshore) %>%
+  arrange(Date.date, Minutes_since_0000) %>% 
+  extract.all.vars() -> data.all
+
 
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
@@ -1546,13 +1935,37 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+# 
+# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+#                           col.types.inshore, col.types.offshore,
+#                           col.names.inshore, col.names.offshore,
+#                           Year, xls.file.name.inshore, xls.file.name.offshore,
+#                           start.time, max.shift = 4)%>% 
+#   extract.all.vars()
 
-data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                          col.types.inshore, col.types.offshore,
-                          col.names.inshore, col.names.offshore,
-                          Year, xls.file.name.inshore, xls.file.name.offshore,
-                          start.time, max.shift = 4)%>% 
-  extract.all.vars()
+data.inshore <- get.data(Year = Year, 
+                         xls.file.name = xls.file.name.inshore, 
+                         sheet.name = sheet.name.inshore,
+                         col.types = col.types.inshore, 
+                         col.names = col.names.inshore, 
+                         start.time = start.time,
+                         max.shift = 4) %>%
+  mutate(Area = "in")
+  
+
+data.offshore <- get.data(Year = Year,
+                          xls.file.name = xls.file.name.offshore,
+                          sheet.name = sheet.name.offshore,
+                          col.types = col.types.offshore,
+                          col.names = all_of(col.names.offshore),
+                          start.time = start.time, 
+                          max.shift = 4)
+
+data.offshore %>% 
+  filter(Mother_Calf > 0) %>%
+  rbind(data.inshore) %>%
+  arrange(Date.date, Minutes_since_0000) %>% 
+  extract.all.vars() -> data.all
 
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
@@ -1622,13 +2035,38 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+# 
+# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+#                           col.types.inshore, col.types.offshore,
+#                           col.names.inshore, col.names.offshore,
+#                           Year, xls.file.name.inshore, xls.file.name.offshore,
+#                           start.time, max.shift = 4)%>% 
+#   extract.all.vars()
 
-data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                          col.types.inshore, col.types.offshore,
-                          col.names.inshore, col.names.offshore,
-                          Year, xls.file.name.inshore, xls.file.name.offshore,
-                          start.time, max.shift = 4)%>% 
-  extract.all.vars()
+data.inshore <- get.data(Year = Year, 
+                         xls.file.name = xls.file.name.inshore, 
+                         sheet.name = sheet.name.inshore,
+                         col.types = col.types.inshore, 
+                         col.names = col.names.inshore, 
+                         start.time = start.time,
+                         max.shift = 4) %>%
+  mutate(Area = "in")
+  
+
+data.offshore <- get.data(Year = Year,
+                          xls.file.name = xls.file.name.offshore,
+                          sheet.name = sheet.name.offshore,
+                          col.types = col.types.offshore,
+                          col.names = all_of(col.names.offshore),
+                          start.time = start.time, 
+                          max.shift = 4)
+
+data.offshore %>% 
+  filter(Mother_Calf > 0) %>%
+  rbind(data.inshore) %>%
+  arrange(Date.date, Minutes_since_0000) %>% 
+  extract.all.vars() -> data.all
+
 
 
 out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
@@ -1707,8 +2145,9 @@ data.inshore <- get.data(Year = Year,
                          col.types = col.types.inshore,
                          col.names = all_of(col.names.inshore),
                          start.time = start.time,
-                         max.shift = max.shift)
-
+                         max.shift = max.shift) %>%
+  mutate(Area = "in")
+  
 data.offshore <- get.data(Year = Year,
                           xls.file.name = xls.file.name.offshore,
                           sheet.name = sheet.name.offshore,
