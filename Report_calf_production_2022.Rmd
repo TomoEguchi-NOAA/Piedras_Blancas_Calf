@@ -26,55 +26,57 @@ set_flextable_defaults(font.size = 8,
                        font.family = "Cambria",
                        line_spacing = 1)
 
-data.path <- "data/Formatted Annual Data/"
+data.path <- "data/Formatted Annual Data v2/"
 
 # UMEs
 UMEs <- data.frame(Season = c("1999/2000", "2019/2020", 
                               "2020/2021", "2021/2022"),
                    Year = c(1999, 2019, 2020, 2021))
 
-FILES <- list.files(path = data.path, 
-                    pattern = "Formatted.csv")
+years <- c(seq(1994, 2019), 2021, 2022)
 
-years <- vector(mode = "numeric", length = length(FILES))
+# Get posterior samples from Josh's analysis:
+Estimates_1994_2021 <- read.csv(file = "data/Updated Calf Estimates 1994-2019.csv")
+#Estimates_2021 <- read.csv(file = "data/Updated Calf Estimates 2021.csv")
 
-jm.out <- list()
+stats.1994.2021 <- data.frame(Mean = apply(Estimates_1994_2021, 
+                                           FUN = mean, MARGIN = 2),
+                              Median = apply(Estimates_1994_2021,
+                                             FUN = median, MARGIN = 2),
+                            Var = apply(Estimates_1994_2021,
+                                         FUN = var, MARGIN = 2),
+                            LCL = apply(Estimates_1994_2021,
+                                        FUN = quantile, MARGIN = 2, 0.025),
+                            UCL = apply(Estimates_1994_2021,
+                                        FUN = quantile, MARGIN = 2, 0.975),
+                            Year = years[1:27]) %>%
+  mutate(SD = sqrt(Var),
+         Method = "Stewart&Weller") %>%
+  select(Mean, Median, SD, LCL, UCL, Year, Method)
 
-for(i in 1:length(FILES)){
-  years[i] <- as.numeric(str_split(FILES[i], " Formatted.csv")[[1]][1])
+jm.out.2022 <- readRDS(paste0("RData/calf_estimates_v1_2022_Aug2022.rds"))
+    
+stats.2022 <- data.frame(
+  Mean = jm.out.2022$jm$mean$Total.Calves,
+  Median = jm.out.2022$jm$q50$Total.Calves,
+  SD = jm.out.2022$jm$sd$Total.Calves,
+  LCL = jm.out.2022$jm$q2.5$Total.Calves,
+  UCL = jm.out.2022$jm$q97.5$Total.Calves,
+  Year = 2022,
+  Method = "Stewart&Weller")
   
-  data <- read.csv(paste0(data.path, FILES[i]))
-  jm.out[[i]] <- readRDS(paste0("RData/calf_estimates_v1_", years[i], ".rds"))
-    #jm <- jm.out$jm
-}
-
-Mean <- Median <- LCL <- UCL <- vector(mode = "numeric", length = length(FILES))
-stats.total.calves <- lapply(jm.out, FUN = function(x){
-  Mean <- x$jm$mean$Total.Calves
-  Median <- x$jm$q50$Total.Calves
-  LCL <- x$jm$q2.5$Total.Calves
-  UCL <- x$jm$q97.5$Total.Calves
-  
-  return(data.frame(Mean = Mean,
-                    Median = Median,
-                    LCL = LCL,
-                    UCL = UCL))
-})
-
-Estimates <- do.call(rbind, stats.total.calves)
-Estimates$Year <- years
-Estimates$Method <- "Stewart&Weller"
-
+Estimates <- rbind(stats.1994.2021, stats.2022)
 #Compare Wayne's estimates and new estimates
 WayneAll <- read.csv("data/Calf Production Wayne Estimates.csv")
 WayneAll %>% filter(!is.na(Effort)) %>%
   mutate(Method = "Perryman",
          LCL = Estimate - SE * 1.96,
          UCL = Estimate + SE * 1.96,
-         Mean = Estimate) -> WayneShort
+         Mean = Estimate,
+         SD = SE) -> WayneShort
 
-estimates.PandV1 <- rbind(Estimates %>% select(Year, Mean, LCL, UCL, Method),
-                         WayneShort %>% select(Year, Mean, LCL, UCL, Method))
+estimates.PandV1 <- rbind(Estimates %>% select(Year, Mean, SD, LCL, UCL, Method),
+                         WayneShort %>% select(Year, Mean, SD, LCL, UCL, Method))
 
 ```
 
