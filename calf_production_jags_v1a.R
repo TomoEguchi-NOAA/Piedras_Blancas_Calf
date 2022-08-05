@@ -81,11 +81,13 @@ stats.total.calves <- lapply(jm.out,
                              FUN = function(x){
                                Mean <- x$jm$mean$Total.Calves
                                Median <- x$jm$q50$Total.Calves
+                               SD <- x$jm$sd$Total.Calves
                                LCL <- x$jm$q2.5$Total.Calves
                                UCL <- x$jm$q97.5$Total.Calves
                                
                                return(data.frame(Mean = Mean,
                                                  Median = Median,
+                                                 SD = SD,
                                                  LCL = LCL,
                                                  UCL = UCL))
                              })
@@ -98,5 +100,19 @@ write.csv(Estimates,
           "data/Calf Estimates v1 Aug2022.csv",
           row.names = F)
 
+Estimates_1994_2021 <- read.csv(file = "data/Updated Calf Estimates 1994-2019.csv")
+#Estimates_2021 <- read.csv(file = "data/Updated Calf Estimates 2021.csv")
 
+stats.1994.2021 <- data.frame(Mean = apply(Estimates_1994_2019, 
+                                           FUN = mean, MARGIN = 2),
+                              Median = apply(Estimates_1994_2019,
+                                             FUN = median, MARGIN = 2),
+                            Var = apply(Estimates_1994_2019,
+                                         FUN = var, MARGIN = 2),
+                            LCL = apply(Estimates_1994_2019,
+                                        FUN = quantile, MARGIN = 2, 0.025),
+                            UCL = apply(Estimates_1994_2019,
+                                        FUN = quantile, MARGIN = 2, 0.975),
+                            Year = years[1:27]) %>%
+  mutate(SD = sqrt(Var))
 

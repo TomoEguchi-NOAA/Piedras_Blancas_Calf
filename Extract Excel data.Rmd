@@ -235,7 +235,8 @@ if (!file.exists(out.file.name.formatted))
 
 ## 1996
 
-Some dates were wrong in the inshore file. They were fixed. See the spreadsheet's note column for details. 
+Some dates were wrong in the inshore file. They need to be fixed. 
+
 ```{r}
 Year <- 1996
 dir.name <- paste0("C_C ", Year)
