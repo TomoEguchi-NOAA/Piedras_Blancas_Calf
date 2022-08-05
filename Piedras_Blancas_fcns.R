@@ -266,6 +266,16 @@ find.effort <- function(x, start.hr = 7, end.hr = 19, max.shift = 4){
                  Minutes_since_0000 <= end.shift[k1]) -> one.shift
       
       if (nrow(one.shift) != 0){
+        # Sometimes the beginning of one shift and the end of the previous 
+        # shift is shared in one line with Shift = x/y. When that and a sighting
+        # happens simultaneously, the sighting gets double counted between the
+        # two shifts. So, the sighting has to be placed in one or the other.
+        line.bottom <- one.shift[nrow(one.shift),]
+        if (line.bottom$Event == 4 & str_detect(line.bottom$Shift, "/")){
+          one.shift <- one.shift[1:(nrow(one.shift)-1),]
+          
+        }
+        
         # add one row at the top and end of one.shift, so that it has
         # Event 1 at the top, and 5 at the bottom if they are not there:
         if (one.shift[1,"Event"] != 1){

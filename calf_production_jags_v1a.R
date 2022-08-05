@@ -37,6 +37,7 @@ years <- vector(mode = "numeric", length = length(FILES))
 jm.out <- list()
 for(i in 1:length(FILES)){
   
+  
   data <- read.csv(paste0(data.path, FILES[i]))
   data$Effort[is.na(data$Effort)] <- 0
   years[i] <- as.numeric(str_split(FILES[i], " Formatted.csv")[[1]][1])
