@@ -10,7 +10,7 @@ output:
 ```{r setup, include=FALSE}
 rm(list = ls())
 knitr::opts_chunk$set(echo = TRUE)
-save.fig <- F
+save.fig <- T
 
 source("Piedras_Blancas_fcns.R")
 library(tidyverse)
@@ -29,9 +29,10 @@ set_flextable_defaults(font.size = 8,
 data.path <- "data/Formatted Annual Data v2/"
 
 # UMEs
-UMEs <- data.frame(Season = c("1999/2000", "2019/2020", 
+UMEs <- data.frame(Season = c("1999/2000", "2000/2001",
+                              "2019/2020", 
                               "2020/2021", "2021/2022"),
-                   Year = c(1999, 2019, 2020, 2021))
+                   Year = c(1999, 2000, 2019, 2020, 2021))
 
 years <- c(seq(1994, 2019), 2021, 2022)
 
@@ -43,23 +44,23 @@ stats.1994.2021 <- data.frame(Mean = apply(Estimates_1994_2021,
                                            FUN = mean, MARGIN = 2),
                               Median = apply(Estimates_1994_2021,
                                              FUN = median, MARGIN = 2),
-                            Var = apply(Estimates_1994_2021,
-                                         FUN = var, MARGIN = 2),
-                            LCL = apply(Estimates_1994_2021,
-                                        FUN = quantile, MARGIN = 2, 0.025),
-                            UCL = apply(Estimates_1994_2021,
-                                        FUN = quantile, MARGIN = 2, 0.975),
-                            Year = years[1:27]) %>%
-  mutate(SD = sqrt(Var),
+                              Var = apply(Estimates_1994_2021,
+                                          FUN = var, MARGIN = 2),
+                              LCL = apply(Estimates_1994_2021,
+                                          FUN = quantile, MARGIN = 2, 0.025),
+                              UCL = apply(Estimates_1994_2021,
+                                          FUN = quantile, MARGIN = 2, 0.975),
+                              Year = years[1:27]) %>%
+  mutate(SE = sqrt(Var),
          Method = "Stewart&Weller") %>%
-  select(Mean, Median, SD, LCL, UCL, Year, Method)
+  select(Mean, Median, SE, LCL, UCL, Year, Method)
 
 jm.out.2022 <- readRDS(paste0("RData/calf_estimates_v1_2022_Aug2022.rds"))
     
 stats.2022 <- data.frame(
   Mean = jm.out.2022$jm$mean$Total.Calves,
   Median = jm.out.2022$jm$q50$Total.Calves,
-  SD = jm.out.2022$jm$sd$Total.Calves,
+  SE = jm.out.2022$jm$sd$Total.Calves,
   LCL = jm.out.2022$jm$q2.5$Total.Calves,
   UCL = jm.out.2022$jm$q97.5$Total.Calves,
   Year = 2022,
@@ -72,11 +73,10 @@ WayneAll %>% filter(!is.na(Effort)) %>%
   mutate(Method = "Perryman",
          LCL = Estimate - SE * 1.96,
          UCL = Estimate + SE * 1.96,
-         Mean = Estimate,
-         SD = SE) -> WayneShort
+         Mean = Estimate) -> WayneShort
 
-estimates.PandV1 <- rbind(Estimates %>% select(Year, Mean, SD, LCL, UCL, Method),
-                         WayneShort %>% select(Year, Mean, SD, LCL, UCL, Method))
+estimates.PandV1 <- rbind(Estimates %>% select(Year, Mean, SE, LCL, UCL, Method),
+                         WayneShort %>% select(Year, Mean, SE, LCL, UCL, Method))
 
 ```
 
@@ -129,7 +129,7 @@ In some years, a survey was concluded mid-week after three consecutive days of 0
 
 ```{r data.2022, echo=FALSE, include=FALSE, cache=TRUE, message=FALSE}
 
-data.2022 <- read.csv(paste0(data.path, FILES[length(FILES)]))
+data.2022 <- read.csv(paste0(data.path, "2022 Formatted.csv"))
 
 data.2022 %>% group_by(Date) %>%
   summarise(Daily_Sightings = sum(Sightings),
@@ -140,7 +140,7 @@ data.2022 %>% group_by(Date) %>%
 p.daily.sightings <- ggplot(data.2022.by.day) +
   geom_point(aes(x = Date, y = Sightings_per_Effort)) +
   geom_path(aes(x = Date, y = Sightings_per_Effort)) +
-  xlab("") + ylab("Daily observed number of mother-calf pairs per effor hour")
+  xlab("") + ylab("Observed number of mother-calf pairs per effor hour")
 
 if (save.fig)
   ggsave(filename = "figures/daily_sightings_2022.png",
@@ -153,7 +153,7 @@ if (save.fig)
 
 ### Calf production {-}
 
-From `r min(as.Date(data.2022$Date, format = "%Y-%m-%d")) %>% format("%d %B %Y")` to `r max(as.Date(data.2022$Date, format = "%Y-%m-%d")) %>% format("%d %B %Y")`, `r signif(sum(data.2022$Effort),3)` hours of survey were completed. Daily survey effort ranged from zero to `r signif(max(data.2022.by.day$Daily_Effort), 3)` hours. A total of `r sum(data.2022$Sightings)` mother-calf pairs of gray whales were counted, with the highest daily count of `r max(data.2022.by.day$Daily_Sightings)` pairs on `r data.2022.by.day[data.2022.by.day$Daily_Sightings == max(data.2022.by.day$Daily_Sightings), "Date"] %>% pull() %>% format("%d %B %Y")`.  (`r  data.2022.by.day[data.2022.by.day$Daily_Sightings == max(data.2022.by.day$Daily_Sightings), "Sightings_per_Effort"] %>% pull() %>% signif(3)` per survey effort hour, Figure \@ref(fig:Figure-daily-sightings)). 
+From `r min(as.Date(data.2022.by.day$Date, format = "%Y-%m-%d")) %>% format("%d %B %Y")` to `r max(as.Date(data.2022.by.day$Date, format = "%Y-%m-%d")) %>% format("%d %B %Y")`, `r signif(sum(data.2022.by.day$Daily_Effort),3)` hours of survey were completed. Daily survey effort ranged from zero to `r signif(max(data.2022.by.day$Daily_Effort), 3)` hours. A total of `r sum(data.2022$Sightings)` mother-calf pairs of gray whales were counted, with the highest daily count of `r max(data.2022.by.day$Daily_Sightings)` pairs on `r data.2022.by.day[data.2022.by.day$Daily_Sightings == max(data.2022.by.day$Daily_Sightings), "Date"] %>% pull() %>% format("%d %B %Y")`.  (`r  data.2022.by.day[data.2022.by.day$Daily_Sightings == max(data.2022.by.day$Daily_Sightings), "Sightings_per_Effort"] %>% pull() %>% signif(3)` per survey effort hour, Figure \@ref(fig:Figure-daily-sightings)). 
 
 
 ```{r Figure-daily-sightings, echo=FALSE, message=FALSE, fig.cap="Observation rate (mumbers per hour of survey effort) of mother-calf pairs of gray whales migrating through the sampling area off Piedras Blancas during the 2022 survey period. "}
@@ -213,10 +213,10 @@ As Stewart and Weller (2021) reported, the Bayesian approach resulted in general
 flextable(Estimates %>% 
             dplyr::relocate(Year) %>% 
             dplyr::select(- Method)) %>%
-  set_caption(paste0("Estimated abundance (Mean and Median) and 95% lower (LCL) and upper (UCL) confidence limits of gray whale calves from the visual surveys off the Piedras Blancas Lighthouse Station, CA. "))  %>%
+  set_caption(paste0("Estimated abundance (Mean and Median), standard error (SE), and 95% lower (LCL) and upper (UCL) confidence limits of gray whale calves from the visual surveys off the Piedras Blancas Lighthouse Station, CA. "))  %>%
   colformat_double(j = "Year", big.mark = "",
                    digits = 0) %>%
-  colformat_double(j = c("Mean", "Median", "LCL", "UCL"), digits = 1) %>%
+  colformat_double(j = c("Mean", "Median", "SE", "LCL", "UCL"), digits = 1) %>%
   set_table_properties(width = 0.5, layout = "autofit")
 ```
 
@@ -240,7 +240,7 @@ Durban_estim <- data.frame(Year = c(2007, 2008, 2010, 2011, 2015, 2016, 2022),
                            Nhat = c(20750, 17820, 21210, 20990, 23530, 26960, 16650),
                            LCL = c(18860, 16150, 19420, 19230, 21270, 24420, 15170),
                            UCL = c(23320, 19920, 23250, 22900, 25945, 29830, 18335),
-                           Method = "Durban")+-
+                           Method = "Durban")
 
 Nhats <- read.csv(file = "~/R/Granite_Canyon_Counts/Data/all_estimates_2022.csv") %>%
   filter(Method == "Laake" & Year > 1993 & Year < 2007) %>% 
@@ -275,7 +275,7 @@ p.NvsCalves <- ggplot(MC_Nhats %>% na.omit()) +
                      xmin = LCL.y, 
                      xmax = UCL.y, 
                      color = factor(Year))) +
-  xlab("Abundance") + ylab("Mother calf pair") +
+  xlab("Abundance") + ylab("Number of calves") +
   labs(color = "Year")
 
 if (save.fig)
