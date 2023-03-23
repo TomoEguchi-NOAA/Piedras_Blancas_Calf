@@ -245,7 +245,7 @@ From what I have so far, how do DOY and the shift duration affect the number of 
 
 ```{r gam.1, cache=T}
 library(mgcv)
-library(tidymv)
+library(tidygam)
 
 gam.1 <- gam(log(Mother_Calf+1) ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
              data = count.long.df, 
