@@ -484,4 +484,15 @@ It does pretty good job for counts that are less than 5, but larger values fail 
 
 I need to build a year-specific model to fill in the gaps. 
 
+Back to year-specific models for estimating annual calf production. Long term analyses will be done separately. I looked at how the binomial likelihood for observed counts fit to the data. It turned out the binomial model had high Pareto k values. Taking the 2022 season for example...
+
+```{r}
+library("loo")
+results.2022.v1 <- readRDS(file = "RData/calf_estimates_v1_2022.rds")
+
+pareto_k_table(results.2022.v1$MCMC.diag$loo.out)
+
+```
+
+
 
