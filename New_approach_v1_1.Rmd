@@ -396,7 +396,7 @@ plot_smooths(model = gam.3,
 
 
 ```{r gam.3.1, cache=T}
-gam.3.1 <- gam(Count ~ s(Effort) + s(DOY, Year) + s(Week), 
+gam.3.1 <- gam(Mother_Calf ~ s(Effort) + s(DOY, Year) + s(Week), 
              data = count.long.df, family = "nb")
 
 summary(gam.3.1)
@@ -405,7 +405,7 @@ summary(gam.3.1)
 
 
 ```{r gam.3.2, cache=T}
-gam.3.2 <- gam(Count ~ Year.f + s(Effort) + s(DOY, by = Year.f) + s(Week), 
+gam.3.2 <- gam(Mother_Calf ~ Year.f + s(Effort) + s(DOY, by = Year.f) + s(Week), 
              data = count.long.df, 
              family = "nb")
 
@@ -414,7 +414,7 @@ summary(gam.3.2)
 
 
 ```{r gam.4, cache=T}
-gam.4 <- gam((Count+1) ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
+gam.4 <- gam((Mother_Calf+1) ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
              data = count.long.df, family = "poisson")
 
 summary(gam.4)
@@ -474,9 +474,9 @@ pred.data %>%
          UCL = gam.3.2.pred$fit + gam.3.2.pred$se.fit * 1.96) -> pred.data
 
 ggplot(data = pred.data) +
-  geom_point(aes(x = Count, 
+  geom_point(aes(x = Mother_Calf, 
                  y = prediction)) +
-  geom_errorbar(aes(x = Count, ymin = LCL, ymax = UCL))
+  geom_errorbar(aes(x = Mother_Calf, ymin = LCL, ymax = UCL))
 ```
 
 
