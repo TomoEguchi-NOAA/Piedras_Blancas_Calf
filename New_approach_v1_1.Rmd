@@ -138,7 +138,7 @@ ggplot(count.long.df %>% filter(Year > 1999, Year < 2012)) +
 
 
 ```{r plot-cumsum-2000-2}
-ggplot(count.long.df %>% filter(Year > 2011, Year < 2022)) +
+ggplot(count.long.df %>% filter(Year > 2011, Year < 2023)) +
   geom_point(aes(x = DOY, y = cumsum.nhat)) +
   facet_wrap(Year ~., nrow = 3)
 
@@ -173,7 +173,7 @@ ggplot(count.long.df %>% filter(Year > 1999, Year < 2012)) +
 
 
 ```{r plot-nhat-2000-2}
-ggplot(count.long.df %>% filter(Year > 2011, Year < 2022)) +
+ggplot(count.long.df %>% filter(Year > 2011, Year < 2023)) +
   geom_point(aes(x = DOY, y = n.hat)) +
   facet_wrap(Year ~., nrow = 3)
 
@@ -205,7 +205,7 @@ ggplot(count.long.df %>% filter(Year > 1999, Year < 2012, Effort > 0)) +
 
 
 ```{r plot-nhat-nonzer-effort-2000-2}
-ggplot(count.long.df %>% filter(Year > 2011, Year < 2022, Effort > 0)) +
+ggplot(count.long.df %>% filter(Year > 2011, Effort > 0)) +
   geom_point(aes(x = DOY, y = n.hat, color = factor(Shift))) +
   facet_wrap(Year ~., nrow = 3)
 
@@ -232,7 +232,7 @@ ggplot(count.long.df %>% filter(Year > 1999, Year < 2012, Effort > 0)) +
 
 ```{r}
 
-ggplot(count.long.df %>% filter(Year > 2011, Year < 2022, Effort > 0)) +
+ggplot(count.long.df %>% filter(Year > 2011, Effort > 0)) +
   geom_point(aes(x = Effort, y = n.hat, color = DOY)) +
   facet_wrap(Year ~., nrow = 3)
 
