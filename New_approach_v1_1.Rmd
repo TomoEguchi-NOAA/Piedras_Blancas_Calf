@@ -54,7 +54,7 @@ years <- vector(mode = "numeric", length = length(FILES))
 
 i <- 1
 for(i in 1:length(FILES)){
-  # Sea_State and Vis have -Inf from missing data, which turns into parsing issues
+  # Sea_State and Vis have -Inf from missing data, which turn into parsing issues
   # These can be ignored.
   data <- read_csv(paste0(data.path, FILES[i]), 
                    col_types = col.defs)
@@ -127,8 +127,8 @@ ggplot(count.long.df %>% filter(Year < 2000)) +
 
 ```
 
-```{r plot-cumsum-2000-1}
-ggplot(count.long.df %>% filter(Year > 1999, Year < 2012)) +
+```{r plot-cumsum-2000}
+ggplot(count.long.df %>% filter(Year > 1999, Year < 2010)) +
   geom_point(aes(x = DOY, y = cumsum.nhat)) +
   facet_wrap(Year ~., nrow = 3)
 
@@ -137,8 +137,8 @@ ggplot(count.long.df %>% filter(Year > 1999, Year < 2012)) +
 ```
 
 
-```{r plot-cumsum-2000-2}
-ggplot(count.long.df %>% filter(Year > 2011, Year < 2023)) +
+```{r plot-cumsum-2010}
+ggplot(count.long.df %>% filter(Year > 2009, Year < 2020)) +
   geom_point(aes(x = DOY, y = cumsum.nhat)) +
   facet_wrap(Year ~., nrow = 3)
 
@@ -147,6 +147,13 @@ ggplot(count.long.df %>% filter(Year > 2011, Year < 2023)) +
 
 ```
 
+
+```{r plot-cumsum-2020}
+ggplot(count.long.df %>% filter(Year > 2019)) +
+  geom_point(aes(x = DOY, y = cumsum.nhat)) +
+  facet_wrap(Year ~., nrow = 3)
+
+```
 
 Next, look at how the counts change within each year:
 
@@ -162,8 +169,8 @@ ggplot(count.long.df %>% filter(Year < 2000)) +
 ```
 
 
-```{r plot-nhat-2000-1}
-ggplot(count.long.df %>% filter(Year > 1999, Year < 2012)) +
+```{r plot-nhat-2000}
+ggplot(count.long.df %>% filter(Year > 1999, Year < 2010)) +
   geom_point(aes(x = DOY, y = n.hat)) +
   facet_wrap(Year ~., nrow = 3)
 
@@ -172,13 +179,18 @@ ggplot(count.long.df %>% filter(Year > 1999, Year < 2012)) +
 ```
 
 
-```{r plot-nhat-2000-2}
-ggplot(count.long.df %>% filter(Year > 2011, Year < 2023)) +
+```{r plot-nhat-2010}
+ggplot(count.long.df %>% filter(Year > 2009, Year < 2020)) +
   geom_point(aes(x = DOY, y = n.hat)) +
   facet_wrap(Year ~., nrow = 3)
 
+```
 
 
+```{r plot-nhat-2020}
+ggplot(count.long.df %>% filter(Year > 2019)) +
+  geom_point(aes(x = DOY, y = n.hat)) +
+  facet_wrap(Year ~., nrow = 3)
 
 ```
 
@@ -196,16 +208,16 @@ ggplot(count.long.df %>% filter(Year < 2000, Effort > 0)) +
 ```
 
 
-```{r plot-nhat-nonzero-effort-2000-1}
-ggplot(count.long.df %>% filter(Year > 1999, Year < 2012, Effort > 0)) +
+```{r plot-nhat-nonzero-effort-2000}
+ggplot(count.long.df %>% filter(Year > 1999, Year < 2010, Effort > 0)) +
   geom_point(aes(x = DOY, y = n.hat, color = factor(Shift))) +
   facet_wrap(Year ~., nrow = 3)
 
 ```
 
 
-```{r plot-nhat-nonzer-effort-2000-2}
-ggplot(count.long.df %>% filter(Year > 2011, Effort > 0)) +
+```{r plot-nhat-nonzer-effort-2010}
+ggplot(count.long.df %>% filter(Year > 2009, Year < 2020, Effort > 0)) +
   geom_point(aes(x = DOY, y = n.hat, color = factor(Shift))) +
   facet_wrap(Year ~., nrow = 3)
 
@@ -213,9 +225,17 @@ ggplot(count.long.df %>% filter(Year > 2011, Effort > 0)) +
 ```
 
 
+```{r plot-nhat-nonzer-effort-2020}
+ggplot(count.long.df %>% filter(Year > 2019, Effort > 0)) +
+  geom_point(aes(x = DOY, y = n.hat, color = factor(Shift))) +
+  facet_wrap(Year ~., nrow = 3)
+
+
+```
 
 ```{r plot-n-nonzero-effort-1990s}
-ggplot(count.long.df %>% filter(Year < 2000, Effort > 0)) +
+ggplot(count.long.df %>% 
+         filter(Year < 2000, Effort > 0)) +
   geom_point(aes(x = Effort, y = n.hat, color = DOY)) +
   facet_wrap(Year ~., nrow = 3)
 
@@ -223,16 +243,28 @@ ggplot(count.long.df %>% filter(Year < 2000, Effort > 0)) +
 ```
 
 
-```{r plot-n-nonzero-effort-2000-1}
-ggplot(count.long.df %>% filter(Year > 1999, Year < 2012, Effort > 0)) +
+```{r plot-n-nonzero-effort-2000}
+ggplot(count.long.df %>% 
+         filter(Year > 1999, Year < 2010, Effort > 0)) +
   geom_point(aes(x = Effort, y = n.hat, color = DOY)) +
   facet_wrap(Year ~., nrow = 3)
 
 ```
 
-```{r}
 
-ggplot(count.long.df %>% filter(Year > 2011, Effort > 0)) +
+
+```{r plot-n-nonzero-effort-2010}
+ggplot(count.long.df %>% 
+         filter(Year > 2009, Year < 2020, Effort > 0)) +
+  geom_point(aes(x = Effort, y = n.hat, color = DOY)) +
+  facet_wrap(Year ~., nrow = 3)
+
+```
+
+```{r plot-n-nonzero-effort-2020}
+
+ggplot(count.long.df %>% 
+         filter(Year > 2019, Effort > 0)) +
   geom_point(aes(x = Effort, y = n.hat, color = DOY)) +
   facet_wrap(Year ~., nrow = 3)
 
@@ -245,7 +277,7 @@ From what I have so far, how do DOY and the shift duration affect the number of 
 
 ```{r gam.1, cache=T}
 library(mgcv)
-library(tidygam)
+library(tidygam) # https://github.com/stefanocoretta/tidygam
 
 gam.1 <- gam(log(Mother_Calf+1) ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
              data = count.long.df, 
