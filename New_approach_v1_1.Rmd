@@ -278,6 +278,7 @@ From what I have so far, how do DOY and the shift duration affect the number of 
 ```{r gam.1, cache=T}
 library(mgcv)
 library(tidygam) # https://github.com/stefanocoretta/tidygam
+#library(tidymv) # replaced by tidygam
 
 gam.1 <- gam(log(Mother_Calf+1) ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
              data = count.long.df, 
@@ -286,10 +287,31 @@ gam.1 <- gam(log(Mother_Calf+1) ~ s(Effort) + s(DOY) + s(Year) + s(Week),
 summary(gam.1)
 ```
 
-```{r}
-plot(gam.1)
+```{r gam.1.pred.effort}
+pred.gam.1.effort <- tidygam::predict_gam(model = gam.1,
+                                          series = "Effort",
+                                          length_out = 200)
+
+plot(pred.gam.1.effort)
 ```
 
+
+```{r gam.1.pred.DOY}
+pred.gam.1.DOY <- tidygam::predict_gam(model = gam.1,
+                                          series = "DOY",
+                                          length_out = 200)
+
+plot(pred.gam.1.DOY)
+```
+
+
+```{r gam.1.pred.week}
+pred.gam.1.week <- tidygam::predict_gam(model = gam.1,
+                                          series = "Week",
+                                          length_out = 200)
+
+plot(pred.gam.1.week)
+```
 
 ```{r gam.1.1, cache=T}
 gam.1.1 <- gam(log(Mother_Calf+1) ~ s(Effort) + s(DOY, Year) + s(Week), 
@@ -301,12 +323,42 @@ summary(gam.1.1)
 ```
 
 
-```{r}
-plot(gam.1.1)
+```{r pred.gam.1.1}
+pred.gam.1.1.DOY.year <- tidygam::predict_gam(model = gam.1.1,
+                                          series = c("DOY", "Year"),
+                                          length_out = 500)
+
+plot(pred.gam.1.1.DOY.year)
+#plot(gam.1.1)
 ```
 
+Subtle difference among years over DOY. Some years go in to later in the season. 
 
-Week doesn't do much so drop it... 
+
+
+```{r pred.gam.1.1.year}
+pred.gam.1.1.year <- tidygam::predict_gam(model = gam.1.1,
+                                          series = "Year",
+                                          length_out = 200,
+                                          tran_fun = exp)
+
+plot(pred.gam.1.1.year)
+#plot(gam.1.1)
+```
+
+Decline in the last five or so years is apparent here. 
+
+
+```{r pred.gam.1.1.week}
+pred.gam.1.1.week <- tidygam::predict_gam(model = gam.1.1,
+                                          series = "Week",
+                                          length_out = 200)
+
+plot(pred.gam.1.1.week)
+#plot(gam.1.1)
+```
+
+Week doesn't do much so drop it... ?
 
 ```{r gam.1.2, cache=T}
 gam.1.2 <- gam(log(Mother_Calf+1) ~ s(Effort) + s(DOY, Year), 
@@ -317,9 +369,6 @@ summary(gam.1.2)
 
 ```
 
-```{r}
-plot(gam.1.2)
-```
 
 
 ```{r gam.1.3, cache=T}
@@ -369,6 +418,8 @@ Not much variation in DOY among years.
 <!-- That was a bit of digression. They don't add much to explaining deviance. Don't bother it for now. Also, this won't help with filling in the missing data points. -->
 
 
+Try zero-inflated Poisson.
+
 ```{r gam.2, cache=T}
 gam.2 <- gam(Mother_Calf ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
              data = count.long.df, family = "ziP")
@@ -378,13 +429,20 @@ summary(gam.2)
 
 
 ```{r}
-plot_smooths(model = gam.2, 
-             series = Year, 
-             transform = exp)
+pred.year.gam.2 <- tidygam::predict_gam(model = gam.2, 
+                               series = "Year",
+                               length_out = 100,
+                               tran_fun = exp)
+plot(pred.year.gam.2)
+
+# tidymv::plot_smooths(model = gam.2, 
+#              series = Year, 
+#              transform = exp)
 ```
 
 Tweedie seems to fit better. 
 
+Try negative binomial. 
 
 ```{r gam.3, cache=T}
 gam.3 <- gam(Mother_Calf ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
@@ -397,31 +455,49 @@ Negative binomial seems to fit even better. >77% of deviance explained.
 
 
 ```{r}
-plot_smooths(model = gam.3,
-             series = Effort,
-             transform = exp) 
-             
+
+pred.gam.3.effort <- tidygam::predict_gam(model = gam.3,
+                                          length = 200,
+                                          series = "Effort")
+
+plot(pred.gam.3.effort)
 ```
 
 
 ```{r}
-plot_smooths(model = gam.3,
-             series = DOY, transform = exp)
+
+pred.gam.3.DOY <- tidygam::predict_gam(model = gam.3,
+                                          length = 200,
+                                          series = "DOY")
+
+plot(pred.gam.3.DOY)
+
 ```
 
 
 
 ```{r}
-plot_smooths(model = gam.3,
-             series = Year, transform = exp)
+
+pred.gam.3.year <- tidygam::predict_gam(model = gam.3,
+                                          length = 200,
+                                          series = "Year")
+
+plot(pred.gam.3.year)
+
+
 ```
 
 
 
 
 ```{r}
-plot_smooths(model = gam.3,
-             series = Week, transform = exp)
+
+pred.gam.3.week <- tidygam::predict_gam(model = gam.3,
+                                          length = 200,
+                                          series = "Week")
+
+plot(pred.gam.3.week)
+
 ```
 
 
@@ -437,7 +513,7 @@ summary(gam.3.1)
 
 
 ```{r gam.3.2, cache=T}
-gam.3.2 <- gam(Mother_Calf ~ Year.f + s(Effort) + s(DOY, by = Year.f) + s(Week), 
+gam.3.2 <- gam(Mother_Calf ~ s(Year) + s(Effort) + s(DOY, by = Year.f) + s(Week), 
              data = count.long.df, 
              family = "nb")
 
@@ -455,35 +531,47 @@ summary(gam.4)
 Negative binomial seems to be the best. 
 
 ```{r}
-plot_smooths(model = gam.3,
-             series = Effort,
-             transform = exp)
+pred.gam.3.2.effort <- tidygam::predict_gam(model = gam.3.2,
+                                            series = "Effort",
+                                            length_out = 200)
+# plot_smooths(model = gam.3,
+#              series = Effort,
+#              transform = exp)
+plot(pred.gam.3.2.effort)
+```
+
+
+```{r}
+pred.gam.3.2.DOY <- tidygam::predict_gam(model = gam.3.2,
+                                            series = "DOY",
+                                            length_out = 200)
+
+plot(pred.gam.3.2.DOY)
+
+```
+
+
+
+```{r}
+
+pred.gam.3.2.week <- tidygam::predict_gam(model = gam.3.2,
+                                            series = "Week",
+                                            length_out = 200)
+
+plot(pred.gam.3.2.week)
+
 
 ```
 
 
 ```{r}
-plot_smooths(model = gam.3,
-             series = DOY,
-             transform = exp)
 
-```
+pred.gam.3.2.year <- tidygam::predict_gam(model = gam.3.2,
+                                            series = "Year",
+                                            length_out = 200)
 
+plot(pred.gam.3.2.year)
 
-
-```{r}
-plot_smooths(model = gam.3,
-             series = Week,
-             transform = exp)
-
-```
-
-
-```{r}
-plot_smooths(model = gam.3,
-             series = Year, 
-             series_length = 40,
-             transform = exp)
 
 ```
 
@@ -503,9 +591,9 @@ gam.3.2.pred <- predict.gam(gam.3.2,
 pred.data %>% 
   mutate(prediction = gam.3.2.pred$fit,
          LCL = gam.3.2.pred$fit - gam.3.2.pred$se.fit * 1.96,
-         UCL = gam.3.2.pred$fit + gam.3.2.pred$se.fit * 1.96) -> pred.data
+         UCL = gam.3.2.pred$fit + gam.3.2.pred$se.fit * 1.96) -> pred.data.3.2
 
-ggplot(data = pred.data) +
+ggplot(data = pred.data.3.2) +
   geom_point(aes(x = Mother_Calf, 
                  y = prediction)) +
   geom_errorbar(aes(x = Mother_Calf, ymin = LCL, ymax = UCL))
@@ -513,6 +601,23 @@ ggplot(data = pred.data) +
 
 
 It does pretty good job for counts that are less than 5, but larger values fail pretty badly. The model fit is okay just because of that. But, the larger values are as important, even though they don't happen too often... 
+
+```{r}
+gam.3.1.pred <- predict.gam(gam.3.1,
+                          type = "response",
+                          se.fit = T)
+
+pred.data %>% 
+  mutate(prediction = gam.3.1.pred$fit,
+         LCL = gam.3.1.pred$fit - gam.3.1.pred$se.fit * 1.96,
+         UCL = gam.3.1.pred$fit + gam.3.1.pred$se.fit * 1.96) -> pred.data.3.1
+
+ggplot(data = pred.data.3.1) +
+  geom_point(aes(x = Mother_Calf, 
+                 y = prediction)) +
+  geom_errorbar(aes(x = Mother_Calf, ymin = LCL, ymax = UCL))
+```
+
 
 I need to build a year-specific model to fill in the gaps. 
 
@@ -527,4 +632,10 @@ pareto_k_table(results.2022.v1$MCMC.diag$loo.out)
 ```
 
 
+```{r}
+results.v2 <- readRDS(file = "RData/calf_estimates_v2.rds")
+
+pareto_k_table(results.v2$MCMC.diag$loo.out)
+
+```
 

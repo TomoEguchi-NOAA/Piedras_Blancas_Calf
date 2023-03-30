@@ -105,10 +105,60 @@ if (!file.exists("RData/calf_estimates_v2.rds")){
              n.iter = MCMC.params$n.samples,
              DIC = T, parallel=T)
   
+  # the numbers of data points are not equal among years so
+  # I have to make a matrix of log likelihood values without
+  # NAs and provide array index to relative_eff()
+  
+  # samples from jags are stored in here:
+  # it is a list of length = the number of chains
+  samples.jags <- jm$samples
+  dim.names <- lapply(samples.jags,
+                      FUN = function(x) attr(x, "dimnames")[[2]])
+
+  loglik.idx <- lapply(dim.names, 
+                       FUN = function(x) grep("loglik", x))
+  
+  loglik.samples.list <- lapply(samples.jags, 
+                                FUN = function(x) x[, loglik.idx[[1]]])
+  
+  loglik.samples.mat <- do.call("rbind", loglik.samples.list)  
+  
+  chain_ID <- rep(1:MCMC.params$n.chains,
+                  each = nrow(samples.jags[[1]]))
+  
+  # The following (loglik) has the dimension of 
+  # the number of total samples x
+  # the number of years x
+  # the maximum number of data points
+  # loglik <- jm$sims.list$loglik
+  # First chain is from 1:n.samples, 
+  # second chains is (n.samples+1):(2*n.samples), etc
+  # This can be seen from doing something like:
+  # samples.jags[[1]][1, grep("loglik\\[1,100", dim.names[[1]])]
+  # loglik[1,1,100]
+  # samples.jags[[2]][1, grep("loglik\\[1,321", dim.names[[2]])]
+  # loglik[501,1,321]
+
+  Reff <- relative_eff(exp(loglik.samples.mat),
+                       chain_id = chain_ID,
+                       cores = MCMC.params$n.chains)
+  
+  loo.out <- loo(loglik.samples.mat, 
+                 r_eff = Reff, 
+                 cores = MCMC.params$n.chains)
+  
+  jm.MCMC <- list(DIC = jm$DIC,
+                  loglik.obs = loglik.samples.mat,
+                  Reff = Reff,
+                  Rhat = Rhat,
+                  loo.out = loo.out)
+  
   jm.out <- list(jm = jm,
                  jags.data = jags.data,
                  MCMC.params = MCMC.params,
-                 run.date = Sys.Date())
+                 MCMC.diag = jm.MCMC,
+                 run.date = Sys.Date(),
+                 env = Sys.getenv())
   saveRDS(jm.out,
           file = "RData/calf_estimates_v2.rds")
   

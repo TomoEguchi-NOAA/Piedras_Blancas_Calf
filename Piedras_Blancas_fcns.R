@@ -114,8 +114,10 @@ MCMC.diag <- function(jm, MCMC.params){
   Reff <- relative_eff(exp(loglik), 
                        chain_id = rep(1:MCMC.params$n.chains, 
                                       each = n.per.chain),
-                       cores = 1)
-  loo.out <- loo(loglik, r_eff = Reff, cores = 1)
+                       cores = MCMC.params$n.chains)
+  loo.out <- loo(loglik, 
+                 r_eff = Reff, 
+                 cores = MCMC.params$n.chains)
   
   return(list(DIC = jm$DIC,
               loglik.obs = loglik,
