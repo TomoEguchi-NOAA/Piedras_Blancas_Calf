@@ -14,7 +14,8 @@ library(bayesplot)
 source("Piedras_Blancas_fcns.R")
 
 #FILES <- list.files(pattern = ".csv$")
-data.path <- "data/Formatted Annual Data/"
+#data.path <- "data/Formatted Annual Data/"
+data.path <- "data/Formatted Annual Data v2/"
 FILES <- list.files(path = data.path, 
                     pattern = "Formatted.csv")
 

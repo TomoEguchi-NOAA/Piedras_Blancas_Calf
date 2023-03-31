@@ -631,6 +631,31 @@ pareto_k_table(results.2022.v1$MCMC.diag$loo.out)
 
 ```
 
+v1 is the following:
+
+model {
+  p.obs ~ dnorm(0.889,0.06375^-2) #estimated observation probability
+
+  for(j in 1:n.weeks){
+    lambda[j] ~ dunif(0,40)
+  }
+
+  for(i in 1:n.obs){
+    count.true[i] ~ dpois(lambda[week[i]])
+    # watch period is 3 hours, so any amount of effort 
+    # below 3 hours scales the observation probability accordingly
+    p.obs.corr[i] <- p.obs * effort[i]/3 
+        
+    count.obs[i] ~ dbin(p.obs.corr[i], count.true[i])
+    loglik[i] <- logdensity.bin(count.obs[i], p.obs.corr[i], count.true[i])
+  }#i
+
+  Total.Calves <- sum(count.true[1:n.obs])
+
+}#model
+    
+lambda is an IID random deviate over n.weeks weeks. In reality, this changes in somewhat expected ways: increase, then decrease. Also, two consecutive shifts may be auto-correlated. 
+
 
 ```{r}
 results.v2 <- readRDS(file = "RData/calf_estimates_v2.rds")
@@ -638,4 +663,126 @@ results.v2 <- readRDS(file = "RData/calf_estimates_v2.rds")
 pareto_k_table(results.v2$MCMC.diag$loo.out)
 
 ```
+
+V2 is quite bad in goodness-of-fit, according to Pareto k diagnostic values.
+
+v2 has year-week specific lambdas, rather than IID over all weeks.
+
+model {
+  p.obs ~ dnorm(0.889,0.06375^-2) #estimated observation probability
+
+  for (y in 1:n.years){
+    for(j in 1:n.weeks[y]){
+      lambda[y,j] ~ dunif(0,40) # dgamma(2, 0.15) 
+    } #j
+      
+    for(i in 1:n.obs[y]){
+      count.true[y,i] ~ dpois(lambda[y, week[y,i]])
+
+      # watch period is 3 hours, so any amount of effort 
+      # below 3 hours scales the observation probability accordingly:      
+      p.obs.corr[y,i] <- p.obs * effort[y,i]/3
+        
+      count.obs[y,i] ~ dbin(p.obs.corr[y, i], count.true[y, i])
+      loglik[y,i] <- logdensity.bin(count.obs[y,i], p.obs.corr[y,i], count.true[y,i])
+    }#i
+
+    Total.Calves[y] <- sum(count.true[y, 1:n.obs[y]])
+
+  }#y
+      
+}#model
+    
+
+```{r}
+results.2022.v3 <- readRDS(file = "RData/calf_estimates_v3_2022.rds")
+
+pareto_k_table(results.2022.v3$MCMC.diag$loo.out)
+```
+
+v3 is similar to v1 but uses Poisson rather than binomial for the likelihood function. 
+
+model {
+  p.obs ~ dnorm(0.889,0.06375^-2) #estimated observation probability
+
+  for(j in 1:n.weeks){
+    lambda[j] ~ dunif(0,2000)
+    count.true[j] ~ dpois(lambda[j]) 
+        
+    p.obs.corr[j] <- p.obs * prop.effort[j]
+
+    count.obs[j] ~ dpois(p.obs.corr[j] * count.true[j])
+    loglik[j] <- logdensity.pois(count.obs[j], p.obs.corr[j] * count.true[j])
+  }
+
+  Total.Calves <- sum(count.true)
+
+}#model
+
+
+```{r}
+results.2022.v4 <- readRDS(file = "RData/calf_estimates_v4_2022.rds")
+
+pareto_k_table(results.2022.v4$MCMC.diag$loo.out)
+```
+
+v4 uses week-specific uniform lambda prior and binomial likelihood but Poisson prior on the true number of mother-calf pairs. 
+
+model {
+  p.obs ~ dnorm(0.889,0.06375^-2) #estimated observation probability
+
+  for(j in 1:n.weeks){
+    lambda[j] ~ dunif(0,2000)
+    count.true[j] ~ dpois(lambda[j]) 
+        
+    p.obs.corr[j] <- p.obs * prop.effort[j]
+    count.obs[j] ~ dbin(p.obs.corr[j], count.true[j])
+    loglik[j] <- logdensity.bin(count.obs[j], p.obs.corr[j], count.true[j])
+
+  }
+
+  Total.Calves <- sum(count.true)
+
+}#model
+    
+    
+
+```{r}
+results.2022.v5 <- readRDS(file = "RData/calf_estimates_v5_2022.rds")
+
+pareto_k_table(results.2022.v5$MCMC.diag$loo.out)
+```
+
+v5 has week-specific lambda, just as in v1. The likelihood function is Poisson. 
+
+
+model {
+  p.obs ~ dnorm(0.889,0.06375^-2) #estimated observation probability
+
+  for(j in 1:n.weeks){
+    lambda[j] ~ dunif(0,40)
+  }
+
+  for(i in 1:n.obs){
+    count.true[i] ~ dpois(lambda[week[i]])
+    
+    # watch period is 3 hours, so any amount of 
+    # effort below 3 hours scales the observation probability accordingly
+    p.obs.corr[i] <- p.obs * effort[i]/3 
+        
+    count.obs[i] ~ dpois(p.obs.corr[i] * count.true[i])
+    loglik[i] <- logdensity.pois(count.obs[i], p.obs.corr[i] * count.true[i])
+  }#i
+
+  Total.Calves <- sum(count.true[1:n.obs])
+
+}#model
+
+    
+    
+
+None of these models fit well... I think we need to make an auto-regressive model... 
+
+
+
 

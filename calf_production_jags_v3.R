@@ -15,15 +15,20 @@ source("Piedras_Blancas_fcns.R")
 
 save.figs <- T
 #FILES <- list.files(pattern = ".csv$")
-data.path <- "data/Formatted Annual Data/"
+#data.path <- "data/Formatted Annual Data/"
+data.path <- "data/Formatted Annual Data v2/"
+
 FILES <- list.files(path = data.path, 
                     pattern = "Formatted.csv")
 
-MCMC.params <- list(n.samples = 500000,
-                    n.thin = 100,
-                    n.burnin = 300000,
+# MCMC.params <- list(n.samples = 500000,
+#                     n.thin = 100,
+#                     n.burnin = 300000,
+#                     n.chains = 3)
+MCMC.params <- list(n.samples = 80000,
+                    n.thin = 80,
+                    n.burnin = 40000,
                     n.chains = 3)
-
 n.samples <- MCMC.params$n.chains * ((MCMC.params$n.samples - MCMC.params$n.burnin)/MCMC.params$n.thin)
 
 jags.params <- c("count.true",
