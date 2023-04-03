@@ -44,15 +44,17 @@ n.samples <- MCMC.params$n.chains * ((MCMC.params$n.samples - MCMC.params$n.burn
 # get data
 col.defs <- cols(Date = col_date(format = "%Y-%m-%d"), 
                  Shift = col_integer(), 
-                 Sea_State = col_integer(),
-                 Vis = col_integer(),
+                 Sea_State = col_character(), # contains entries like 3/4... this needs to be dealt with eventually
+                 Vis = col_character(),
                  Effort = col_double(),
                  Mother_Calf = col_integer())
 
 count.obs <- effort <- week <- date <- n.obs <- n.weeks <- all.data <- list()
 years <- vector(mode = "numeric", length = length(FILES))
 
-i <- 1
+#options(warn = 2)  # Change warnings to errors
+options(warn = 0)
+i <- 6
 for(i in 1:length(FILES)){
   # Sea_State and Vis have -Inf from missing data, which turn into parsing issues
   # These can be ignored.
@@ -115,6 +117,27 @@ all.data.2 <- lapply(all.data, FUN = function(x){
 })
 
 count.long.df <- do.call(rbind, all.data.2)
+
+# Find sea state and visibility with "/"
+# Take a larger value.
+
+idx.Fslash.BF <- grep("/", count.long.df$Sea_State)
+BF.max <- lapply(count.long.df$Sea_State[idx.Fslash.BF], 
+                FUN = function(x) {strsplit(x, "/") %>% 
+                    unlist() %>% 
+                    as.numeric() %>% 
+                    max()}) %>% unlist()
+
+count.long.df$Sea_State[idx.Fslash.BF] <- as.character(BF.max)
+
+idx.Fslash.VS <- grep("/", count.long.df$Vis)
+VS.max <- lapply(count.long.df$Sea_State[idx.Fslash.VS], 
+                FUN = function(x) {strsplit(x, "/") %>% 
+                    unlist() %>% 
+                    as.numeric() %>% 
+                    max()}) %>% unlist()
+
+count.long.df$Vis[idx.Fslash.VS] <- as.character(VS.max)
 
 ```
 
@@ -278,6 +301,10 @@ library(mgcv)
 library(tidygam) # https://github.com/stefanocoretta/tidygam
 #library(tidymv) # replaced by tidygam
 
+count.long.df %>% 
+  mutate(BF = as.numeric(Sea_State),
+         VS = as.numeric(Vis)) -> count.long.df
+
 if (!file.exists("RData/GAM_1.rds")){
   gam.1 <- gam(log(Mother_Calf+1) ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
                data = count.long.df, 
@@ -322,6 +349,7 @@ if (!file.exists("RData/GAM_1_1.rds")){
   gam.1.1 <- gam(log(Mother_Calf+1) ~ s(Effort) + s(DOY, Year) + s(Week), 
                  data = count.long.df, 
                  family = "tw")
+   saveRDS(gam.1.1, "RData/GAM_1_1.rds")
 } else {
   gam.1.1 <- readRDS("RData/GAM_1_1.rds")
 }
@@ -372,6 +400,7 @@ if (!file.exists("RData/GAM_1_2.rds")){
   gam.1.2 <- gam(log(Mother_Calf+1) ~ s(Effort) + s(DOY, Year), 
                  data = count.long.df, 
                  family = "tw")
+   saveRDS(gam.1.2, "RData/GAM_1_2.rds")
 } else {
   gam.1.2 <- readRDS("RData/GAM_1_2.rds")
 }
@@ -389,6 +418,7 @@ if (!file.exists("RData/GAM_1_3.rds")){
   gam.1.3 <- gam(log(Mother_Calf+1) ~ Year.f + s(Effort) + s(DOY, by = Year.f), 
                  data = count.long.df, 
              family = "tw")
+  saveRDS(gam.1.3, "RData/GAM_1_3.rds")
 } else {
   gam.1.3 <- readRDS("RData/GAM_1_3.rds")
 }
@@ -441,6 +471,7 @@ if (!file.exists("RData/GAM_2.rds")){
  
   gam.2 <- gam(Mother_Calf ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
                data = count.long.df, family = "ziP")
+  saveRDS(gam.2, "RData/GAM_2.rds")
 } else {
   gam.2 <- readRDS("RData/GAM_2.rds")
 }
@@ -470,6 +501,7 @@ if (!file.exists("RData/GAM_3.rds")){
  
   gam.3 <- gam(Mother_Calf ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
                data = count.long.df, family = "nb")
+  saveRDS(gam.3, "RData/GAM_3.rds")
 } else {
   gam.3 <- readRDS("RData/GAM_3.rds")
 }
@@ -534,6 +566,7 @@ if (!file.exists("RData/GAM_3_1.rds")){
  
   gam.3.1 <- gam(Mother_Calf ~ s(Effort) + s(DOY, Year) + s(Week), 
                  data = count.long.df, family = "nb")
+  saveRDS(gam.3.1, "RData/GAM_3_1.rds")
 } else {
   gam.3.1 <- readRDS("RData/GAM_3_1.rds")
 }
@@ -548,6 +581,7 @@ if (!file.exists("RData/GAM_3_2.rds")){
   gam.3.2 <- gam(Mother_Calf ~ s(Year) + s(Effort) + s(DOY, by = Year.f) + s(Week), 
                  data = count.long.df, 
                  family = "nb")
+  saveRDS(gam.3.2, "RData/GAM_3_2.rds")
 } else {
   gam.3.2 <- readRDS("RData/GAM_3_2.rds")
 }
@@ -560,6 +594,7 @@ if (!file.exists("RData/GAM_4.rds")){
   
   gam.4 <- gam((Mother_Calf+1) ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
              data = count.long.df, family = "poisson")
+  saveRDS(gam.4, "RData/GAM_4.rds")
 } else {
   gam.4 <- readRDS("RData/GAM_4.rds")
 }
@@ -617,6 +652,39 @@ plot(pred.gam.3.2.year)
 The cyclical nature of the year effect is interesting... 
 
 Effects of DOY, Year, and Week seem to be quite small... 
+
+Add Beaufort and visibility to the best model
+
+```{r gam.3.3, cache=T}
+if (!file.exists("RData/GAM_3_3.rds")){
+  
+  gam.3.3 <- gam(Mother_Calf ~ s(Year) + s(Effort) + s(DOY) + s(Week) + s(BF, k = 3) + s(VS, k = 3), 
+                 data = count.long.df %>% filter(BF < 8), 
+                 family = "nb")
+  saveRDS(gam.3.3, "RData/GAM_3_3.rds")
+} else {
+  gam.3.3 <- readRDS("RData/GAM_3_3.rds")
+}
+summary(gam.3.3)
+```
+
+```{r}
+pred.gam.3.3.Beaufort <- tidygam::predict_gam(model = gam.3.3,
+                                            series = "BF",
+                                            length_out = 5)
+
+plot(pred.gam.3.3.Beaufort)
+```
+
+
+```{r}
+pred.gam.3.3.Vis <- tidygam::predict_gam(model = gam.3.3,
+                                            series = "VS",
+                                            length_out = 5)
+
+plot(pred.gam.3.3.Vis)
+```
+
 
 prediction using the gam model
 ```{r}
