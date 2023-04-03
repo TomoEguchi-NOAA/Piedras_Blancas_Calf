@@ -143,8 +143,6 @@ ggplot(count.long.df %>% filter(Year > 2009, Year < 2020)) +
   facet_wrap(Year ~., nrow = 3)
 
 
-
-
 ```
 
 
@@ -280,9 +278,14 @@ library(mgcv)
 library(tidygam) # https://github.com/stefanocoretta/tidygam
 #library(tidymv) # replaced by tidygam
 
-gam.1 <- gam(log(Mother_Calf+1) ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
-             data = count.long.df, 
-             family = "tw")
+if (!file.exists("RData/GAM_1.rds")){
+  gam.1 <- gam(log(Mother_Calf+1) ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
+               data = count.long.df, 
+               family = "tw")
+  saveRDS(gam.1, "RData/GAM_1.rds")
+} else {
+  gam.1 <- readRDS("RData/GAM_1.rds")
+}
 
 summary(gam.1)
 ```
@@ -314,10 +317,14 @@ plot(pred.gam.1.week)
 ```
 
 ```{r gam.1.1, cache=T}
-gam.1.1 <- gam(log(Mother_Calf+1) ~ s(Effort) + s(DOY, Year) + s(Week), 
-             data = count.long.df, 
-             family = "tw")
-
+if (!file.exists("RData/GAM_1_1.rds")){
+  
+  gam.1.1 <- gam(log(Mother_Calf+1) ~ s(Effort) + s(DOY, Year) + s(Week), 
+                 data = count.long.df, 
+                 family = "tw")
+} else {
+  gam.1.1 <- readRDS("RData/GAM_1_1.rds")
+}
 summary(gam.1.1)
 
 ```
@@ -361,10 +368,13 @@ plot(pred.gam.1.1.week)
 Week doesn't do much so drop it... ?
 
 ```{r gam.1.2, cache=T}
-gam.1.2 <- gam(log(Mother_Calf+1) ~ s(Effort) + s(DOY, Year), 
-             data = count.long.df, 
-             family = "tw")
-
+if (!file.exists("RData/GAM_1_2.rds")){
+  gam.1.2 <- gam(log(Mother_Calf+1) ~ s(Effort) + s(DOY, Year), 
+                 data = count.long.df, 
+                 family = "tw")
+} else {
+  gam.1.2 <- readRDS("RData/GAM_1_2.rds")
+}
 summary(gam.1.2)
 
 ```
@@ -374,9 +384,14 @@ summary(gam.1.2)
 ```{r gam.1.3, cache=T}
 count.long.df %>% mutate(Year.f = factor(Year)) -> count.long.df
 
-gam.1.3 <- gam(log(Mother_Calf+1) ~ Year.f + s(Effort) + s(DOY, by = Year.f), 
-             data = count.long.df, 
+if (!file.exists("RData/GAM_1_3.rds")){
+  
+  gam.1.3 <- gam(log(Mother_Calf+1) ~ Year.f + s(Effort) + s(DOY, by = Year.f), 
+                 data = count.long.df, 
              family = "tw")
+} else {
+  gam.1.3 <- readRDS("RData/GAM_1_3.rds")
+}
 
 summary(gam.1.3)
 
@@ -421,9 +436,14 @@ Not much variation in DOY among years.
 Try zero-inflated Poisson.
 
 ```{r gam.2, cache=T}
-gam.2 <- gam(Mother_Calf ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
-             data = count.long.df, family = "ziP")
 
+if (!file.exists("RData/GAM_2.rds")){
+ 
+  gam.2 <- gam(Mother_Calf ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
+               data = count.long.df, family = "ziP")
+} else {
+  gam.2 <- readRDS("RData/GAM_2.rds")
+}
 summary(gam.2)
 ```
 
@@ -445,8 +465,14 @@ Tweedie seems to fit better.
 Try negative binomial. 
 
 ```{r gam.3, cache=T}
-gam.3 <- gam(Mother_Calf ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
-             data = count.long.df, family = "nb")
+
+if (!file.exists("RData/GAM_3.rds")){
+ 
+  gam.3 <- gam(Mother_Calf ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
+               data = count.long.df, family = "nb")
+} else {
+  gam.3 <- readRDS("RData/GAM_3.rds")
+}
 
 summary(gam.3)
 ```
@@ -504,26 +530,39 @@ plot(pred.gam.3.week)
 
 
 ```{r gam.3.1, cache=T}
-gam.3.1 <- gam(Mother_Calf ~ s(Effort) + s(DOY, Year) + s(Week), 
-             data = count.long.df, family = "nb")
-
+if (!file.exists("RData/GAM_3_1.rds")){
+ 
+  gam.3.1 <- gam(Mother_Calf ~ s(Effort) + s(DOY, Year) + s(Week), 
+                 data = count.long.df, family = "nb")
+} else {
+  gam.3.1 <- readRDS("RData/GAM_3_1.rds")
+}
 summary(gam.3.1)
 ```
 
 
 
 ```{r gam.3.2, cache=T}
-gam.3.2 <- gam(Mother_Calf ~ s(Year) + s(Effort) + s(DOY, by = Year.f) + s(Week), 
-             data = count.long.df, 
-             family = "nb")
-
+if (!file.exists("RData/GAM_3_2.rds")){
+  
+  gam.3.2 <- gam(Mother_Calf ~ s(Year) + s(Effort) + s(DOY, by = Year.f) + s(Week), 
+                 data = count.long.df, 
+                 family = "nb")
+} else {
+  gam.3.2 <- readRDS("RData/GAM_3_2.rds")
+}
 summary(gam.3.2)
 ```
 
 
 ```{r gam.4, cache=T}
-gam.4 <- gam((Mother_Calf+1) ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
+if (!file.exists("RData/GAM_4.rds")){
+  
+  gam.4 <- gam((Mother_Calf+1) ~ s(Effort) + s(DOY) + s(Year) + s(Week), 
              data = count.long.df, family = "poisson")
+} else {
+  gam.4 <- readRDS("RData/GAM_4.rds")
+}
 
 summary(gam.4)
 ```
