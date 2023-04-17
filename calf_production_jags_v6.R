@@ -42,6 +42,7 @@ for(i in 1:length(FILES)){
   
   data <- read.csv(paste0(data.path, FILES[i]))
   data$Effort[is.na(data$Effort)] <- 0
+  data$Sightings[data$Effort == 0] <- 0  # no effort, no sightings - error in 1997-04-14, shift 4 - check for errors
   years[i] <- as.numeric(str_split(FILES[i], " Formatted.csv")[[1]][1])
   
   jags.data <- list(count.obs = data$Sightings,
@@ -95,7 +96,7 @@ stats.total.calves <- lapply(jm.out,
 Estimates <- do.call(rbind, stats.total.calves)
 Estimates$Year <- years
 Estimates$Method <- "v6"
-Estimates$Sys_env <- Sys.getenv()
+#Estimates$Sys_env <- Sys.getenv()
 
 write.csv(Estimates,
           "data/Calf Estimates v6.csv",
