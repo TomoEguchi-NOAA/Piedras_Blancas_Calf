@@ -1,4 +1,4 @@
-# this version (v6) uses Poisson likelihood and the second order autoregressive
+# this version (v7) uses Binomial likelihood and the second order autoregressive
 # model for the mean of Poisson.
 
 model {
@@ -14,8 +14,8 @@ model {
 		
         p.obs.corr[i] <- p.obs * effort[i]/3 # watch period is 3 hours, so any amount of effort below 3 hours scales the observation probability accordingly
         
-        count.obs[i] ~ dpois(p.obs.corr[i] * count.true[i])
-        loglik[i] <- logdensity.pois(count.obs[i], p.obs.corr[i] * count.true[i])
+		count.obs[i] ~ dbin(p.obs.corr[i], count.true[i])
+        loglik[i] <- logdensity.bin(count.obs[i], p.obs.corr[i], count.true[i])
     }#i
 
 	Total.Calves <- sum(count.true[1:n.obs])

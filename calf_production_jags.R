@@ -2,7 +2,7 @@
 # This script is a modified version of "Running Individual Year Model.R"
 # I inherited it from Josh Stewart in early 2022.
 
-# In this version (v5), I try Poisson likelihood instead of binomial. 
+# In this version, all models can be run by specifying the model name (v1 - vy) at the beginning.
 
 
 rm(list=ls())
@@ -12,6 +12,9 @@ library(lubridate)
 library(bayesplot)
 
 source("Piedras_Blancas_fcns.R")
+
+save.file <- T
+model <- "v7"
 
 #FILES <- list.files(pattern = ".csv$")
 #data.path <- "data/Formatted Annual Data/"
@@ -52,11 +55,11 @@ for(i in 1:length(FILES)){
                     n.obs = length(data$Sightings),
                     n.weeks = max(data$Week))
   
-  if (!file.exists(paste0("RData/calf_estimates_v6_", years[i], ".rds"))){
+  if (!file.exists(paste0("RData/calf_estimates_", model, "_", years[i], ".rds"))){
     jm <- jags(jags.data,
                inits = NULL,
                parameters.to.save= jags.params,
-               "models/GWCalfCount_v6.jags", 
+               paste0("models/GWCalfCount_", model, ".jags"), 
                n.chains = MCMC.params$n.chains,
                n.burnin = MCMC.params$n.burnin,
                n.thin = MCMC.params$n.thin,
@@ -73,10 +76,10 @@ for(i in 1:length(FILES)){
                         run.date = Sys.Date())     
     
     saveRDS(jm.out[[i]],
-            file = paste0("RData/calf_estimates_v6_", years[i], ".rds"))
+            file = paste0("RData/calf_estimates_", model, "_", years[i], ".rds"))
     
   } else {
-    jm.out[[i]] <- readRDS(paste0("RData/calf_estimates_v6_", years[i], ".rds"))
+    jm.out[[i]] <- readRDS(paste0("RData/calf_estimates_", model, "_", years[i], ".rds"))
     #jm <- jm.out$jm
   }
 }
@@ -96,12 +99,13 @@ stats.total.calves <- lapply(jm.out,
 
 Estimates <- do.call(rbind, stats.total.calves)
 Estimates$Year <- years
-Estimates$Method <- "v6"
+Estimates$Method <- model
 #Estimates$Sys_env <- Sys.getenv()
 
-write.csv(Estimates,
-          "data/Calf Estimates v6.csv",
-          row.names = F)
+if (save.file)
+  write.csv(Estimates,
+            paste0("data/Calf Estimates ", model, ".csv"),
+            row.names = F)
 
 
 

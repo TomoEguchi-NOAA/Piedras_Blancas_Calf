@@ -193,7 +193,7 @@ Numerically compare different approaches:
 # get data
 count.obs <- effort <- week <- n.obs <- n.weeks <- list()
 years <- vector(mode = "numeric", length = length(FILES))
-jm.out.v1 <- jm.out.v3 <- jm.out.v4 <- jm.out.v5 <- list()
+jm.out.v1 <- jm.out.v3 <- jm.out.v4 <- jm.out.v5 <- jm.out.v6 <- list()
 
 i <- 3
 for(i in 1:length(FILES)){
@@ -202,6 +202,7 @@ for(i in 1:length(FILES)){
   jm.out.v3[[i]] <- readRDS(paste0("RData/calf_estimates_v3_", years[i], ".rds"))
   jm.out.v4[[i]] <- readRDS(paste0("RData/calf_estimates_v4_", years[i], ".rds"))
   jm.out.v5[[i]] <- readRDS(paste0("RData/calf_estimates_v5_", years[i], ".rds"))
+  jm.out.v6[[i]] <- readRDS(paste0("RData/calf_estimates_v6_", years[i], ".rds"))
 }
 
 summary.stats.fcn <- function(x, years, v.txt){
@@ -224,6 +225,7 @@ Estimates.V1 <- summary.stats.fcn(jm.out.v1, years, "V1")
 Estimates.V3 <- summary.stats.fcn(jm.out.v3, years, "V3")
 Estimates.V4 <- summary.stats.fcn(jm.out.v4, years, "V4")
 Estimates.V5 <- summary.stats.fcn(jm.out.v5, years, "V5")
+Estimates.V6 <- summary.stats.fcn(jm.out.v5, years, "V6")
 
 Estimates.WP <- data.frame(Mean = Nhat,
                            SE = sqrt(var.Nhat),
@@ -241,6 +243,7 @@ estimates.all <- rbind(Estimates.V1 %>% select(Year, Mean, LCL, UCL, Method),
                        Estimates.V3 %>% select(Year, Mean, LCL, UCL, Method),
                        Estimates.V4 %>% select(Year, Mean, LCL, UCL, Method),       
                        Estimates.V5 %>% select(Year, Mean, LCL, UCL, Method),
+                       Estimates.V6 %>% select(Year, Mean, LCL, UCL, Method),
                        Estimates.WP %>% select(Year, Mean, LCL, UCL, Method))
 
 # WayneVsV4.lm.data <- data.frame(Mean.Wayne = WayneShort$Mean,

@@ -887,6 +887,11 @@ model {
 
     
     
+```{r}
+results.2022.v6 <- readRDS(file = "RData/calf_estimates_v6_2022.rds")
+
+pareto_k_table(results.2022.v6$MCMC.diag$loo.out)
+```
 
 None of these models fit well... I think we need to make an auto-regressive model... 
 
