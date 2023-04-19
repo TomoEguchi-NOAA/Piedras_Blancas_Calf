@@ -32,7 +32,7 @@ n.samples <- MCMC.params$n.chains * ((MCMC.params$n.samples - MCMC.params$n.burn
 
 jags.params <- c("count.true",
                 "lambda",
-                "beta1", "beta2",
+                "beta1", "beta2", "eps",
                 "p.obs.corr",
                 "p.obs",
                 "Total.Calves",
@@ -53,7 +53,14 @@ for(i in 1:length(FILES)){
                     effort = data$Effort,
                     week = data$Week,
                     n.obs = length(data$Sightings),
-                    n.weeks = max(data$Week))
+                    n.weeks = max(data$Week),
+                    weekly.max = data %>% 
+                      group_by(Week) %>% 
+                      summarize(weekly.max = max(Sightings)) %>% 
+                      select (weekly.max) %>% 
+                      as.vector() %>%
+                      unlist() %>% 
+                      unname())
   
   if (!file.exists(paste0("RData/calf_estimates_", model, "_", years[i], ".rds"))){
     jm <- jags(jags.data,
