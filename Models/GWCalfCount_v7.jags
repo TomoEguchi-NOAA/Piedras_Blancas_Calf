@@ -1,16 +1,19 @@
 # this version (v7) uses Binomial likelihood and the second order autoregressive
-# model for the mean of Poisson.
+# model for the mean of Poisson. The  mean is a function of day, not week.
+# The mean is modeled with Richards function. 
 
 model {
 	p.obs ~ dnorm(0.889,0.06375^-2) #estimated observation probability
-
-	for (i in 1:n.weeks){
-		eta[i] <- beta1 * i + beta2 * i * i + eps
-		log(lambda[i]) <- eta[i] T(log(weekly.max[i]),)
+	
+	# Richards function to model daily mean
+	for (t in 1:n.days){
+		M1[t] <- (1 + (2 * exp(K) - 1) * exp((1/(-S1)) * (P - t))) ^ (-1/exp(K))
+		M2[t] <- (1 + (2 * exp(K) - 1) * exp((1/S2) * (P - t))) ^ (-1/exp(K))
+		lambda[t] <- (Max) * (M1[t] * M2[t])
 	}
 	
 	for(i in 1:n.obs){
-        count.true[i] ~ dpois(lambda[week[i]]) #T(weekly.max[week[i]],)      
+	    count.true[i] ~ dpois(lambda[day[i]]) #T(weekly.max[week[i]],)      
 		
         p.obs.corr[i] <- p.obs * effort[i]/3 # watch period is 3 hours, so any amount of effort below 3 hours scales the observation probability accordingly
         
@@ -23,6 +26,12 @@ model {
 	beta1 ~ dnorm(0, 0.01)
 	beta2 ~ dnorm(0, 0.01)
 	eps ~ dnorm(0, 0.01)
+
+	Max ~ dgamma(4, 0.002)
+	S1 ~ dgamma(2.1,1) T(,5) #dunif(-5, -0.3) 
+	S2 ~ dgamma(2.1,1) T(,5)  #dunif(0.3, 5) 
+	K ~ dunif(0.1, 5)   #dnorm(0, 0.01)T(0.3, 3)
+	P ~ dunif(30, 60)
 
 }#model
     

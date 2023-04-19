@@ -1,0 +1,62 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This notebook compares results between Formatted Annual Data and Formatted Annual Data v2. The former was done by J. Stewart, whereas the latter was done by me. Results should be the same but a few inconsistencies were found recently (Apr 2023). So, I'm comparing each one to see where the problem is.
+
+```{r}
+library(tidyverse)
+library(lubridate)
+library(flextable)
+library(readr)
+```
+
+
+```{r}
+dir.1 <- "data/Formatted Annual Data/"
+dir.2 <- "data/Formatted Annual Data v2/"
+
+files.1 <- list.files(path = dir.1, 
+                    pattern = "Formatted.csv")
+
+files.2 <- list.files(path = dir.2, 
+                    pattern = "Formatted.csv")
+
+```
+
+1994
+
+```{r}
+col.def.1 <- cols(Week = col_integer(),
+                Date = col_date(format = "%d-%b-%y"),
+                Effort = col_double(),
+                Sightings = col_integer())
+
+data.1.1994 <- read_csv(file = paste0(dir.1, "1994 Formatted.csv"),
+                        col_types = col.def.1) 
+
+data.1.1994 %>% 
+  mutate(Shift = rep(1:8, times = nrow(data.1.1994)/8)) -> tmp
+
+col.def.2 <- cols(Week = col_integer(),
+                Date = col_date(format = "%Y-%m-%d"),
+                Shift = col_integer(),
+                Effort = col_double(),
+                Sightings = col_integer())
+
+data.2.1994 <- read_csv(file = paste0(dir.2, "1994 Formatted.csv"),
+                        col_types = col.def.2)
+
+data.1.1994 %>% 
+  group_by(Date) %>%
+  summarize(daily.effort = sum(Effort),
+            daily.sightings = sum(Sightings)) -> daily.summary.1 
+
+data.2.1994 %>% 
+  group_by(Date) %>%
+  summarize(daily.effort = sum(Effort),
+            daily.sightings = sum(Sightings)) -> daily.summary.2 
+
+```
+
