@@ -20,43 +20,83 @@ dir.2 <- "data/Formatted Annual Data v2/"
 files.1 <- list.files(path = dir.1, 
                     pattern = "Formatted.csv")
 
+col.def.1 <- cols(Week = col_integer(),
+                  Date = col_date(format = "%d-%b-%y"),
+                  Effort = col_double(),
+                  Sightings = col_integer())
+
 files.2 <- list.files(path = dir.2, 
                     pattern = "Formatted.csv")
 
+col.def.2 <- cols(Week = col_integer(),
+                  Date = col_date(format = "%Y-%m-%d"),
+                  Shift = col_integer(),
+                  Effort = col_double(),
+                  Sightings = col_integer())
+
+fcn.compare.data <- function(data.1, data.2){
+  data.1 %>% 
+    group_by(Date) %>%
+    summarize(daily.effort.1 = sum(Effort),
+              daily.sightings.1 = sum(Sightings)) %>%
+    mutate(Date.char = as.character(Date)) %>%
+    dplyr::select(-Date) -> daily.summary.1 
+  
+  data.2 %>% 
+    group_by(Date) %>%
+    summarize(daily.effort.2 = sum(Effort),
+              daily.sightings.2 = sum(Sightings)) %>%
+    mutate(Date.char = as.character(Date)) %>%
+    dplyr::select(-Date) -> daily.summary.2 
+  
+  daily.summary.1 %>% 
+    left_join(daily.summary.2, by = "Date.char") %>%
+    mutate(dif.effort = daily.effort.1 - daily.effort.2,
+           dif.sightings = daily.sightings.1 - daily.sightings.2) -> daily.summary.1.2
+
+  out.list <- list(daily.summary.1 = daily.summary.1,
+                   daily.summary.2 = daily.summary.2,
+                   daily.summary.1.2 = daily.summary.1.2)
+  return(out.list)  
+}
+
 ```
 
-1994
+1994 - There are a lot of differences between the two. Need to look into this a bit more. 
 
 ```{r}
-col.def.1 <- cols(Week = col_integer(),
-                Date = col_date(format = "%d-%b-%y"),
-                Effort = col_double(),
-                Sightings = col_integer())
-
-data.1.1994 <- read_csv(file = paste0(dir.1, "1994 Formatted.csv"),
+Y <- 1994
+data.1 <- read_csv(file = paste0(dir.1, Y, " Formatted.csv"),
                         col_types = col.def.1) 
 
-data.1.1994 %>% 
-  mutate(Shift = rep(1:8, times = nrow(data.1.1994)/8)) -> tmp
+data.1 %>% 
+  mutate(Shift = rep(1:8, times = nrow(data.1)/8)) -> tmp
 
-col.def.2 <- cols(Week = col_integer(),
-                Date = col_date(format = "%Y-%m-%d"),
-                Shift = col_integer(),
-                Effort = col_double(),
-                Sightings = col_integer())
 
-data.2.1994 <- read_csv(file = paste0(dir.2, "1994 Formatted.csv"),
+data.2 <- read_csv(file = paste0(dir.2, Y, " Formatted.csv"),
                         col_types = col.def.2)
 
-data.1.1994 %>% 
-  group_by(Date) %>%
-  summarize(daily.effort = sum(Effort),
-            daily.sightings = sum(Sightings)) -> daily.summary.1 
-
-data.2.1994 %>% 
-  group_by(Date) %>%
-  summarize(daily.effort = sum(Effort),
-            daily.sightings = sum(Sightings)) -> daily.summary.2 
+daily.summary.1994 <- fcn.compare.data(data.1, data.2)
 
 ```
 
+
+
+
+2022 - no difference in effort. One extra sighting on 2022-03-31 for V1 (4 sightings) compared with V2 (3 sightings). Raw data file (PiedrasBlancas2022SurveyData_postQC_TE.xlsx) contains only three sightings on 2022-03-31. So V2 is correct.
+
+```{r}
+Y <- 2022
+
+# The date format is different from earlier days. So, I use the same column definitions as V2
+
+data.1 <- read_csv(file = paste0(dir.1, Y, " Formatted.csv"),
+                        col_types = col.def.2) 
+
+data.2 <- read_csv(file = paste0(dir.2, Y, " Formatted.csv"),
+                        col_types = col.def.2)
+
+daily.summary.2022 <- fcn.compare.data(data.1, data.2)
+
+
+```
