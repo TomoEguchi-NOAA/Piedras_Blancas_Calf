@@ -25,6 +25,11 @@ col.def.1 <- cols(Week = col_integer(),
                   Effort = col_double(),
                   Sightings = col_integer())
 
+col.def.1.2 <- cols(Week = col_integer(),
+                  Date = col_date(format = "%d-%b-%Y"),
+                  Effort = col_double(),
+                  Sightings = col_integer())
+
 files.2 <- list.files(path = dir.2, 
                     pattern = "Formatted.csv")
 
@@ -54,15 +59,23 @@ fcn.compare.data <- function(data.1, data.2){
     mutate(dif.effort = daily.effort.1 - daily.effort.2,
            dif.sightings = daily.sightings.1 - daily.sightings.2) -> daily.summary.1.2
 
+  p. <- ggplot(daily.summary.1.2) +
+    geom_point(aes(x = as.Date(Date.char), y = dif.effort)) +
+    geom_point(aes(x = as.Date(Date.char), y = dif.sightings),
+               color = "red") +
+    xlab("Date") + 
+    ylab("Differences in effort (black) and # sightings (red)")
+  
   out.list <- list(daily.summary.1 = daily.summary.1,
                    daily.summary.2 = daily.summary.2,
-                   daily.summary.1.2 = daily.summary.1.2)
+                   daily.summary.1.2 = daily.summary.1.2,
+                   figure = p.)
   return(out.list)  
 }
 
 ```
 
-1994 - There are a lot of differences between the two. Need to look into this a bit more. 
+1994 
 
 ```{r}
 Y <- 1994
@@ -78,12 +91,34 @@ data.2 <- read_csv(file = paste0(dir.2, Y, " Formatted.csv"),
 
 daily.summary.1994 <- fcn.compare.data(data.1, data.2)
 
+daily.summary.1994$figure 
 ```
 
+There are a lot of differences between the two. Need to look into this a bit more. 
+
+2021
+
+```{r}
+Y <- 2021
+
+# The date format is different from earlier days. So, I use the same column definitions as V2
+
+data.1 <- read_csv(file = paste0(dir.1, Y, " Formatted.csv"),
+                   col_types = col.def.1.2) 
+
+data.2 <- read_csv(file = paste0(dir.2, Y, " Formatted.csv"),
+                   col_types = col.def.2)
+
+daily.summary.2021 <- fcn.compare.data(data.1, data.2)
+
+daily.summary.2021$figure
+```
+
+There are a few discrepancies... 
 
 
 
-2022 - no difference in effort. One extra sighting on 2022-03-31 for V1 (4 sightings) compared with V2 (3 sightings). Raw data file (PiedrasBlancas2022SurveyData_postQC_TE.xlsx) contains only three sightings on 2022-03-31. So V2 is correct.
+2022
 
 ```{r}
 Y <- 2022
@@ -91,12 +126,16 @@ Y <- 2022
 # The date format is different from earlier days. So, I use the same column definitions as V2
 
 data.1 <- read_csv(file = paste0(dir.1, Y, " Formatted.csv"),
-                        col_types = col.def.2) 
+                   col_types = col.def.2) 
 
 data.2 <- read_csv(file = paste0(dir.2, Y, " Formatted.csv"),
-                        col_types = col.def.2)
+                   col_types = col.def.2)
 
 daily.summary.2022 <- fcn.compare.data(data.1, data.2)
 
-
+daily.summary.2022$figure
 ```
+
+In the previous run, ther was no difference in effort. One extra sighting on 2022-03-31 for V1 (4 sightings) compared with V2 (3 sightings). Raw data file (PiedrasBlancas2022SurveyData_postQC_TE.xlsx) contains only three sightings on 2022-03-31. So V2 is correct.
+
+Today... 2023-04-28, there are a lot more differences. Not sure what happened here. 

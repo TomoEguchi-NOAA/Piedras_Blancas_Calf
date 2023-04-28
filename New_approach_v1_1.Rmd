@@ -17,8 +17,7 @@ I explore the dataset first then develop a new approach that has better assumpti
 
 This needs to get it done from the ground up. 
 
-A script (Extract Excel data.Rmd) was developed to extract raw data.
-
+A script (Extract Excel data.Rmd) was developed to extract raw data. There aer some differences in extraction methods (Stewart's and mine) for earlier years. The comparison is done in *compare_data_extractions.Rmd*.
 
 
 ```{r setup-and-data}
