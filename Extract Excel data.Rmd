@@ -45,8 +45,8 @@ THIS FILE NEEDS TO BE UPDATED AND ANNOTATED BETTER. EACH YEAR HAS A DIFFERENT FO
 ```{r}
 Year <- 1994
 dir.name <- paste0("C_C ", Year)
-#start.time <- "630"
-start.time <- "700"
+start.time <- "630"
+#start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -85,7 +85,7 @@ data.offshore <- get.data(Year = Year,
                           xls.file.name = xls.file.name.offshore,
                           sheet.name = sheet.name.offshore,
                           col.types = col.types.offshore,
-                          col.names = all_of(col.names.offshore),
+                          col.names = col.names.offshore,
                           start.time = start.time, 
                           max.shift = 4) %>%
   mutate(Area = "off")
@@ -111,10 +111,13 @@ out.file.name.formatted <- paste0(out.formatted.dir,
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, 
-                          start.hr = 7, 
-                          end.hr = 19, 
-                          max.shift = 4) %>% extract.shift.vars()
+# data.shift <- find.effort(data.all, 
+#                           start.hr = 6.5, 
+#                           end.hr = 19, 
+#                           max.shift = 4) %>% extract.shift.vars()
+
+data.shift <- find.effort(data.all) #%>% extract.shift.vars()
+
 
 formatted.all.data <- format.output(data.shift, max.shift = 4)
 

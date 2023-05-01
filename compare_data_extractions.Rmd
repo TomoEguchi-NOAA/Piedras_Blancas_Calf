@@ -6,6 +6,7 @@ output: html_notebook
 This notebook compares results between Formatted Annual Data and Formatted Annual Data v2. The former was done by J. Stewart, whereas the latter was done by me. Results should be the same but a few inconsistencies were found recently (Apr 2023). So, I'm comparing each one to see where the problem is.
 
 ```{r}
+rm(list = ls())
 library(tidyverse)
 library(lubridate)
 library(flextable)
@@ -30,6 +31,11 @@ col.def.1.2 <- cols(Week = col_integer(),
                   Effort = col_double(),
                   Sightings = col_integer())
 
+col.def.1.1997 <- cols(Week = col_integer(),
+                       Date = col_character(), #date(format = "%d-%b-%y"),
+                       Effort = col_double(),
+                       Sightings = col_integer())
+
 files.2 <- list.files(path = dir.2, 
                     pattern = "Formatted.csv")
 
@@ -39,7 +45,7 @@ col.def.2 <- cols(Week = col_integer(),
                   Effort = col_double(),
                   Sightings = col_integer())
 
-fcn.compare.data <- function(data.1, data.2){
+fcn.compare.data <- function(data.1, data.2, year){
   data.1 %>% 
     group_by(Date) %>%
     summarize(daily.effort.1 = sum(Effort),
@@ -64,54 +70,305 @@ fcn.compare.data <- function(data.1, data.2){
     geom_point(aes(x = as.Date(Date.char), y = dif.sightings),
                color = "red") +
     xlab("Date") + 
-    ylab("Differences in effort (black) and # sightings (red)")
+    ylab("Differences in effort (black) and # sightings (red)") +
+    ggtitle(year)
+    
   
-  out.list <- list(daily.summary.1 = daily.summary.1,
+  out.list <- list(data.1 = data.1,
+                   data.2 = data.2,
+                   daily.summary.1 = daily.summary.1,
                    daily.summary.2 = daily.summary.2,
                    daily.summary.1.2 = daily.summary.1.2,
-                   figure = p.)
+                   figure = p.,
+                   year = year)
   return(out.list)  
 }
 
 ```
 
+
+```{r}
+years <- c(1994:2019, 2021, 2022)
+col.defs.1 <- list(col.def.1, col.def.1.1997, col.def.1.2, col.def.2)
+col.defs.1.idx <- c(rep(1, 3), rep(2, 23), 3, 4)
+
+daily.summary.list <- list()
+for (k in 1:length(years)){
+  
+  Y <- years[k]
+  
+  if (col.defs.1.idx[k] == 2){
+    data.1 <- read_csv(file = paste0(dir.1, Y, " Formatted.csv"),
+                       col_types = col.defs.1[[col.defs.1.idx[k]]]) %>%
+      mutate(Date.1 = as.Date(paste0(Date, "-", Y), format = "%d-%b-%Y")) %>%
+      transmute(Week = Week, 
+                Date = Date.1, 
+                Effort = Effort, 
+                Sightings = Sightings)
+  } else {
+    data.1 <- read_csv(file = paste0(dir.1, Y, " Formatted.csv"),
+                       col_types = col.defs.1[[col.defs.1.idx[k]]]) 
+    
+  }
+  
+  data.2 <- read_csv(file = paste0(dir.2, Y, " Formatted.csv"),
+                     col_types = col.def.2)
+  
+  daily.summary.list[[k]]  <- fcn.compare.data(data.1, data.2, Y)
+  
+}
+
+
+```
+
+
 1994 
 
 ```{r}
 Y <- 1994
-data.1 <- read_csv(file = paste0(dir.1, Y, " Formatted.csv"),
-                        col_types = col.def.1) 
-
-data.1 %>% 
-  mutate(Shift = rep(1:8, times = nrow(data.1)/8)) -> tmp
-
-
-data.2 <- read_csv(file = paste0(dir.2, Y, " Formatted.csv"),
-                        col_types = col.def.2)
-
-daily.summary.1994 <- fcn.compare.data(data.1, data.2)
-
-daily.summary.1994$figure 
+daily.summary.list[[which(years == Y)]]$figure 
 ```
 
 There are a lot of differences between the two. Need to look into this a bit more. 
+
+
+```{r}
+data.1 <- daily.summary.list[[which(years == Y)]]$data.1
+data.2 <- daily.summary.list[[which(years == Y)]]$data.2
+daily.1.2 <- daily.summary.list[[which(years == Y)]]$daily.summary.1.2
+
+# Effort difference
+dif.effort <- daily.1.2 %>% filter(dif.effort != 0)
+dif.dates <- dif.effort$Date.char
+
+dif.1 <- dif.2 <- list()
+for (k in 1:length(dif.dates)){
+  dif.1[[k]] <- data.1 %>% filter(Date == as.Date(dif.dates[k])) 
+  dif.2[[k]] <- data.2 %>% filter(Date == as.Date(dif.dates[k]))
+
+}
+
+
+# sighting difference
+dif.sightings <- daily.1.2 %>% filter(dif.sightings != 0)
+
+```
+
+
+
+1995 
+
+```{r}
+daily.summary.list[[which(years == 1995)]]$figure 
+```
+
+Many differences found... 
+
+1996 
+
+```{r}
+daily.summary.list[[which(years == 1996)]]$figure 
+```
+
+
+1997 
+
+```{r}
+daily.summary.list[[which(years == 1997)]]$figure 
+```
+
+1998 
+
+```{r}
+daily.summary.list[[which(years == 1998)]]$figure
+```
+
+1999 
+
+```{r}
+daily.summary.list[[which(years == 1999)]]$figure
+```
+
+
+2000 
+
+```{r}
+daily.summary.list[[which(years == 2000)]]$figure
+```
+
+
+2001 
+
+```{r}
+daily.summary.list[[which(years == 2001)]]$figure
+```
+
+
+
+
+2002
+
+```{r}
+daily.summary.list[[which(years == 2002)]]$figure
+```
+
+
+2003
+
+```{r}
+daily.summary.list[[which(years == 2003)]]$figure
+```
+
+2004
+
+```{r}
+daily.summary.list[[which(years == 2004)]]$figure
+```
+
+2005
+
+```{r}
+daily.summary.list[[which(years == 2005)]]$figure
+```
+
+
+2006
+
+```{r}
+daily.summary.list[[which(years == 2006)]]$figure
+```
+
+
+2007
+
+```{r}
+Y <- 2007
+daily.summary.list[[which(years == Y)]]$figure
+```
+
+2008
+
+```{r}
+Y <- 2008
+
+daily.summary.list[[which(years == Y)]]$figure
+```
+
+
+2009
+
+```{r}
+Y <- 2009
+
+daily.summary.list[[which(years == Y)]]$figure
+```
+
+
+2010
+
+```{r}
+Y <- 2010
+
+daily.summary.list[[which(years == Y)]]$figure
+```
+
+
+2011
+
+```{r}
+Y <- 2011
+
+daily.summary.list[[which(years == Y)]]$figure
+
+```
+
+
+2012
+
+```{r}
+Y <- 2012
+
+daily.summary.list[[which(years == Y)]]$figure
+```
+
+
+2013
+
+```{r}
+Y <- 2013
+
+daily.summary.list[[which(years == Y)]]$figure
+```
+
+
+2014
+
+```{r}
+Y <- 2014
+
+daily.summary.list[[which(years == Y)]]$figure
+```
+
+
+2014
+
+```{r}
+Y <- 2014
+
+daily.summary.list[[which(years == Y)]]$figure
+```
+
+
+2015
+
+```{r}
+Y <- 2015
+
+daily.summary.list[[which(years == Y)]]$figure
+```
+
+
+2016
+
+```{r}
+Y <- 2016
+
+daily.summary.list[[which(years == Y)]]$figure
+```
+
+
+2017
+
+```{r}
+Y <- 2017
+
+daily.summary.list[[which(years == Y)]]$figure
+```
+
+
+2018
+
+```{r}
+Y <- 2018
+
+daily.summary.list[[which(years == Y)]]$figure
+```
+
+2019
+
+```{r}
+Y <- 2019
+
+daily.summary.list[[which(years == Y)]]$figure
+```
+
 
 2021
 
 ```{r}
 Y <- 2021
 
-# The date format is different from earlier days. So, I use the same column definitions as V2
-
-data.1 <- read_csv(file = paste0(dir.1, Y, " Formatted.csv"),
-                   col_types = col.def.1.2) 
-
-data.2 <- read_csv(file = paste0(dir.2, Y, " Formatted.csv"),
-                   col_types = col.def.2)
-
-daily.summary.2021 <- fcn.compare.data(data.1, data.2)
-
-daily.summary.2021$figure
+daily.summary.list[[which(years == Y)]]$figure
 ```
 
 There are a few discrepancies... 
@@ -123,19 +380,12 @@ There are a few discrepancies...
 ```{r}
 Y <- 2022
 
-# The date format is different from earlier days. So, I use the same column definitions as V2
-
-data.1 <- read_csv(file = paste0(dir.1, Y, " Formatted.csv"),
-                   col_types = col.def.2) 
-
-data.2 <- read_csv(file = paste0(dir.2, Y, " Formatted.csv"),
-                   col_types = col.def.2)
-
-daily.summary.2022 <- fcn.compare.data(data.1, data.2)
-
-daily.summary.2022$figure
+daily.summary.list[[which(years == Y)]]$figure
 ```
 
 In the previous run, ther was no difference in effort. One extra sighting on 2022-03-31 for V1 (4 sightings) compared with V2 (3 sightings). Raw data file (PiedrasBlancas2022SurveyData_postQC_TE.xlsx) contains only three sightings on 2022-03-31. So V2 is correct.
 
-Today... 2023-04-28, there are a lot more differences. Not sure what happened here. 
+Today... 2023-04-28, there are a lot more differences. Not sure what happened here. I was using old files. Using files that were extracted on 2023-04-19, there was only one difference. Those new files were uploaded to Google folder.
+
+
+
