@@ -231,37 +231,15 @@ find.shift <- function(x0, max.shift = 4){
 # and 1900), and the maximum number of shift per day (default to 4).
 #find.effort <- function(x, start.hr = 7, end.hr = 19, max.shift = 4){
 find.effort <- function(x){
-  NEED TO ADD SHIFT INDEX. TO DO THAT, I NEED TO KNOW WHAT TIME THE OBSERVATION
-  STARTS EVERYDAY AND THE MAXIMUM NUMBER OF SHIFTS PER DAY, WHICH ARE NOT CONSISTENT
-  AMONG YEARS. I NEED TO THINK ABOUT THIS A BIT MORE... 2023-05-01
-  
+  # NEED TO ADD SHIFT INDEX. TO DO THAT, I NEED TO KNOW WHAT TIME THE OBSERVATION
+  # STARTS EVERYDAY AND THE MAXIMUM NUMBER OF SHIFTS PER DAY, WHICH ARE NOT CONSISTENT
+  # AMONG YEARS. I NEED TO THINK ABOUT THIS A BIT MORE... 2023-05-01
+  # 
+  # REGARDLESS OF STARTING TIME, THEY SHOULD BE SEPARATED INTO 3-HR BLOCKS
   
   # this turns dates in to character
   all.dates <- unique(x$Date)
   
-  # if (max.shift == 4){
-  #   shifts <- c("1", "2", "3", "4")
-  # 
-  # } else if (max.shift == 5){
-  #   shifts <- c("1", "2", "3", "4", "5")
-  # }
-  # 
-  # start.shift <- seq(start.hr*60, (end.hr*60-180), by = 180)
-  # start.Time <- minutes2time_char(start.shift)
-  # 
-  # end.shift <- seq((start.hr*60 + 180), (end.hr*60), by = 180)
-  # end.Time <- minutes2time_char(end.shift)
-  # 
-  # out.df <- data.frame(Date.char = rep(all.dates,
-  #                                      each = length(shifts)),
-  #                      Shift = rep(shifts, 
-  #                                  times = length(all.dates)),
-  #                      Effort = NA,
-  #                      Mother_Calf = 0,
-  #                      Sea_State = NA,
-  #                      Vis = NA,
-  #                      Time_T0 = NA,
-  #                      Time_0000 = NA)
   out.list <- list()
   d <- k1 <- c <- 1
   for (d in 1:length(all.dates)){

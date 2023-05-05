@@ -31,6 +31,11 @@ col.def.1.2 <- cols(Week = col_integer(),
                   Effort = col_double(),
                   Sightings = col_integer())
 
+col.def.1.3 <- cols(Week = col_integer(),
+                    Date = col_date(format = "%Y-%m-%d"),
+                    Effort = col_double(),
+                    Sightings = col_integer())
+
 col.def.1.1997 <- cols(Week = col_integer(),
                        Date = col_character(), #date(format = "%d-%b-%y"),
                        Effort = col_double(),
@@ -89,10 +94,12 @@ fcn.compare.data <- function(data.1, data.2, year){
 
 ```{r}
 years <- c(1994:2019, 2021, 2022)
-col.defs.1 <- list(col.def.1, col.def.1.1997, col.def.1.2, col.def.2)
+col.defs.1 <- list(col.def.1, col.def.1.1997, col.def.1.2, col.def.1.3)
 col.defs.1.idx <- c(rep(1, 3), rep(2, 23), 3, 4)
 
 daily.summary.list <- list()
+k <- 28
+
 for (k in 1:length(years)){
   
   Y <- years[k]
@@ -105,6 +112,10 @@ for (k in 1:length(years)){
                 Date = Date.1, 
                 Effort = Effort, 
                 Sightings = Sightings)
+  } else if (col.defs.1.idx[k] == 4){
+    data.1 <- read_csv(file = paste0(dir.1, Y, " Formatted.csv"),
+                       col_types = col.defs.1[[col.defs.1.idx[k]]]) 
+    
   } else {
     data.1 <- read_csv(file = paste0(dir.1, Y, " Formatted.csv"),
                        col_types = col.defs.1[[col.defs.1.idx[k]]]) 
@@ -130,6 +141,39 @@ daily.summary.list[[which(years == Y)]]$figure
 ```
 
 There are a lot of differences between the two. Need to look into this a bit more. 
+
+Effort:
+```{r}
+daily.summary.list[[which(years == Y)]]$daily.summary.1.2 %>%
+  filter(dif.effort != 0) %>%
+  dplyr::select(Date.char) %>%
+  pull() -> date.dif.effort
+
+k <- 1
+for (k in 1:length(date.dif.effort)){
+  daily.summary.list[[which(years == Y)]]$data.1 %>%
+    filter(Date == as.Date(date.dif.effort[k])) -> data.1.dif
+  
+   daily.summary.list[[which(years == Y)]]$data.2 %>%
+    filter(Date == as.Date(date.dif.effort[k])) -> data.2.dif
+  
+}
+
+```
+
+
+Sightings
+
+```{r}
+
+daily.summary.list[[which(years == Y)]]$daily.summary.1.2 %>%
+  filter(dif.sightings != 0) %>%
+  dplyr::select(Date.char) %>%
+  pull() -> date.dif.sightings
+
+
+
+```
 
 
 ```{r}
