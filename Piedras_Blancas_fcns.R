@@ -42,12 +42,12 @@ get.all.data <- function(sheet.name.inshore, sheet.name.offshore,
 get.data <- function(Year, xls.file.name, sheet.name,
                      col.types, col.names, start.time,
                      max.shift){
-  # col.names <- c("Date", "Event", "Time", "Obs. Code", "Sea State", 
-  #                "Vis. IN", "Cow  / Calf")
+  
   if (length(col.names) < 8){
     data.out <- read_excel(xls.file.name,
                            sheet = sheet.name,
-                           col_types = col.types) %>% 
+                           col_types = col.types,
+                           col_names = TRUE) %>% 
       dplyr::select(all_of(col.names)) %>%
       transmute(Date = .data[[col.names[[1]]]],
                 Event = .data[[col.names[[2]]]],
@@ -65,7 +65,8 @@ get.data <- function(Year, xls.file.name, sheet.name,
   } else {
     data.out <- read_excel(xls.file.name,
                            sheet = sheet.name,
-                           col_types = col.types) %>% 
+                           col_types = col.types,
+                           col_names = TRUE) %>% 
       dplyr::select(all_of(col.names)) %>%
       transmute(Date = .data[[col.names[[1]]]],
                 Event = .data[[col.names[[2]]]],
@@ -230,53 +231,40 @@ find.shift <- function(x0, max.shift = 4){
 # start and end of each day (default = 7 and 19, correspond to 0700
 # and 1900), and the maximum number of shift per day (default to 4).
 #find.effort <- function(x, start.hr = 7, end.hr = 19, max.shift = 4){
-find.effort <- function(x){
-  NEED TO ADD SHIFT INDEX. TO DO THAT, I NEED TO KNOW WHAT TIME THE OBSERVATION
-  STARTS EVERYDAY AND THE MAXIMUM NUMBER OF SHIFTS PER DAY, WHICH ARE NOT CONSISTENT
-  AMONG YEARS. I NEED TO THINK ABOUT THIS A BIT MORE... 2023-05-01
+# T0 is start time in character, e.g., "0630", "0700)
+find.effort <- function(x, T0){
+  # NEED TO ADD SHIFT INDEX. TO DO THAT, I NEED TO KNOW WHAT TIME THE OBSERVATION
+  # STARTS EVERYDAY AND THE MAXIMUM NUMBER OF SHIFTS PER DAY, WHICH ARE NOT CONSISTENT
+  # AMONG YEARS. I NEED TO THINK ABOUT THIS A BIT MORE... 2023-05-01
+  # 
+  # THE FUNCTION ABOVE find.shift DEFINES SHIFTS. ANYTIME BEFORE 1000 IS SHIFT 1, ETC.
+  # get.data USES find.shift AND RETURNS ASSIGNED SHIFTS IN THE OUTPUT.
   
   
   # this turns dates in to character
   all.dates <- unique(x$Date)
   
-  # if (max.shift == 4){
-  #   shifts <- c("1", "2", "3", "4")
-  # 
-  # } else if (max.shift == 5){
-  #   shifts <- c("1", "2", "3", "4", "5")
-  # }
-  # 
-  # start.shift <- seq(start.hr*60, (end.hr*60-180), by = 180)
-  # start.Time <- minutes2time_char(start.shift)
-  # 
-  # end.shift <- seq((start.hr*60 + 180), (end.hr*60), by = 180)
-  # end.Time <- minutes2time_char(end.shift)
-  # 
-  # out.df <- data.frame(Date.char = rep(all.dates,
-  #                                      each = length(shifts)),
-  #                      Shift = rep(shifts, 
-  #                                  times = length(all.dates)),
-  #                      Effort = NA,
-  #                      Mother_Calf = 0,
-  #                      Sea_State = NA,
-  #                      Vis = NA,
-  #                      Time_T0 = NA,
-  #                      Time_0000 = NA)
+  # Start time of shift 1:
+  T0.minutes <- char_time2min(T0)
+  
+  # End of shift time
+  shift.ends <- c(600, 780, 960, 1140, 1320)
+  
+  shift.begins <- c(T0.minutes, shift.ends)
+  
   out.list <- list()
-  d <- k1 <- c <- 1
+  d <- k1 <- c <- k2 <- 1
   for (d in 1:length(all.dates)){
     # pick just one day's worth of data
-    one.day <- filter(x, Date == as.Date(all.dates[d]))
-    T0 <- one.day$Minutes_since_0000[1]
-    T1 <- T0 + 180   # 180 minutes per shift
-    Tend <- one.day$Minutes_since_0000[nrow(one.day)]
+    one.day <- filter(x, Date == as.Date(all.dates[d])) %>% arrange(Minutes_since_0000)
     
-    while(T1 < Tend){
-      one.day %>%
-        filter(Minutes_since_0000 >= T0 &
-                 Minutes_since_0000 <= T1) -> one.shift
+    # go through one shift at a time
+    for (k4 in 1:5){
+      shift.idx <- grep(as.character(k4), one.day$Shift)
       
-      if (nrow(one.shift) != 0){
+      one.shift <- one.day[shift.idx,]
+
+      if (nrow(one.shift) > 0){
         # Sometimes the beginning of one shift and the end of the previous 
         # shift is shared in one line with Shift = x/y. When that and a sighting
         # happens simultaneously, the sighting gets double counted between the
@@ -292,7 +280,7 @@ find.effort <- function(x){
         if (one.shift[1,"Event"] != 1){
           one.shift.eft <- rbind(one.shift[1,], one.shift)
           one.shift.eft[1, "Event"] <- 1
-          one.shift.eft[1, "Minutes_since_0000"] <- T0
+          one.shift.eft[1, "Minutes_since_0000"] <- shift.begins[k4]
         } else {
           one.shift.eft <- one.shift
         }
@@ -300,7 +288,7 @@ find.effort <- function(x){
         if (one.shift[nrow(one.shift), "Event"] != 5){
           one.shift.eft <- rbind(one.shift.eft, one.shift[nrow(one.shift),])
           one.shift.eft[nrow(one.shift.eft), "Event"] <- 5
-          one.shift.eft[nrow(one.shift.eft), "Minutes_since_0000"] <- T1
+          one.shift.eft[nrow(one.shift.eft), "Minutes_since_0000"] <- shift.ends[k4]
         }
         
         # find out how many on/off effort existed
@@ -346,139 +334,37 @@ find.effort <- function(x){
           tmp.eft <- tmp.eft + (max(tmp$Minutes_since_0000) - min(tmp$Minutes_since_0000))  
           
         }
-        max.sea.state <- max(one.shift$SeaState, na.rm = T)
-        max.Vis <- max(one.shift$Vis, na.rm = T)
         
-        out.list[[c]] <- list(Date = all.dates[d],
-                              Minutes_since_0000 = unname(T0),
-                              Effort = tmp.eft,
-                              Mother_Calf = sum(one.shift$Mother_Calf, 
-                                                na.rm = T),
-                              Sea_State = ifelse(!is.infinite(max.sea.state),
-                                                 max.sea.state, NA),
-                              Vis = ifelse(!is.infinite(max.Vis),
-                                           max.Vis, NA))
+        # Sometimes, there is no Vis (or also sea state) update in an entire
+        # shift. Use one from previous shift in those cases
+        if (sum(!is.na(one.shift$SeaState)) > 0){
+          max.sea.state <- max(one.shift$SeaState, na.rm = T)          
+        } else {
+          max.sea.state <- max.sea.state
+        }
+
+        if (sum(!is.na(one.shift$Vis)) > 0){
+          max.Vis <- max(one.shift$Vis, na.rm = T) 
+        } else {
+          max.Vis <- max.Vis
+        }
         
-        T0 <- T1
-        T1 <- T0 + 180
+        out.list[[c]] <- data.frame(Date = all.dates[d],
+                                    Minutes_since_0000 = shift.begins[k4],
+                                    Shift = k4,
+                                    Effort = tmp.eft,
+                                    Mother_Calf = sum(one.shift$Mother_Calf, 
+                                                      na.rm = T),
+                                    Sea_State = ifelse(!is.infinite(max.sea.state),
+                                                       max.sea.state, NA),
+                                    Vis = ifelse(!is.infinite(max.Vis),
+                                                 max.Vis, NA))
+        
         c <- c + 1
         
       }
-      
-
     }
     
-    
-    # for (k1 in 1:length(shifts)){
-    #   one.day %>%
-    #     filter(Minutes_since_0000 >= start.shift[k1] &
-    #              Minutes_since_0000 <= end.shift[k1]) -> one.shift
-    #   
-    #   if (nrow(one.shift) != 0){
-    #     # Sometimes the beginning of one shift and the end of the previous 
-    #     # shift is shared in one line with Shift = x/y. When that and a sighting
-    #     # happens simultaneously, the sighting gets double counted between the
-    #     # two shifts. So, the sighting has to be placed in one or the other.
-    #     line.bottom <- one.shift[nrow(one.shift),]
-    #     if (line.bottom$Event == 4 & str_detect(line.bottom$Shift, "/")){
-    #       one.shift <- one.shift[1:(nrow(one.shift)-1),]
-    #       
-    #     }
-    #     
-    #     # add one row at the top and end of one.shift, so that it has
-    #     # Event 1 at the top, and 5 at the bottom if they are not there:
-    #     if (one.shift[1,"Event"] != 1){
-    #       one.shift.eft <- rbind(one.shift[1,], one.shift)
-    #       one.shift.eft[1, "Event"] <- 1
-    #       one.shift.eft[1, "Time"] <- start.Time[k1]
-    #     } else {
-    #       one.shift.eft <- one.shift
-    #     }
-    #     
-    #     if (one.shift[nrow(one.shift), "Event"] != 5){
-    #       one.shift.eft <- rbind(one.shift.eft, one.shift[nrow(one.shift),])
-    #       one.shift.eft[nrow(one.shift.eft), "Event"] <- 5
-    #       one.shift.eft[nrow(one.shift.eft), "Time"] <- end.Time[k1]
-    #     }
-    # 
-    #     # find out how many on/off effort existed
-    #     row.1 <- which(one.shift.eft$Event == 1)
-    #     row.5 <- which(one.shift.eft$Event == 5)
-    #     
-    #     # sometimes too many event == 1 and event == 5
-    #     if (length(row.1) > 1 & length(row.5) > 1){
-    #       for (k3 in 2:length(row.1)){
-    #         if (row.1[k3] < row.5[k3-1]){
-    #           row.1[k3] <- NA
-    #         } 
-    #         
-    #       }
-    #       row.1 <- row.1[!is.na(row.1)]
-    #       
-    #     }
-    #     
-    #     # if they don't match, adjust accordingly.
-    #     if (length(row.1) != length(row.5)){
-    #       nrow <- min(length(row.1), length(row.5))
-    #       row.1.1 <- vector(mode = "numeric", length = nrow)
-    #       row.5.1 <- vector(mode = "numeric", length = nrow)
-    #       for (k2 in 1:nrow){
-    #         if (k2 == 1){
-    #           row.1.1[k2] <- row.1[k2]
-    #           row.5.1[k2] <- row.5[k2]
-    #         } else {
-    #           row.1.1[k2] <- first(row.1[row.1 > row.5.1[k2-1]])
-    #           row.5.1[k2] <- first(row.5[row.5 > row.1.1[k2]])
-    #         }
-    #         
-    #       }
-    #       row.1 <- row.1.1[!is.na(row.1.1)]
-    #       row.5 <- row.5.1[!is.na(row.5.1)]
-    #     }
-    # 
-    # 
-    #     # calculate effort for each "on" period per shift
-    #     tmp.eft <- 0
-    #     for (k2 in 1:length(row.1)){
-    #       tmp <- one.shift.eft[row.1[k2]:row.5[k2],] 
-    #       tmp.eft <- tmp.eft + (max(tmp$Minutes_since_0000) - min(tmp$Minutes_since_0000))  
-    #       
-    #     }
-    # 
-    #     out.df[out.df$Date == all.dates[d] & 
-    #              out.df$Shift == shifts[k1], "Effort"] <- tmp.eft
-    #     
-    #     out.df[out.df$Date == all.dates[d] & 
-    #              out.df$Shift == shifts[k1], "Mother_Calf"] <- sum(one.shift$Mother_Calf, 
-    #                                                               na.rm = T) 
-    #     max.sea.state <- max(one.shift$SeaState, na.rm = T)
-    #     if (!is.infinite(max.sea.state)){
-    #       out.df[out.df$Date == all.dates[d] & 
-    #                out.df$Shift == shifts[k1], "Sea_State"] <- max.sea.state
-    #       
-    #     } else {
-    #       out.df[out.df$Date == all.dates[d] & 
-    #                out.df$Shift == shifts[k1], "Sea_State"] <- NA
-    #     }
-    #     
-    #     max.Vis <- max(one.shift$Vis, na.rm = T) 
-    #     if (!is.infinite(max.Vis)){
-    #       out.df[out.df$Date == all.dates[d] & 
-    #                out.df$Shift == shifts[k1], "Vis"] <- max.Vis
-    #         
-    #     } else {
-    #       out.df[out.df$Date == all.dates[d] & 
-    #                out.df$Shift == shifts[k1], "Vis"] <- NA
-    #     }
-    #     
-    #     out.df[out.df$Date == all.dates[d] & 
-    #              out.df$Shift == shifts[k1], "Time_T0"] <- min(one.shift$Minutes_since_T0, 
-    #                                                            na.rm = T) 
-    #     out.df[out.df$Date == all.dates[d] & 
-    #              out.df$Shift == shifts[k1], "Time_0000"] <- min(one.shift$Minutes_since_0000, 
-    #                                                              na.rm = T) 
-    #   }
-    # }
     
   }
   
@@ -494,9 +380,9 @@ format.output <- function(data.shift, max.shift){
   day.shifts <- data.frame(Date = rep(unique(data.shift$Date),
                                            each = max.shift),
                            Shift = ifelse(max.shift == 4, 
-                                          rep(c("1", "2", "3", "4"), 
+                                          rep(c(1,2,3,4), 
                                               times = length(unique(data.shift$Date))),
-                                          rep(c("1", "2", "3", "4", "5"), 
+                                          rep(c(1,2,3,4,5), 
                                               times = length(unique(data.shift$Date)))))
   # Combine the full set of date/shift with the observed - some shifts are NAs because
   # they were not in the dataset
@@ -528,8 +414,7 @@ format.output <- function(data.shift, max.shift){
   # create all shists, incluyding nights
   all.shifts <- data.frame(Date = rep(all.dates,
                                            each = 8),
-                           Shift = rep(c("1", "2", "3", "4",
-                                         "5", "6", "7", "8"), 
+                           Shift = rep(c(1:8), 
                                        times = length(all.dates),
                                        by = "day"))
   
