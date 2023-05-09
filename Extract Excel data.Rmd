@@ -35,6 +35,22 @@ extract.shift.vars <- function(x) {
             Mother_Calf = Mother_Calf) -> x.out
   return(x.out)
 }
+
+file.names <- function(out.dir, Year){
+  out.file.name.all <- paste0(out.dir, "Processed_all_data_",
+                              Year, ".csv")
+  out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
+                                Year, ".csv")
+  
+  out.file.name.formatted <- paste0(out.formatted.dir,
+                                    Year, " Formatted.csv")
+
+  file.names <- list(all = out.file.name.all,
+                     shift = out.file.name.shift,
+                     formatted = out.file.name.formatted)
+  return(file.names)
+}
+
 ```
 
 Event code:
@@ -75,68 +91,32 @@ col.types.inshore <- c("date", "numeric", "text", "numeric", "numeric",
 col.names.inshore <- c("Date", "Event", "Time", "Obs. Code", "Sea State",
                        "Vis. IN", "Cow  / Calf")
 
-data.inshore <- get.data(Year = Year, 
-                         xls.file.name = xls.file.name.inshore, 
-                         sheet.name = sheet.name.inshore,
-                         col.types = col.types.inshore, 
-                         col.names = col.names.inshore, 
-                         start.time = start.time,
-                         max.shift = 5) %>%
-  mutate(Area = "in")
-
 col.types.offshore <- c("date", "numeric", "text", "numeric", "numeric",
                         "numeric", "numeric", "numeric", "text", "text")
 
 col.names.offshore <- c("Date", "Event", "Time", "Obs.", "Sea State",
                         "Vis. Code", "Cow/Calf")
 
-data.offshore <- get.data(Year = Year,
-                          xls.file.name = xls.file.name.offshore,
-                          sheet.name = sheet.name.offshore,
-                          col.types = col.types.offshore,
-                          col.names = col.names.offshore,
-                          start.time = start.time, 
-                          max.shift = 5) %>%
-  mutate(Area = "off")
+out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                         col.types.inshore, col.types.offshore,
+                         col.names.inshore, col.names.offshore,
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time, max.shift = 5)
 
-data.offshore %>% 
-  filter(Mother_Calf > 0) %>%
-  rbind(data.inshore) %>%
-  arrange(Date.date, Minutes_since_0000) %>% 
-  extract.all.vars() -> data.all
+files <- file.names(out.dir, Year)
 
+if (!file.exists(files$all))
+  write_csv(out.list$data.all,
+            file = files$all)
 
-# There are some characters, e.g., ?, in columns that don't expect them. 
-# Warnings return - Line 665 - Fixed it as well as a few others. See the top
-# of this chunk
+if (!file.exists(files$shift))
+  write_csv(out.list$data.shift,
+            file = files$shift)
 
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
-
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
-
-out.file.name.formatted <- paste0(out.formatted.dir, 
-                                  Year, " Formatted.csv")
-
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-
-data.shift <- find.effort(data.all, T0 = start.time) #%>% extract.shift.vars()
-
-formatted.all.data <- format.output(data.shift, max.shift = max(data.shift$Shift))
-
-if (!file.exists(out.file.name.all))
-  write_csv(data.all,
-            file = out.file.name.all)
-
-if (!file.exists(out.file.name.shift))
-  write_csv(data.shift,
-            file = out.file.name.shift)
-
-if (!file.exists(out.file.name.formatted))
-  write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+if (!file.exists(files$formatted))
+  write_csv(out.list$formatted.all.data,
+            file = files$formatted, 
             quote = "none",
             na = "")
 
@@ -171,15 +151,6 @@ col.types.inshore <- c("date", "numeric", "text", "numeric", "numeric",
 col.names.inshore <- c("Date",	"Event Code",	"Time",	"Observer Code",	
                        "Sea State",	"Vis In",	"C/C Pairs")
 
-data.inshore <- get.data(Year = Year, 
-                         xls.file.name = xls.file.name.inshore, 
-                         sheet.name = sheet.name.inshore,
-                         col.types = col.types.inshore, 
-                         col.names = col.names.inshore, 
-                         start.time = start.time,
-                         max.shift = 5) %>%
-  mutate(Area = "in")
-
 col.types.offshore <- c("date", "numeric", "text", "numeric", 
                         "numeric", "numeric", "numeric", "numeric", 
                         "numeric", "text", "numeric", "text")
@@ -187,47 +158,26 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
 col.names.offshore <- c("Date",	"Event",	"Time",	"OBS.", 
                         "Sea", "Vis.", 	"Cow/Calf")
 
-data.offshore <- get.data(Year = Year,
-                          xls.file.name = xls.file.name.offshore,
-                          sheet.name = sheet.name.offshore,
-                          col.types = col.types.offshore,
-                          col.names = all_of(col.names.offshore),
-                          start.time = start.time, 
-                          max.shift = 5)
+out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                         col.types.inshore, col.types.offshore,
+                         col.names.inshore, col.names.offshore,
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time, max.shift = 5)
 
-data.offshore %>% 
-  filter(Mother_Calf > 0) %>%
-  rbind(data.inshore) %>%
-  arrange(Date.date, Minutes_since_0000) %>% 
-  extract.all.vars() -> data.all
+files <- file.names(out.dir, Year)
 
+if (!file.exists(files$all))
+  write_csv(out.list$data.all,
+            file = files$all)
 
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
+if (!file.exists(files$shift))
+  write_csv(out.list$data.shift,
+            file = files$shift)
 
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
-
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, T0 = start.time) #%>% extract.shift.vars()
-
-formatted.all.data <- format.output(data.shift, max.shift = max(data.shift$Shift))
-
-if (!file.exists(out.file.name.all))
-  write_csv(data.all,
-            file = out.file.name.all)
-
-if (!file.exists(out.file.name.shift))
-  write_csv(data.shift,
-            file = out.file.name.shift)
-
-if (!file.exists(out.file.name.formatted))
-  write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+if (!file.exists(files$formatted))
+  write_csv(out.list$formatted.all.data,
+            file = files$formatted, 
             quote = "none",
             na = "")
 
@@ -267,15 +217,7 @@ col.types.inshore <- c("date", "numeric", "text", "numeric",
                        "numeric", "text", "text", 
                        "text", "text", "text")
 
-data.inshore <- get.data(Year = Year, 
-                         xls.file.name = xls.file.name.inshore, 
-                         sheet.name = sheet.name.inshore,
-                         col.types = col.types.inshore, 
-                         col.names = col.names.inshore, 
-                         start.time = start.time,
-                         max.shift = 4)  %>%
-  mutate(Area = "in")
-  
+
 col.names.offshore <- c("DATE",	"EVENT CODE",	"TIME", 	"OBS",
                        	"SEA ST.", "VIS",	"C/C")
 
@@ -283,48 +225,26 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "numeric", "numeric", "numeric", 
                         "numeric", "text",  "text")
 
-data.offshore <- get.data(Year = Year,
-                          xls.file.name = xls.file.name.offshore,
-                          sheet.name = sheet.name.offshore,
-                          col.types = col.types.offshore,
-                          col.names = all_of(col.names.offshore),
-                          start.time = start.time, 
-                          max.shift = 4)
+out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                         col.types.inshore, col.types.offshore,
+                         col.names.inshore, col.names.offshore,
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time, max.shift = 5)
 
-data.offshore %>% 
-  filter(Mother_Calf > 0) %>%
-  rbind(data.inshore) %>%
-  arrange(Date.date, Minutes_since_0000) %>% 
-  extract.all.vars() -> data.all
+files <- file.names(out.dir, Year)
 
+if (!file.exists(files$all))
+  write_csv(out.list$data.all,
+            file = files$all)
 
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
+if (!file.exists(files$shift))
+  write_csv(out.list$data.shift,
+            file = files$shift)
 
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
-
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, T0 = start.time) #%>% extract.shift.vars()
-
-formatted.all.data <- format.output(data.shift, max.shift = max(data.shift$Shift))
-
-
-if (!file.exists(out.file.name.all))
-  write_csv(data.all,
-            file = out.file.name.all)
-
-if (!file.exists(out.file.name.shift))
-  write_csv(data.shift,
-            file = out.file.name.shift)
-
-if (!file.exists(out.file.name.formatted))
-  write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+if (!file.exists(files$formatted))
+  write_csv(out.list$formatted.all.data,
+            file = files$formatted, 
             quote = "none",
             na = "")
 
@@ -358,16 +278,6 @@ col.types.inshore <- c("date", "numeric", "text", "numeric", "numeric",
                        "text", "numeric", "text", "text", 
                        "text")
 
-data.inshore <- get.data(Year = Year, 
-                         xls.file.name = xls.file.name.inshore, 
-                         sheet.name = sheet.name.inshore,
-                         col.types = col.types.inshore, 
-                         col.names = col.names.inshore, 
-                         start.time = start.time,
-                         max.shift = 5)  %>%
-  mutate(Area = "in")
-  
-
 col.names.offshore <- c("DATE",	"EVENT CODE",	"TIME", "OBS",
                         "S STATE", "VIS", "COW/CA")
 
@@ -375,46 +285,26 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "text", "numeric", 
                         "text", "text",  "numeric", "text")
 
-data.offshore <- get.data(Year = Year,
-                          xls.file.name = xls.file.name.offshore,
-                          sheet.name = sheet.name.offshore,
-                          col.types = col.types.offshore,
-                          col.names = all_of(col.names.offshore),
-                          start.time = start.time, 
-                          max.shift = 5)
+out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                         col.types.inshore, col.types.offshore,
+                         col.names.inshore, col.names.offshore,
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time, max.shift = 5)
 
-data.offshore %>% 
-  filter(Mother_Calf > 0) %>%
-  rbind(data.inshore) %>%
-  arrange(Date.date, Minutes_since_0000) %>% 
-  extract.all.vars() -> data.all
+files <- file.names(out.dir, Year)
 
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
+if (!file.exists(files$all))
+  write_csv(out.list$data.all,
+            file = files$all)
 
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
+if (!file.exists(files$shift))
+  write_csv(out.list$data.shift,
+            file = files$shift)
 
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, T0 = start.time) #%>% extract.shift.vars()
-
-formatted.all.data <- format.output(data.shift, max.shift = max(data.shift$Shift))
-
-if (!file.exists(out.file.name.all))
-  write_csv(data.all,
-            file = out.file.name.all)
-
-if (!file.exists(out.file.name.shift))
-  write_csv(data.shift,
-            file = out.file.name.shift)
-
-if (!file.exists(out.file.name.formatted))
-  write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+if (!file.exists(files$formatted))
+  write_csv(out.list$formatted.all.data,
+            file = files$formatted, 
             quote = "none",
             na = "")
 
@@ -426,9 +316,13 @@ if (!file.exists(out.file.name.formatted))
 ## 1998 START HERE 2023-05-08
 
 ```{r}
+# Inshore:
+# Row 388 Time 100 has been changed to 1000 2023-05-09
+
+
 Year <- 1998
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+start.time <- "630"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -444,16 +338,6 @@ col.types.inshore <- c("date", "numeric", "text", "numeric",
                        "numeric", "text", "text", "text", 
                        "text", "text")
 
-
-data.inshore <- get.data(Year = Year, 
-                         xls.file.name = xls.file.name.inshore, 
-                         sheet.name = sheet.name.inshore,
-                         col.types = col.types.inshore, 
-                         col.names = col.names.inshore, 
-                         start.time = start.time,
-                         max.shift = 5)  %>%
-  mutate(Area = "in")
-
 col.names.offshore <- c("Date",	"Event Code",	"Time",	"Obs",	
                         "Vis",	"SeaState",	"c/c")
 
@@ -461,50 +345,26 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
   
-data.offshore <- get.data(Year = Year,
-                          xls.file.name = xls.file.name.offshore,
-                          sheet.name = sheet.name.offshore,
-                          col.types = col.types.offshore,
-                          col.names = all_of(col.names.offshore),
-                          start.time = start.time, 
-                          max.shift = 5)
+out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                         col.types.inshore, col.types.offshore,
+                         col.names.inshore, col.names.offshore,
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time, max.shift = 5)
 
-data.offshore %>% 
-  filter(Mother_Calf > 0) %>%
-  rbind(data.inshore) %>%
-  arrange(Date.date, Minutes_since_0000) %>% 
-  extract.all.vars() -> data.all
+files <- file.names(out.dir, Year)
 
+if (!file.exists(files$all))
+  write_csv(out.list$data.all,
+            file = files$all)
 
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
+if (!file.exists(files$shift))
+  write_csv(out.list$data.shift,
+            file = files$shift)
 
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
-
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, T0 = start.time) #%>% extract.shift.vars()
-
-formatted.all.data <- format.output(data.shift, max.shift = max(data.shift$Shift))
-
-
-if (!file.exists(out.file.name.all))
-  write_csv(data.all,
-            file = out.file.name.all)
-
-if (!file.exists(out.file.name.shift))
-  write_csv(data.shift,
-            file = out.file.name.shift)
-
-if (!file.exists(out.file.name.formatted))
-  write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+if (!file.exists(files$formatted))
+  write_csv(out.list$formatted.all.data,
+            file = files$formatted, 
             quote = "none",
             na = "")
 
@@ -516,9 +376,15 @@ if (!file.exists(out.file.name.formatted))
 ## 1999
 
 ```{r}
+# Inshore:
+# Row 395 Time = 100, changed to 1200 2023-05-09
+
+# Offshore
+# Row 997 Time = 100. changed to 1300 2023-05-09
+
 Year <- 1999
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+start.time <- "630"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -534,19 +400,6 @@ col.types.inshore <- c("date", "numeric", "text", "numeric",
                        "numeric", "text", "text", "text",
                        "text", "text", "text")
 
-# data.out <- read_excel(xls.file.name.inshore,
-#                          sheet = sheet.name.inshore,
-#                          col_types = col.types.inshore)
-#                        
-# data.inshore <- get.data(Year = Year,
-#                            dir.name = dir.name,
-#                            xls.file.name = xls.file.name.inshore,
-#                            sheet.name = sheet.name.inshore,
-#                            col.types = col.types.inshore,
-#                            col.names = col.names.inshore,
-#                            area.name = "inshore",
-#                            start.time = start.time)
-
 col.names.offshore <- c("Date",	"Event Code",	"Time",	"Observer",	
                         "Vis. Code",	"Sea State",	"C/C")
 
@@ -554,69 +407,26 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
-# 
-# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-#                           col.types.inshore, col.types.offshore,
-#                           col.names.inshore, col.names.offshore,
-#                           Year, xls.file.name.inshore, xls.file.name.offshore,
-#                           start.time, max.shift = 4)%>% 
-#   extract.all.vars()
+out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                         col.types.inshore, col.types.offshore,
+                         col.names.inshore, col.names.offshore,
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time, max.shift = 5)
 
-data.inshore <- get.data(Year = Year, 
-                         xls.file.name = xls.file.name.inshore, 
-                         sheet.name = sheet.name.inshore,
-                         col.types = col.types.inshore, 
-                         col.names = col.names.inshore, 
-                         start.time = start.time,
-                         max.shift = 4)  %>%
-  mutate(Area = "in")
-  
-data.offshore <- get.data(Year = Year,
-                          xls.file.name = xls.file.name.offshore,
-                          sheet.name = sheet.name.offshore,
-                          col.types = col.types.offshore,
-                          col.names = all_of(col.names.offshore),
-                          start.time = start.time, 
-                          max.shift = 4)
+files <- file.names(out.dir, Year)
 
-data.offshore %>% 
-  filter(Mother_Calf > 0) %>%
-  rbind(data.inshore) %>%
-  arrange(Date.date, Minutes_since_0000) %>% 
-  extract.all.vars() -> data.all
+if (!file.exists(files$all))
+  write_csv(out.list$data.all,
+            file = files$all)
 
+if (!file.exists(files$shift))
+  write_csv(out.list$data.shift,
+            file = files$shift)
 
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
-
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
-
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, 
-                          start.hr = 7, 
-                          end.hr = 19, 
-                          max.shift = 4)%>% extract.shift.vars()
-
-# same as before. Vis and SeaState are probably not filled in. 
-
-formatted.all.data <- format.output(data.shift, max.shift = 4)
-
-if (!file.exists(out.file.name.all))
-  write_csv(data.all,
-            file = out.file.name.all)
-
-if (!file.exists(out.file.name.shift))
-  write_csv(data.shift,
-            file = out.file.name.shift)
-
-if (!file.exists(out.file.name.formatted))
-  write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+if (!file.exists(files$formatted))
+  write_csv(out.list$formatted.all.data,
+            file = files$formatted, 
             quote = "none",
             na = "")
 ```
@@ -628,7 +438,7 @@ if (!file.exists(out.file.name.formatted))
 ```{r}
 Year <- 2000
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+start.time <- "630"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -644,19 +454,6 @@ col.types.inshore <- c("date", "numeric", "text", "numeric",
                        "text", "text", "text", "text",
                        "text", "text")
 
-# data.out <- read_excel(xls.file.name.inshore,
-#                          sheet = sheet.name.inshore,
-#                          col_types = col.types.inshore)
-#                        
-# data.inshore <- get.data(Year = Year,
-#                            dir.name = dir.name,
-#                            xls.file.name = xls.file.name.inshore,
-#                            sheet.name = sheet.name.inshore,
-#                            col.types = col.types.inshore,
-#                            col.names = col.names.inshore,
-#                            area.name = "inshore",
-#                            start.time = start.time)
-
 col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS.",
                         "VIS CODE",	"SEA STATE",	"C/C")
 
@@ -664,69 +461,26 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text")
 
+out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                         col.types.inshore, col.types.offshore,
+                         col.names.inshore, col.names.offshore,
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time, max.shift = 5)
 
-# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-#                           col.types.inshore, col.types.offshore,
-#                           col.names.inshore, col.names.offshore,
-#                           Year, xls.file.name.inshore, xls.file.name.offshore,
-#                           start.time, max.shift = 4)%>% 
-#   extract.all.vars()
+files <- file.names(out.dir, Year)
 
-data.inshore <- get.data(Year = Year, 
-                         xls.file.name = xls.file.name.inshore, 
-                         sheet.name = sheet.name.inshore,
-                         col.types = col.types.inshore, 
-                         col.names = col.names.inshore, 
-                         start.time = start.time,
-                         max.shift = 4)  %>%
-  mutate(Area = "in")
-  
-data.offshore <- get.data(Year = Year,
-                          xls.file.name = xls.file.name.offshore,
-                          sheet.name = sheet.name.offshore,
-                          col.types = col.types.offshore,
-                          col.names = all_of(col.names.offshore),
-                          start.time = start.time, 
-                          max.shift = 4)
+if (!file.exists(files$all))
+  write_csv(out.list$data.all,
+            file = files$all)
 
-data.offshore %>% 
-  filter(Mother_Calf > 0) %>%
-  rbind(data.inshore) %>%
-  arrange(Date.date, Minutes_since_0000) %>% 
-  extract.all.vars() -> data.all
+if (!file.exists(files$shift))
+  write_csv(out.list$data.shift,
+            file = files$shift)
 
-
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
-
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
-
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, 
-                          start.hr = 7, 
-                          end.hr = 19, 
-                          max.shift = 4)%>% extract.shift.vars()
-
-# same as before. Vis and SeaState are probably not filled in. 
-
-formatted.all.data <- format.output(data.shift, max.shift = 4)
-
-if (!file.exists(out.file.name.all))
-  write_csv(data.all,
-            file = out.file.name.all)
-
-if (!file.exists(out.file.name.shift))
-  write_csv(data.shift,
-            file = out.file.name.shift)
-
-if (!file.exists(out.file.name.formatted))
-  write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+if (!file.exists(files$formatted))
+  write_csv(out.list$formatted.all.data,
+            file = files$formatted, 
             quote = "none",
             na = "")
 
@@ -737,6 +491,16 @@ if (!file.exists(out.file.name.formatted))
 ## 2001
 
 ```{r}
+# Inshore:
+# Row 838 Time = 8.3. Changed to 830. 2023-05-09
+
+
+# Offshore:
+# Row 898 Time = 147. Changed to 1547. 2023-05-09
+# Row 458 Time = 13321. Changed to 1332. 2023-05-09
+# Row 921 Time = 130. Changed to 1730 (could be 1830). 2023-05-09
+
+
 Year <- 2001
 dir.name <- paste0("C_C ", Year)
 start.time <- "700"
@@ -755,19 +519,6 @@ col.types.inshore <- c("date", "numeric", "text", "numeric",
                        "text", "text", "text", "text",
                        "text", "text")
 
-# data.out <- read_excel(xls.file.name.inshore,
-#                          sheet = sheet.name.inshore,
-#                          col_types = col.types.inshore)
-#                        
-# data.inshore <- get.data(Year = Year,
-#                            dir.name = dir.name,
-#                            xls.file.name = xls.file.name.inshore,
-#                            sheet.name = sheet.name.inshore,
-#                            col.types = col.types.inshore,
-#                            col.names = col.names.inshore,
-#                            area.name = "inshore",
-#                            start.time = start.time)
-
 col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",
                         "VIS",	"SEA STATE",	"C/C")
 
@@ -775,69 +526,26 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                         col.types.inshore, col.types.offshore,
+                         col.names.inshore, col.names.offshore,
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time, max.shift = 5)
 
-# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-#                           col.types.inshore, col.types.offshore,
-#                           col.names.inshore, col.names.offshore,
-#                           Year, xls.file.name.inshore, xls.file.name.offshore,
-#                           start.time, max.shift = 4)%>% 
-#   extract.all.vars()
+files <- file.names(out.dir, Year)
 
-data.inshore <- get.data(Year = Year, 
-                         xls.file.name = xls.file.name.inshore, 
-                         sheet.name = sheet.name.inshore,
-                         col.types = col.types.inshore, 
-                         col.names = col.names.inshore, 
-                         start.time = start.time,
-                         max.shift = 4) %>%
-  mutate(Area = "in")
-  
-data.offshore <- get.data(Year = Year,
-                          xls.file.name = xls.file.name.offshore,
-                          sheet.name = sheet.name.offshore,
-                          col.types = col.types.offshore,
-                          col.names = all_of(col.names.offshore),
-                          start.time = start.time, 
-                          max.shift = 4)
+if (!file.exists(files$all))
+  write_csv(out.list$data.all,
+            file = files$all)
 
-data.offshore %>% 
-  filter(Mother_Calf > 0) %>%
-  rbind(data.inshore) %>%
-  arrange(Date.date, Minutes_since_0000) %>% 
-  extract.all.vars() -> data.all
+if (!file.exists(files$shift))
+  write_csv(out.list$data.shift,
+            file = files$shift)
 
-
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
-
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
-
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, 
-                          start.hr = 7, 
-                          end.hr = 19, 
-                          max.shift = 4)%>% extract.shift.vars()
-
-# same as before. Vis and SeaState are probably not filled in. 
-
-formatted.all.data <- format.output(data.shift, max.shift = 4)
-
-if (!file.exists(out.file.name.all))
-  write_csv(data.all,
-            file = out.file.name.all)
-
-if (!file.exists(out.file.name.shift))
-  write_csv(data.shift,
-            file = out.file.name.shift)
-
-if (!file.exists(out.file.name.formatted))
-  write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+if (!file.exists(files$formatted))
+  write_csv(out.list$formatted.all.data,
+            file = files$formatted, 
             quote = "none",
             na = "")
 
@@ -850,7 +558,7 @@ if (!file.exists(out.file.name.formatted))
 ```{r}
 Year <- 2002
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+start.time <- "630"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -866,15 +574,6 @@ col.types.inshore <- c("date", "numeric", "text", "numeric",
                        "text", "text", "text", "text",
                        "text", "text")
 
-# data.inshore <- get.data(Year = Year,
-#                            dir.name = dir.name,
-#                            xls.file.name = xls.file.name.inshore,
-#                            sheet.name = sheet.name.inshore,
-#                            col.types = col.types.inshore,
-#                            col.names = col.names.inshore,
-#                            area.name = "inshore",
-#                            start.time = start.time)
-
 col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",
                         "VIS",	"SS",	"C/C")
 
@@ -882,67 +581,26 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
-# 
-# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-#                           col.types.inshore, col.types.offshore,
-#                           col.names.inshore, col.names.offshore,
-#                           Year, xls.file.name.inshore, xls.file.name.offshore,
-#                           start.time, max.shift = 4)%>% 
-#   extract.all.vars()
+out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                         col.types.inshore, col.types.offshore,
+                         col.names.inshore, col.names.offshore,
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time, max.shift = 5)
 
-data.inshore <- get.data(Year = Year, 
-                         xls.file.name = xls.file.name.inshore, 
-                         sheet.name = sheet.name.inshore,
-                         col.types = col.types.inshore, 
-                         col.names = col.names.inshore, 
-                         start.time = start.time,
-                         max.shift = 4) %>%
-  mutate(Area = "in")
-  
-data.offshore <- get.data(Year = Year,
-                          xls.file.name = xls.file.name.offshore,
-                          sheet.name = sheet.name.offshore,
-                          col.types = col.types.offshore,
-                          col.names = all_of(col.names.offshore),
-                          start.time = start.time, 
-                          max.shift = 4)
+files <- file.names(out.dir, Year)
 
-data.offshore %>% 
-  filter(Mother_Calf > 0) %>%
-  rbind(data.inshore) %>%
-  arrange(Date.date, Minutes_since_0000) %>% 
-  extract.all.vars() -> data.all
+if (!file.exists(files$all))
+  write_csv(out.list$data.all,
+            file = files$all)
 
+if (!file.exists(files$shift))
+  write_csv(out.list$data.shift,
+            file = files$shift)
 
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
-
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
-
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, 
-                          start.hr = 7, 
-                          end.hr = 19, 
-                          max.shift = 4)%>% extract.shift.vars()
-
-formatted.all.data <- format.output(data.shift, max.shift = 4)
-
-if (!file.exists(out.file.name.all))
-  write_csv(data.all,
-            file = out.file.name.all)
-
-if (!file.exists(out.file.name.shift))
-  write_csv(data.shift,
-            file = out.file.name.shift)
-
-if (!file.exists(out.file.name.formatted))
-  write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+if (!file.exists(files$formatted))
+  write_csv(out.list$formatted.all.data,
+            file = files$formatted, 
             quote = "none",
             na = "")
 
@@ -955,7 +613,7 @@ if (!file.exists(out.file.name.formatted))
 ```{r}
 Year <- 2003
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+start.time <- "630"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -971,15 +629,6 @@ col.types.inshore <- c("date", "numeric", "text", "numeric",
                        "text", "text", "text", "text",
                        "text", "text")
 
-# data.inshore <- get.data(Year = Year,
-#                            dir.name = dir.name,
-#                            xls.file.name = xls.file.name.inshore,
-#                            sheet.name = sheet.name.inshore,
-#                            col.types = col.types.inshore,
-#                            col.names = col.names.inshore,
-#                            area.name = "inshore",
-#                            start.time = start.time)
-
 col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",
                         "VIS",	"SS",	"C/C")
 
@@ -987,69 +636,26 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
-# 
-# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-#                           col.types.inshore, col.types.offshore,
-#                           col.names.inshore, col.names.offshore,
-#                           Year, xls.file.name.inshore, xls.file.name.offshore,
-#                           start.time, max.shift = 4)%>% 
-#   extract.all.vars()
+out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                         col.types.inshore, col.types.offshore,
+                         col.names.inshore, col.names.offshore,
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time, max.shift = 5)
 
-data.inshore <- get.data(Year = Year, 
-                         xls.file.name = xls.file.name.inshore, 
-                         sheet.name = sheet.name.inshore,
-                         col.types = col.types.inshore, 
-                         col.names = col.names.inshore, 
-                         start.time = start.time,
-                         max.shift = 4) %>%
-  mutate(Area = "in")
-  
-data.offshore <- get.data(Year = Year,
-                          xls.file.name = xls.file.name.offshore,
-                          sheet.name = sheet.name.offshore,
-                          col.types = col.types.offshore,
-                          col.names = all_of(col.names.offshore),
-                          start.time = start.time, 
-                          max.shift = 4)
+files <- file.names(out.dir, Year)
 
-data.offshore %>% 
-  filter(Mother_Calf > 0) %>%
-  rbind(data.inshore) %>%
-  arrange(Date.date, Minutes_since_0000) %>% 
-  extract.all.vars() -> data.all
+if (!file.exists(files$all))
+  write_csv(out.list$data.all,
+            file = files$all)
 
+if (!file.exists(files$shift))
+  write_csv(out.list$data.shift,
+            file = files$shift)
 
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
-
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
-
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, 
-                          start.hr = 7, 
-                          end.hr = 19, 
-                          max.shift = 4)%>% extract.shift.vars()
-
-# same as before. Vis and SeaState are probably not filled in. 
-
-formatted.all.data <- format.output(data.shift, max.shift = 4)
-
-if (!file.exists(out.file.name.all))
-  write_csv(data.all,
-            file = out.file.name.all)
-
-if (!file.exists(out.file.name.shift))
-  write_csv(data.shift,
-            file = out.file.name.shift)
-
-if (!file.exists(out.file.name.formatted))
-  write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+if (!file.exists(files$formatted))
+  write_csv(out.list$formatted.all.data,
+            file = files$formatted, 
             quote = "none",
             na = "")
 
@@ -1063,7 +669,7 @@ if (!file.exists(out.file.name.formatted))
 ```{r}
 Year <- 2004
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+start.time <- "630"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[3])
@@ -1079,15 +685,6 @@ col.types.inshore <- c("date", "numeric", "text", "numeric",
                        "text", "text", "text", "text",
                        "text", "text")
 
-# data.inshore <- get.data(Year = Year,
-#                            dir.name = dir.name,
-#                            xls.file.name = xls.file.name.inshore,
-#                            sheet.name = sheet.name.inshore,
-#                            col.types = col.types.inshore,
-#                            col.names = col.names.inshore,
-#                            area.name = "inshore",
-#                            start.time = start.time)
-
 col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",	
                         "VIS",	"SS",	"C/C")
 
@@ -1095,71 +692,27 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
-# 
-# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-#                           col.types.inshore, col.types.offshore,
-#                           col.names.inshore, col.names.offshore,
-#                           Year, xls.file.name.inshore, xls.file.name.offshore,
-#                           start.time, max.shift = 4)%>% 
-#   extract.all.vars()
-
-data.inshore <- get.data(Year = Year, 
-                         xls.file.name = xls.file.name.inshore, 
-                         sheet.name = sheet.name.inshore,
-                         col.types = col.types.inshore, 
-                         col.names = col.names.inshore, 
-                         start.time = start.time,
-                         max.shift = 4) %>%
-  mutate(Area = "in")
-  
-
-data.offshore <- get.data(Year = Year,
-                          xls.file.name = xls.file.name.offshore,
-                          sheet.name = sheet.name.offshore,
-                          col.types = col.types.offshore,
-                          col.names = all_of(col.names.offshore),
-                          start.time = start.time, 
-                          max.shift = 4)
-
-data.offshore %>% 
-  filter(Mother_Calf > 0) %>%
-  rbind(data.inshore) %>%
-  arrange(Date.date, Minutes_since_0000) %>% 
-  extract.all.vars() -> data.all
+out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                         col.types.inshore, col.types.offshore,
+                         col.names.inshore, col.names.offshore,
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time, max.shift = 5)
 
 
+files <- file.names(out.dir, Year)
 
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
+if (!file.exists(files$all))
+  write_csv(out.list$data.all,
+            file = files$all)
 
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
+if (!file.exists(files$shift))
+  write_csv(out.list$data.shift,
+            file = files$shift)
 
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, 
-                          start.hr = 7, 
-                          end.hr = 19, 
-                          max.shift = 4)%>% extract.shift.vars()
-
-# same as before. Vis and SeaState are probably not filled in. 
-
-formatted.all.data <- format.output(data.shift, max.shift = 4)
-
-if (!file.exists(out.file.name.all))
-  write_csv(data.all,
-            file = out.file.name.all)
-
-if (!file.exists(out.file.name.shift))
-  write_csv(data.shift,
-            file = out.file.name.shift)
-
-if (!file.exists(out.file.name.formatted))
-  write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+if (!file.exists(files$formatted))
+  write_csv(out.list$formatted.all.data,
+            file = files$formatted, 
             quote = "none",
             na = "")
 
@@ -1172,7 +725,7 @@ if (!file.exists(out.file.name.formatted))
 ```{r}
 Year <- 2005
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+start.time <- "630"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -1188,19 +741,6 @@ col.types.inshore <- c("date", "numeric", "text", "numeric",
                        "text", "text", "text", "text", 
                        "text", "text")
 
-# data.out <- read_excel(xls.file.name.inshore,
-#                          sheet = sheet.name.inshore,
-#                          col_types = col.types.inshore)
-
-# data.inshore <- get.data(Year = Year,
-#                          dir.name = dir.name,
-#                          xls.file.name = xls.file.name.inshore,
-#                          sheet.name = sheet.name.inshore,
-#                          col.types = col.types.inshore,
-#                          col.names = col.names.inshore,
-#                          area.name = "inshore",
-#                          start.time = start.time)
-
 col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",	
                         "VIS",	"SS",	"C/C")
 
@@ -1208,67 +748,26 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
-# 
-# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-#                           col.types.inshore, col.types.offshore,
-#                           col.names.inshore, col.names.offshore,
-#                           Year, xls.file.name.inshore, xls.file.name.offshore,
-#                           start.time, max.shift = 4)%>% 
-#   extract.all.vars()
+out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                         col.types.inshore, col.types.offshore,
+                         col.names.inshore, col.names.offshore,
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time, max.shift = 5)
 
-data.inshore <- get.data(Year = Year, 
-                         xls.file.name = xls.file.name.inshore, 
-                         sheet.name = sheet.name.inshore,
-                         col.types = col.types.inshore, 
-                         col.names = col.names.inshore, 
-                         start.time = start.time,
-                         max.shift = 4)  %>%
-  mutate(Area = "in")
-  
-data.offshore <- get.data(Year = Year,
-                          xls.file.name = xls.file.name.offshore,
-                          sheet.name = sheet.name.offshore,
-                          col.types = col.types.offshore,
-                          col.names = all_of(col.names.offshore),
-                          start.time = start.time, 
-                          max.shift = 4)
+files <- file.names(out.dir, Year)
 
-data.offshore %>% 
-  filter(Mother_Calf > 0) %>%
-  rbind(data.inshore) %>%
-  arrange(Date.date, Minutes_since_0000) %>% 
-  extract.all.vars() -> data.all
+if (!file.exists(files$all))
+  write_csv(out.list$data.all,
+            file = files$all)
 
+if (!file.exists(files$shift))
+  write_csv(out.list$data.shift,
+            file = files$shift)
 
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
-
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
-
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, 
-                          start.hr = 7, 
-                          end.hr = 19, 
-                          max.shift = 4)%>% extract.shift.vars()
-
-formatted.all.data <- format.output(data.shift, max.shift = 4)
-
-if (!file.exists(out.file.name.all))
-  write_csv(data.all,
-            file = out.file.name.all)
-
-if (!file.exists(out.file.name.shift))
-  write_csv(data.shift,
-            file = out.file.name.shift)
-
-if (!file.exists(out.file.name.formatted))
-  write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+if (!file.exists(files$formatted))
+  write_csv(out.list$formatted.all.data,
+            file = files$formatted, 
             quote = "none",
             na = "")
 ```
@@ -1279,9 +778,12 @@ if (!file.exists(out.file.name.formatted))
 ## 2006
 
 ```{r}
+# Offshore:
+# Row 437 Time = 9.9. Changed to 939. 3 is closest to decimal point. 2023-05-09
+
 Year <- 2006
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+start.time <- "630"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -1304,70 +806,26 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
-# 
-# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-#                           col.types.inshore, col.types.offshore,
-#                           col.names.inshore, col.names.offshore,
-#                           Year, xls.file.name.inshore, xls.file.name.offshore,
-#                           start.time, max.shift = 4)%>% 
-#   extract.all.vars()
+out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                         col.types.inshore, col.types.offshore,
+                         col.names.inshore, col.names.offshore,
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time, max.shift = 5)
 
-data.inshore <- get.data(Year = Year, 
-                         xls.file.name = xls.file.name.inshore, 
-                         sheet.name = sheet.name.inshore,
-                         col.types = col.types.inshore, 
-                         col.names = col.names.inshore, 
-                         start.time = start.time,
-                         max.shift = 4) %>%
-  mutate(Area = "in")
-  
+files <- file.names(out.dir, Year)
 
-data.offshore <- get.data(Year = Year,
-                          xls.file.name = xls.file.name.offshore,
-                          sheet.name = sheet.name.offshore,
-                          col.types = col.types.offshore,
-                          col.names = all_of(col.names.offshore),
-                          start.time = start.time, 
-                          max.shift = 4)
+if (!file.exists(files$all))
+  write_csv(out.list$data.all,
+            file = files$all)
 
-data.offshore %>% 
-  filter(Mother_Calf > 0) %>%
-  rbind(data.inshore) %>%
-  arrange(Date.date, Minutes_since_0000) %>% 
-  extract.all.vars() -> data.all
+if (!file.exists(files$shift))
+  write_csv(out.list$data.shift,
+            file = files$shift)
 
-
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
-
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
-
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, 
-                          start.hr = 7, 
-                          end.hr = 19, 
-                          max.shift = 4)%>% extract.shift.vars()
-
-# same as before. Vis and SeaState are probably not filled in. 
-
-formatted.all.data <- format.output(data.shift, max.shift = 4)
-
-if (!file.exists(out.file.name.all))
-  write_csv(data.all,
-            file = out.file.name.all)
-
-if (!file.exists(out.file.name.shift))
-  write_csv(data.shift,
-            file = out.file.name.shift)
-
-if (!file.exists(out.file.name.formatted))
-  write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+if (!file.exists(files$formatted))
+  write_csv(out.list$formatted.all.data,
+            file = files$formatted, 
             quote = "none",
             na = "")
 
@@ -1396,20 +854,6 @@ col.types.inshore <- c("date", "numeric", "text", "numeric",
                        "text", "text", "text", "text", 
                        "text", "text", "text", "text")
 
-# data.out <- read_excel(xls.file.name.inshore,
-#                          sheet = sheet.name.inshore,
-#                          col_types = col.types.inshore)
-
-# data.inshore <- get.data(Year = Year,
-#                          dir.name = dir.name,
-#                          xls.file.name = xls.file.name.inshore,
-#                          sheet.name = sheet.name.inshore,
-#                          col.types = col.types.inshore,
-#                          col.names = col.names.inshore,
-#                          area.name = "inshore",
-#                          start.time = start.time)
-
-
 col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",	
                         "VIS",	"SEA ST",	"C/C")
 
@@ -1417,70 +861,26 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
-# 
-# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-#                           col.types.inshore, col.types.offshore,
-#                           col.names.inshore, col.names.offshore,
-#                           Year, xls.file.name.inshore, xls.file.name.offshore,
-#                           start.time, max.shift = 4)%>% 
-#   extract.all.vars()
+out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                         col.types.inshore, col.types.offshore,
+                         col.names.inshore, col.names.offshore,
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time, max.shift = 5)
 
-data.inshore <- get.data(Year = Year, 
-                         xls.file.name = xls.file.name.inshore, 
-                         sheet.name = sheet.name.inshore,
-                         col.types = col.types.inshore, 
-                         col.names = col.names.inshore, 
-                         start.time = start.time,
-                         max.shift = 4) %>%
-  mutate(Area = "in")
-  
+files <- file.names(out.dir, Year)
 
-data.offshore <- get.data(Year = Year,
-                          xls.file.name = xls.file.name.offshore,
-                          sheet.name = sheet.name.offshore,
-                          col.types = col.types.offshore,
-                          col.names = all_of(col.names.offshore),
-                          start.time = start.time, 
-                          max.shift = 4)
+if (!file.exists(files$all))
+  write_csv(out.list$data.all,
+            file = files$all)
 
-data.offshore %>% 
-  filter(Mother_Calf > 0) %>%
-  rbind(data.inshore) %>%
-  arrange(Date.date, Minutes_since_0000) %>% 
-  extract.all.vars() -> data.all
+if (!file.exists(files$shift))
+  write_csv(out.list$data.shift,
+            file = files$shift)
 
-
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
-
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
-
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, 
-                          start.hr = 7, 
-                          end.hr = 19, 
-                          max.shift = 4)%>% extract.shift.vars()
-
-# same as before. Vis and SeaState are probably not filled in. 
-
-formatted.all.data <- format.output(data.shift, max.shift = 4)
-
-if (!file.exists(out.file.name.all))
-  write_csv(data.all,
-            file = out.file.name.all)
-
-if (!file.exists(out.file.name.shift))
-  write_csv(data.shift,
-            file = out.file.name.shift)
-
-if (!file.exists(out.file.name.formatted))
-  write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+if (!file.exists(files$formatted))
+  write_csv(out.list$formatted.all.data,
+            file = files$formatted, 
             quote = "none",
             na = "")
 
@@ -1517,69 +917,26 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
-# 
-# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-#                           col.types.inshore, col.types.offshore,
-#                           col.names.inshore, col.names.offshore,
-#                           Year, xls.file.name.inshore, xls.file.name.offshore,
-#                           start.time, max.shift = 4)%>% 
-#   extract.all.vars()
+out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                         col.types.inshore, col.types.offshore,
+                         col.names.inshore, col.names.offshore,
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time, max.shift = 5)
 
-data.inshore <- get.data(Year = Year, 
-                         xls.file.name = xls.file.name.inshore, 
-                         sheet.name = sheet.name.inshore,
-                         col.types = col.types.inshore, 
-                         col.names = col.names.inshore, 
-                         start.time = start.time,
-                         max.shift = 4) %>%
-  mutate(Area = "in")
-  
-data.offshore <- get.data(Year = Year,
-                          xls.file.name = xls.file.name.offshore,
-                          sheet.name = sheet.name.offshore,
-                          col.types = col.types.offshore,
-                          col.names = all_of(col.names.offshore),
-                          start.time = start.time, 
-                          max.shift = 4)
+files <- file.names(out.dir, Year)
 
-data.offshore %>% 
-  filter(Mother_Calf > 0) %>%
-  rbind(data.inshore) %>%
-  arrange(Date.date, Minutes_since_0000) %>% 
-  extract.all.vars() -> data.all
+if (!file.exists(files$all))
+  write_csv(out.list$data.all,
+            file = files$all)
 
+if (!file.exists(files$shift))
+  write_csv(out.list$data.shift,
+            file = files$shift)
 
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
-
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
-
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, 
-                          start.hr = 7, 
-                          end.hr = 19, 
-                          max.shift = 4)%>% extract.shift.vars()
-
-# same as before. Vis and SeaState are probably not filled in. 
-
-formatted.all.data <- format.output(data.shift, max.shift = 4)
-
-if (!file.exists(out.file.name.all))
-  write_csv(data.all,
-            file = out.file.name.all)
-
-if (!file.exists(out.file.name.shift))
-  write_csv(data.shift,
-            file = out.file.name.shift)
-
-if (!file.exists(out.file.name.formatted))
-  write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+if (!file.exists(files$formatted))
+  write_csv(out.list$formatted.all.data,
+            file = files$formatted, 
             quote = "none",
             na = "")
 
@@ -1607,7 +964,6 @@ col.types.inshore <- c("date", "numeric", "text", "numeric",
                        "text", "text", "text", "text", 
                        "text", "text", "text")
 
-
 col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",	
                         "VIS",	"SEA ST",	"C/C")
 
@@ -1615,69 +971,26 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
-# 
-# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-#                           col.types.inshore, col.types.offshore,
-#                           col.names.inshore, col.names.offshore,
-#                           Year, xls.file.name.inshore, xls.file.name.offshore,
-#                           start.time, max.shift = 4)%>% 
-#   extract.all.vars()
+out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                         col.types.inshore, col.types.offshore,
+                         col.names.inshore, col.names.offshore,
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time, max.shift = 5)
 
-data.inshore <- get.data(Year = Year, 
-                         xls.file.name = xls.file.name.inshore, 
-                         sheet.name = sheet.name.inshore,
-                         col.types = col.types.inshore, 
-                         col.names = col.names.inshore, 
-                         start.time = start.time,
-                         max.shift = 4) %>%
-  mutate(Area = "in")
-  
+files <- file.names(out.dir, Year)
 
-data.offshore <- get.data(Year = Year,
-                          xls.file.name = xls.file.name.offshore,
-                          sheet.name = sheet.name.offshore,
-                          col.types = col.types.offshore,
-                          col.names = all_of(col.names.offshore),
-                          start.time = start.time, 
-                          max.shift = 4)
+if (!file.exists(files$all))
+  write_csv(out.list$data.all,
+            file = files$all)
 
-data.offshore %>% 
-  filter(Mother_Calf > 0) %>%
-  rbind(data.inshore) %>%
-  arrange(Date.date, Minutes_since_0000) %>% 
-  extract.all.vars() -> data.all
+if (!file.exists(files$shift))
+  write_csv(out.list$data.shift,
+            file = files$shift)
 
-
-
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
-
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
-
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, 
-                          start.hr = 7, 
-                          end.hr = 19, 
-                          max.shift = 4)%>% extract.shift.vars()
-
-formatted.all.data <- format.output(data.shift, max.shift = 4)
-
-if (!file.exists(out.file.name.all))
-  write_csv(data.all,
-            file = out.file.name.all)
-
-if (!file.exists(out.file.name.shift))
-  write_csv(data.shift,
-            file = out.file.name.shift)
-
-if (!file.exists(out.file.name.formatted))
-  write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+if (!file.exists(files$formatted))
+  write_csv(out.list$formatted.all.data,
+            file = files$formatted, 
             quote = "none",
             na = "")
 
@@ -1709,7 +1022,6 @@ col.types.inshore <- c("date", "numeric", "text", "numeric",
                        "text", "text", "text", "text", 
                        "text", "text", "text")
 
-
 col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",	
                         "VIS",	"SEA ST",	"C/C")
 
@@ -1717,70 +1029,26 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
-# 
-# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-#                           col.types.inshore, col.types.offshore,
-#                           col.names.inshore, col.names.offshore,
-#                           Year, xls.file.name.inshore, xls.file.name.offshore,
-#                           start.time, max.shift = 4)%>% 
-#   extract.all.vars()
+out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                         col.types.inshore, col.types.offshore,
+                         col.names.inshore, col.names.offshore,
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time, max.shift = 5)
 
-data.inshore <- get.data(Year = Year, 
-                         xls.file.name = xls.file.name.inshore, 
-                         sheet.name = sheet.name.inshore,
-                         col.types = col.types.inshore, 
-                         col.names = col.names.inshore, 
-                         start.time = start.time,
-                         max.shift = 4) %>%
-  mutate(Area = "in")
-  
-data.offshore <- get.data(Year = Year,
-                          xls.file.name = xls.file.name.offshore,
-                          sheet.name = sheet.name.offshore,
-                          col.types = col.types.offshore,
-                          col.names = all_of(col.names.offshore),
-                          start.time = start.time, 
-                          max.shift = 4)
+files <- file.names(out.dir, Year)
 
-data.offshore %>% 
-  filter(Mother_Calf > 0) %>%
-  rbind(data.inshore) %>%
-  arrange(Date.date, Minutes_since_0000) %>% 
-  extract.all.vars() -> data.all
+if (!file.exists(files$all))
+  write_csv(out.list$data.all,
+            file = files$all)
 
+if (!file.exists(files$shift))
+  write_csv(out.list$data.shift,
+            file = files$shift)
 
-
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
-
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
-
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, 
-                          start.hr = 7, 
-                          end.hr = 19, 
-                          max.shift = 4)%>% extract.shift.vars()
-
-# same as before. Vis and SeaState are probably not filled in. 
-
-formatted.all.data <- format.output(data.shift, max.shift = 4)
-
-if (!file.exists(out.file.name.all))
-  write_csv(data.all,
-            file = out.file.name.all)
-
-if (!file.exists(out.file.name.shift))
-  write_csv(data.shift,
-            file = out.file.name.shift)
-
-if (!file.exists(out.file.name.formatted))
-  write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+if (!file.exists(files$formatted))
+  write_csv(out.list$formatted.all.data,
+            file = files$formatted, 
             quote = "none",
             na = "")
 ```
@@ -1808,7 +1076,6 @@ col.types.inshore <- c("date", "numeric", "text", "numeric",
                        "text", "text", "text", "text", 
                        "text", "text", "text")
 
-
 col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",	
                         "VIS",	"SEA ST",	"C/C")
 
@@ -1816,70 +1083,26 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
-# 
-# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-#                           col.types.inshore, col.types.offshore,
-#                           col.names.inshore, col.names.offshore,
-#                           Year, xls.file.name.inshore, xls.file.name.offshore,
-#                           start.time, max.shift = 4)%>% 
-#   extract.all.vars()
+out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                         col.types.inshore, col.types.offshore,
+                         col.names.inshore, col.names.offshore,
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time, max.shift = 4)
 
-data.inshore <- get.data(Year = Year, 
-                         xls.file.name = xls.file.name.inshore, 
-                         sheet.name = sheet.name.inshore,
-                         col.types = col.types.inshore, 
-                         col.names = col.names.inshore, 
-                         start.time = start.time,
-                         max.shift = 4) %>%
-  mutate(Area = "in")
-  
-data.offshore <- get.data(Year = Year,
-                          xls.file.name = xls.file.name.offshore,
-                          sheet.name = sheet.name.offshore,
-                          col.types = col.types.offshore,
-                          col.names = all_of(col.names.offshore),
-                          start.time = start.time, 
-                          max.shift = 4)
+files <- file.names(out.dir, Year)
 
-data.offshore %>% 
-  filter(Mother_Calf > 0) %>%
-  rbind(data.inshore) %>%
-  arrange(Date.date, Minutes_since_0000) %>% 
-  extract.all.vars() -> data.all
+if (!file.exists(files$all))
+  write_csv(out.list$data.all,
+            file = files$all)
 
+if (!file.exists(files$shift))
+  write_csv(out.list$data.shift,
+            file = files$shift)
 
-
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
-
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
-
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, 
-                          start.hr = 7, 
-                          end.hr = 19, 
-                          max.shift = 4)%>% extract.shift.vars()
-
-# same as before. Vis and SeaState are probably not filled in. 
-
-formatted.all.data <- format.output(data.shift, max.shift = 4)
-
-if (!file.exists(out.file.name.all))
-  write_csv(data.all,
-            file = out.file.name.all)
-
-if (!file.exists(out.file.name.shift))
-  write_csv(data.shift,
-            file = out.file.name.shift)
-
-if (!file.exists(out.file.name.formatted))
-  write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+if (!file.exists(files$formatted))
+  write_csv(out.list$formatted.all.data,
+            file = files$formatted, 
             quote = "none",
             na = "")
 
@@ -1890,6 +1113,9 @@ if (!file.exists(out.file.name.formatted))
 ## 2012
 
 ```{r}
+# Inshore:
+# Row 311 TIME = 100. Changed to 1600. 2023-05-09
+
 Year <- 2012
 dir.name <- paste0("C_C ", Year)
 start.time <- "700"
@@ -1908,7 +1134,6 @@ col.types.inshore <- c("date", "numeric", "text", "numeric",
                        "text", "text", "text", "text", 
                        "text", "text", "text")
 
-
 col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",	
                         "VIS",	"SEA ST",	"C/C")
 
@@ -1916,70 +1141,26 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
-# 
-# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-#                           col.types.inshore, col.types.offshore,
-#                           col.names.inshore, col.names.offshore,
-#                           Year, xls.file.name.inshore, xls.file.name.offshore,
-#                           start.time, max.shift = 4)%>% 
-#   extract.all.vars()
+out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                         col.types.inshore, col.types.offshore,
+                         col.names.inshore, col.names.offshore,
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time, max.shift = 4)
 
-data.inshore <- get.data(Year = Year, 
-                         xls.file.name = xls.file.name.inshore, 
-                         sheet.name = sheet.name.inshore,
-                         col.types = col.types.inshore, 
-                         col.names = col.names.inshore, 
-                         start.time = start.time,
-                         max.shift = 4) %>%
-  mutate(Area = "in")
-  
+files <- file.names(out.dir, Year)
 
-data.offshore <- get.data(Year = Year,
-                          xls.file.name = xls.file.name.offshore,
-                          sheet.name = sheet.name.offshore,
-                          col.types = col.types.offshore,
-                          col.names = all_of(col.names.offshore),
-                          start.time = start.time, 
-                          max.shift = 4)
+if (!file.exists(files$all))
+  write_csv(out.list$data.all,
+            file = files$all)
 
-data.offshore %>% 
-  filter(Mother_Calf > 0) %>%
-  rbind(data.inshore) %>%
-  arrange(Date.date, Minutes_since_0000) %>% 
-  extract.all.vars() -> data.all
+if (!file.exists(files$shift))
+  write_csv(out.list$data.shift,
+            file = files$shift)
 
-
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
-
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
-
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, 
-                          start.hr = 7, 
-                          end.hr = 19, 
-                          max.shift = 4)%>% extract.shift.vars()
-
-# same as before. Vis and SeaState are probably not filled in. 
-
-formatted.all.data <- format.output(data.shift, max.shift = 4)
-
-if (!file.exists(out.file.name.all))
-  write_csv(data.all,
-            file = out.file.name.all)
-
-if (!file.exists(out.file.name.shift))
-  write_csv(data.shift,
-            file = out.file.name.shift)
-
-if (!file.exists(out.file.name.formatted))
-  write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+if (!file.exists(files$formatted))
+  write_csv(out.list$formatted.all.data,
+            file = files$formatted, 
             quote = "none",
             na = "")
 
@@ -1990,6 +1171,9 @@ if (!file.exists(out.file.name.formatted))
 ## 2013
 
 ```{r}
+# Offshore:
+# Row 450 T"IME = 100. Changed to 1600. 2023-05-09
+
 Year <- 2013
 dir.name <- paste0("C_C ", Year)
 start.time <- "700"
@@ -2008,7 +1192,6 @@ col.types.inshore <- c("date", "numeric", "text", "numeric",
                        "text", "text", "text", "text", 
                        "text", "text", "text")
 
-
 col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",	
                         "VIS",	"SEA ST",	"C/C")
 
@@ -2016,71 +1199,26 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
-# 
-# data.all <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-#                           col.types.inshore, col.types.offshore,
-#                           col.names.inshore, col.names.offshore,
-#                           Year, xls.file.name.inshore, xls.file.name.offshore,
-#                           start.time, max.shift = 4)%>% 
-#   extract.all.vars()
+out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                         col.types.inshore, col.types.offshore,
+                         col.names.inshore, col.names.offshore,
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time, max.shift = 4)
 
-data.inshore <- get.data(Year = Year, 
-                         xls.file.name = xls.file.name.inshore, 
-                         sheet.name = sheet.name.inshore,
-                         col.types = col.types.inshore, 
-                         col.names = col.names.inshore, 
-                         start.time = start.time,
-                         max.shift = 4) %>%
-  mutate(Area = "in")
-  
+files <- file.names(out.dir, Year)
 
-data.offshore <- get.data(Year = Year,
-                          xls.file.name = xls.file.name.offshore,
-                          sheet.name = sheet.name.offshore,
-                          col.types = col.types.offshore,
-                          col.names = all_of(col.names.offshore),
-                          start.time = start.time, 
-                          max.shift = 4)
+if (!file.exists(files$all))
+  write_csv(out.list$data.all,
+            file = files$all)
 
-data.offshore %>% 
-  filter(Mother_Calf > 0) %>%
-  rbind(data.inshore) %>%
-  arrange(Date.date, Minutes_since_0000) %>% 
-  extract.all.vars() -> data.all
+if (!file.exists(files$shift))
+  write_csv(out.list$data.shift,
+            file = files$shift)
 
-
-
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
-
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
-
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, 
-                          start.hr = 7, 
-                          end.hr = 19, 
-                          max.shift = 4)%>% extract.shift.vars()
-
-# same as before. Vis and SeaState are probably not filled in. 
-
-formatted.all.data <- format.output(data.shift, max.shift = 4)
-
-if (!file.exists(out.file.name.all))
-  write_csv(data.all,
-            file = out.file.name.all)
-
-if (!file.exists(out.file.name.shift))
-  write_csv(data.shift,
-            file = out.file.name.shift)
-
-if (!file.exists(out.file.name.formatted))
-  write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+if (!file.exists(files$formatted))
+  write_csv(out.list$formatted.all.data,
+            file = files$formatted, 
             quote = "none",
             na = "")
 ```
@@ -2116,64 +1254,29 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
-start.hr <- 7
-end.hr <- 19
-max.shift <- 4
+out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                         col.types.inshore, col.types.offshore,
+                         col.names.inshore, col.names.offshore,
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time, max.shift = 4)
 
-data.inshore <- get.data(Year = Year,
-                         xls.file.name = xls.file.name.inshore,
-                         sheet.name = sheet.name.inshore, 
-                         col.types = col.types.inshore,
-                         col.names = all_of(col.names.inshore),
-                         start.time = start.time,
-                         max.shift = max.shift) %>%
-  mutate(Area = "in")
-  
-data.offshore <- get.data(Year = Year,
-                          xls.file.name = xls.file.name.offshore,
-                          sheet.name = sheet.name.offshore,
-                          col.types = col.types.offshore,
-                          col.names = all_of(col.names.offshore),
-                          start.time = start.time, 
-                          max.shift = 4)
+files <- file.names(out.dir, Year)
 
-data.offshore %>% 
-  filter(Mother_Calf > 0) %>%
-  rbind(data.inshore) %>%
-  arrange(Date.date, Minutes_since_0000) %>% 
-  extract.all.vars() -> data.all
-
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, 
-                          start.hr = start.hr, 
-                          end.hr = end.hr, 
-                          max.shift = max.shift)%>% extract.shift.vars()
-
-formatted.all.data <- format.output(data.shift, max.shift = max.shift)
-
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
-
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-if (!file.exists(out.file.name.all))
-  write_csv(data.all,
-            file = out.file.name.all,
+if (!file.exists(files$all))
+  write_csv(out.list$data.all,
+            file = files$all,
             quote = "none")
 
-if (!file.exists(out.file.name.shift))
-  write_csv(data.shift,
-            file = out.file.name.shift, 
+if (!file.exists(files$shift))
+  write_csv(out.list$data.shift,
+            file = files$shift, 
             quote = "none")
 
 # Need to remove NA to be used in Collating and Formatting v2.R
-if (!file.exists(out.file.name.formatted))
-  write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+if (!file.exists(files$formatted))
+  write_csv(out.list$formatted.all.data,
+            file = files$formatted, 
             quote = "none",
             na = "")
 
@@ -2184,6 +1287,8 @@ if (!file.exists(out.file.name.formatted))
 ## 2015
 
 ```{r}
+# Row 617 TIME = 100. Changed to 1000. 2023-05-09
+
 Year <- 2015
 dir.name <- paste0("C_C ", Year)
 start.time <- "700"
@@ -2209,63 +1314,30 @@ col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",
 col.types.offshore <- c("date", "numeric", "text", "numeric", 
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
-start.hr <- 7
-end.hr <- 19
-max.shift <- 4
 
-data.inshore <- get.data(Year = Year,
-                         xls.file.name = xls.file.name.inshore,
-                         sheet.name = sheet.name.inshore, 
-                         col.types = col.types.inshore,
-                         col.names = all_of(col.names.inshore),
-                         start.time = start.time,
-                         max.shift = max.shift)
+out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                         col.types.inshore, col.types.offshore,
+                         col.names.inshore, col.names.offshore,
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time, max.shift = 4)
 
-data.offshore <- get.data(Year = Year,
-                          xls.file.name = xls.file.name.offshore,
-                          sheet.name = sheet.name.offshore,
-                          col.types = col.types.offshore,
-                          col.names = all_of(col.names.offshore),
-                          start.time = start.time, 
-                          max.shift = 4)
+files <- file.names(out.dir, Year)
 
-data.offshore %>% 
-  filter(Mother_Calf > 0) %>%
-  rbind(data.inshore) %>%
-  arrange(Date.date, Minutes_since_0000) %>% 
-  extract.all.vars() -> data.all
-
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, 
-                          start.hr = start.hr, 
-                          end.hr = end.hr, 
-                          max.shift = max.shift)%>% extract.shift.vars()
-
-formatted.all.data <- format.output(data.shift, max.shift = max.shift)
-
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
-
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-if (!file.exists(out.file.name.all))
-  write_csv(data.all,
-            file = out.file.name.all,
+if (!file.exists(files$all))
+  write_csv(out.list$data.all,
+            file = files$all,
             quote = "none")
 
-if (!file.exists(out.file.name.shift))
-  write_csv(data.shift,
-            file = out.file.name.shift, 
+if (!file.exists(files$shift))
+  write_csv(out.list$data.shift,
+            file = files$shift, 
             quote = "none")
 
 # Need to remove NA to be used in Collating and Formatting v2.R
-if (!file.exists(out.file.name.formatted))
-  write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+if (!file.exists(files$formatted))
+  write_csv(out.list$formatted.all.data,
+            file = files$formatted, 
             quote = "none",
             na = "")
 
@@ -2277,6 +1349,9 @@ if (!file.exists(out.file.name.formatted))
 ## 2016
 
 ```{r}
+# Offshore:
+# Row 207 TIME = 110. Changed to 1100. 2023-05-09
+
 Year <- 2016
 dir.name <- paste0("C_C ", Year)
 start.time <- "700"
@@ -2302,88 +1377,29 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "numeric", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
-start.hr <- 7
-end.hr <- 19
-max.shift <- 4
+out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                         col.types.inshore, col.types.offshore,
+                         col.names.inshore, col.names.offshore,
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time, max.shift = 4)
 
-data.inshore <- get.data(Year = Year,
-                         xls.file.name = xls.file.name.inshore,
-                         sheet.name = sheet.name.inshore, 
-                         col.types = col.types.inshore,
-                         col.names = all_of(col.names.inshore),
-                         start.time = start.time,
-                         max.shift = max.shift)
+files <- file.names(out.dir, Year)
 
-data.offshore <- get.data(Year = Year,
-                          xls.file.name = xls.file.name.offshore,
-                          sheet.name = sheet.name.offshore,
-                          col.types = col.types.offshore,
-                          col.names = all_of(col.names.offshore),
-                          start.time = start.time, 
-                          max.shift = 4)
-
-# Effort can be different between inshore and offshore, so they have to be 
-# computed separately...
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-
-data.offshore %>% 
-  filter(Mother_Calf > 0) %>%
-  rbind(data.inshore) %>%
-  arrange(Date.date, Minutes_since_0000) %>% 
-  extract.all.vars()-> data.all
-
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, 
-                          start.hr = start.hr, 
-                          end.hr = end.hr, 
-                          max.shift = max.shift) %>% extract.shift.vars()
-
-formatted.all.data <- format.output(data.shift, max.shift = max.shift)
-
-# data.shift.inshore <- find.effort(data.inshore, 
-#                                   start.hr = start.hr, 
-#                                   end.hr = end.hr, 
-#                                   max.shift = max.shift)
-# 
-# formatted.inshore.data <- format.output(data.shift.inshore, max.shift = max.shift)
-# 
-# data.shift.offshore <- find.effort(data.offshore, 
-#                                   start.hr = start.hr, 
-#                                   end.hr = end.hr, 
-#                                   max.shift = max.shift)
-# 
-# formatted.offshore.data <- format.output(data.shift.offshore, max.shift = max.shift)
-# 
-# data.offshore %>% 
-#   filter(Mother_Calf > 0) %>%
-#   rbind(data.inshore) %>%
-#   arrange(Date.date, Minutes_since_0000) -> data.all
-
-
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
-
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-if (!file.exists(out.file.name.all))
-  write_csv(data.all,
-            file = out.file.name.all,
+if (!file.exists(files$all))
+  write_csv(out.list$data.all,
+            file = files$all,
             quote = "none")
 
-if (!file.exists(out.file.name.shift))
-  write_csv(data.shift,
-            file = out.file.name.shift, 
+if (!file.exists(files$shift))
+  write_csv(out.list$data.shift,
+            file = files$shift, 
             quote = "none")
 
 # Need to remove NA to be used in Collating and Formatting v2.R
-if (!file.exists(out.file.name.formatted))
-  write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+if (!file.exists(files$formatted))
+  write_csv(out.list$formatted.all.data,
+            file = files$formatted, 
             quote = "none",
             na = "")
 ```
@@ -2393,6 +1409,9 @@ if (!file.exists(out.file.name.formatted))
 
 No offshore log exists for 2017
 ```{r}
+# Inshore:
+# Row 29: TIME = 83o. Changed to 830. 2023-05-09
+
 Year <- 2017
 dir.name <- paste0("C_C ", Year)
 start.time <- "0700"
@@ -2410,10 +1429,6 @@ col.types <- c("date", "numeric", "text", "text",
                "text", "text", "text", "text",
                "text", "text")
 
-start.hr <- 7
-end.hr <- 19
-max.shift <- 4
-
 # get the data using get.data function, which is in Piedras_Blancas_fcns.R
 data.all <- get.data(Year = Year,
                      xls.file.name = xls.file.name.inshore,
@@ -2421,40 +1436,31 @@ data.all <- get.data(Year = Year,
                      col.types = col.types,
                      col.names = all_of(col.names),
                      start.time = start.time,
-                     max.shift = 4)%>% 
+                     max.shift = 4) %>%
   extract.all.vars()
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, 
-                          start.hr = start.hr, 
-                          end.hr = end.hr, 
-                          max.shift = max.shift) %>% extract.shift.vars()
+data.shift <- find.effort(data.all, T0 = start.time) #%>% extract.shift.vars()
 
-formatted.all.data <- format.output(data.shift, max.shift = max.shift)
+formatted.all.data <- format.output(data.shift, max.shift = max(data.shift$Shift))
 
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
+files <- file.names(out.dir, Year)
 
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-if (!file.exists(out.file.name.all))
+if (!file.exists(files$all))
   write_csv(data.all,
-            file = out.file.name.all,
+            file = files$all,
             quote = "none")
 
-if (!file.exists(out.file.name.shift))
+if (!file.exists(files$shift))
   write_csv(data.shift,
-            file = out.file.name.shift, 
+            file = files$shift, 
             quote = "none")
 
 # Need to remove NA to be used in Collating and Formatting v2.R
-if (!file.exists(out.file.name.formatted))
+if (!file.exists(files$formatted))
   write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+            file = files$formatted, 
             quote = "none",
             na = "")
 
@@ -2484,10 +1490,6 @@ col.types <- c("numeric", "date", "numeric", "text", "text",
                        "text", "text", "text", "text",
                        "text", "text", "text", "text")
 
-start.hr <- 7
-end.hr <- 19
-max.shift <- 4
-
 # get the data using get.data function, which is in Piedras_Blancas_fcns.R
 data.all <- get.data(Year = Year,
                      xls.file.name = xls.file.name.inshore,
@@ -2500,36 +1502,27 @@ data.all <- get.data(Year = Year,
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, 
-                          start.hr = start.hr, 
-                          end.hr = end.hr, 
-                          max.shift = max.shift) %>% extract.shift.vars()
+data.shift <- find.effort(data.all, T0 = start.time) #%>% extract.shift.vars()
 
-formatted.all.data <- format.output(data.shift, max.shift = max.shift)
+formatted.all.data <- format.output(data.shift, max.shift = max(data.shift$Shift))
 
 
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
+files <- file.names(out.dir, Year)
 
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-if (!file.exists(out.file.name.all))
+if (!file.exists(files$all))
   write_csv(data.all,
-            file = out.file.name.all,
+            file = files$all,
             quote = "none")
 
-if (!file.exists(out.file.name.shift))
+if (!file.exists(files$shift))
   write_csv(data.shift,
-            file = out.file.name.shift, 
+            file = files$shift, 
             quote = "none")
 
 # Need to remove NA to be used in Collating and Formatting v2.R
-if (!file.exists(out.file.name.formatted))
+if (!file.exists(files$formatted))
   write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+            file = files$formatted, 
             quote = "none",
             na = "")
 
@@ -2544,16 +1537,16 @@ if (!file.exists(out.file.name.formatted))
 
 No offshore log exists for 2019
 ```{r}
+# Event for 4/29/2019 at 1845 was changed from "1" to "4". 2022-06-24
+# Event for 5/9/2019 at 0830 was changed from "1" to "3". 2022-06-24
+# Event for 5/23/2019 at 1200 was changed from "1" to "3". 2022-06-24
+
 Year <- 2019
 dir.name <- paste0("C_C ", Year)
 start.time <- "700"
 
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
-
-# Event for 4/29/2019 at 1845 was changed from "1" to "4". 2022-06-24
-# Event for 5/9/2019 at 0830 was changed from "1" to "3". 2022-06-24
-# Event for 5/23/2019 at 1200 was changed from "1" to "3". 2022-06-24
 
 sheet.name <- "INSHORE LOGS"
 
@@ -2565,10 +1558,6 @@ col.types <- c("date", "numeric", "numeric", "text", "text",
                        "text", "text", "text", "text", 
                        "text", "text", "text", "text",
                        "text", "text", "text")
-
-start.hr <- 7
-end.hr <- 19
-max.shift <- 4
 
 # get the data using get.data function, which is in Piedras_Blancas_fcns.R
 data.all <- get.data(Year = Year,
@@ -2582,36 +1571,27 @@ data.all <- get.data(Year = Year,
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, 
-                          start.hr = start.hr, 
-                          end.hr = end.hr, 
-                          max.shift = max.shift) %>% extract.shift.vars()
+data.shift <- find.effort(data.all, T0 = start.time) #%>% extract.shift.vars()
 
-formatted.all.data <- format.output(data.shift, max.shift = max.shift)
+formatted.all.data <- format.output(data.shift, max.shift = max(data.shift$Shift))
 
 
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
+files <- file.names(out.dir, Year)
 
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-if (!file.exists(out.file.name.all))
+if (!file.exists(files$all))
   write_csv(data.all,
-            file = out.file.name.all,
+            file = files$all,
             quote = "none")
 
-if (!file.exists(out.file.name.shift))
+if (!file.exists(files$shift))
   write_csv(data.shift,
-            file = out.file.name.shift, 
+            file = files$shift, 
             quote = "none")
 
 # Need to remove NA to be used in Collating and Formatting v2.R
-if (!file.exists(out.file.name.formatted))
+if (!file.exists(files$formatted))
   write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+            file = files$formatted, 
             quote = "none",
             na = "")
 
@@ -2624,13 +1604,13 @@ No data for 2020 - COVID.
 ## 2021
 
 ```{r}
+# Event for 4/20/2021 at 745 was changed from "3" to "5". 2022-06-24
 Year <- 2021
 dir.name <- paste0("C_C ", Year)
 start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 
-# Event for 4/20/2021 at 745 was changed from "3" to "5". 2022-06-24
 sheet.name <- "INSHORE LOGS"
 
 col.names <- c("DATE",	"EVENT", 	"TIME",	"OBS #",
@@ -2654,35 +1634,26 @@ data.all <- get.data(Year = Year,
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, 
-                          start.hr = 7, 
-                          end.hr = 19, 
-                          max.shift = 4) %>% extract.shift.vars()
+data.shift <- find.effort(data.all, T0 = start.time) #%>% extract.shift.vars()
 
-formatted.all.data <- format.output(data.shift, max.shift = 4)
+formatted.all.data <- format.output(data.shift, max.shift = max(data.shift$Shift))
 
-out.file.name.all <- paste0(out.dir, "Processed_all_data_", 
-                            Year, ".csv")
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
+files <- file.names(out.dir, Year)
 
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-if (!file.exists(out.file.name.all))
+if (!file.exists(files$all))
   write_csv(data.all,
-            file = out.file.name.all,
+            file = files$all,
             quote = "none")
 
-if (!file.exists(out.file.name.shift))
+if (!file.exists(files$shift))
   write_csv(data.shift,
-            file = out.file.name.shift, 
+            file = files$shift, 
             quote = "none")
 
 # Need to remove NA to be used in Collating and Formatting v2.R
-if (!file.exists(out.file.name.formatted))
+if (!file.exists(files$formatted))
   write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+            file = files$formatted, 
             quote = "none",
             na = "")
 
@@ -2691,7 +1662,6 @@ if (!file.exists(out.file.name.formatted))
 
 ## 2022
 
-For 2022 and beyond, I added some code here to skip using Collating and Formatting v2.R. It's much easier to get all necessary steps done here, directly out of Excel input files than going through many scripts. 
 
 ```{r}
 # PROBLEM WITH AT LEAST ONE SHIFT 2022-03-28 ENDING/STARTING AT NOT EXACTLY AT THE 
@@ -2732,35 +1702,26 @@ data.all <- get.data(Year = Year,
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, 
-                          start.hr = 7, 
-                          end.hr = 19, 
-                          max.shift = 4) %>% extract.shift.vars() 
+data.shift <- find.effort(data.all, T0 = start.time) #%>% extract.shift.vars()
 
-formatted.all.data <- format.output(data.shift, max.shift = 4)
+formatted.all.data <- format.output(data.shift, max.shift = max(data.shift$Shift))
 
-out.file.name.all <- paste0(out.dir, "Processed_all_data_",
-                            Year, ".csv")
-out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                              Year, ".csv")
+files <- file.names(out.dir, Year)
 
-out.file.name.formatted <- paste0(out.formatted.dir,
-                                  Year, " Formatted.csv")
-
-if (!file.exists(out.file.name.all))
+if (!file.exists(files$all))
   write_csv(data.all ,
-            file = out.file.name.all,
+            file = files$all,
             quote = "none")
 
-if (!file.exists(out.file.name.shift))
+if (!file.exists(files$shift))
   write_csv(data.shift,
-            file = out.file.name.shift, 
+            file = files$shift, 
             quote = "none")
 
 # Need to remove NA to be used in Collating and Formatting v2.R
-if (!file.exists(out.file.name.formatted))
+if (!file.exists(files$formatted))
   write_csv(formatted.all.data,
-            file = out.file.name.formatted, 
+            file = files$formatted, 
             quote = "none",
             na = "")
 

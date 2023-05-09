@@ -15,7 +15,8 @@ get.all.data <- function(sheet.name.inshore, sheet.name.offshore,
                            col.types = col.types.inshore, 
                            col.names = col.names.inshore, 
                            start.time = start.time,
-                           max.shift = max.shift)
+                           max.shift = max.shift) %>%
+    mutate(Area = "in")
   
   data.offshore <- get.data(Year = Year, 
                             xls.file.name = xls.file.name.offshore, 
@@ -23,11 +24,22 @@ get.all.data <- function(sheet.name.inshore, sheet.name.offshore,
                             col.types = col.types.offshore, 
                             col.names = col.names.offshore, 
                             start.time = start.time,
-                            max.shift = max.shift)
+                            max.shift = max.shift)%>%
+    mutate(Area = "off")
   
-  data.all <- rbind(data.inshore, data.offshore) %>% 
-    arrange(Date.date, Minutes_since_0000)
-  return(data.all)
+  data.offshore %>% 
+    filter(Mother_Calf > 0) %>%
+    rbind(data.inshore) %>%
+    arrange(Date.date, Minutes_since_0000) %>% 
+    extract.all.vars() -> data.all
+  
+  data.shift <- find.effort(data.all, T0 = start.time) #%>% extract.shift.vars()
+  
+  formatted.all.data <- format.output(data.shift, max.shift = max(data.shift$Shift))
+  
+  return(list(data.all = data.all,
+              data.shift = data.shift,
+              formatted.all.data = formatted.all.data))
 }
 
 
@@ -160,11 +172,12 @@ char_time2min <- function(x, origin = "0000"){
   }
   
   if (!is.na(M.1)){
-    if (M.1 >= M.0){
-      out <- M.1 - M.0
-    } else {
-      out <- 1440 - (M.0 - M.1)
-    }
+    out <- M.1 - M.0
+    # if (M.1 >= M.0){
+    #   out <- M.1 - M.0
+    # } else {
+    #   out <- 1440 - (M.0 - M.1)
+    # }
     
   } else {
     out <- NA
