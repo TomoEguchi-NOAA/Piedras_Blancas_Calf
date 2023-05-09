@@ -231,16 +231,20 @@ find.shift <- function(x0, max.shift = 4){
 # start and end of each day (default = 7 and 19, correspond to 0700
 # and 1900), and the maximum number of shift per day (default to 4).
 #find.effort <- function(x, start.hr = 7, end.hr = 19, max.shift = 4){
+
 # T0 is start time in character, e.g., "0630", "0700)
 find.effort <- function(x, T0){
+
   # NEED TO ADD SHIFT INDEX. TO DO THAT, I NEED TO KNOW WHAT TIME THE OBSERVATION
   # STARTS EVERYDAY AND THE MAXIMUM NUMBER OF SHIFTS PER DAY, WHICH ARE NOT CONSISTENT
   # AMONG YEARS. I NEED TO THINK ABOUT THIS A BIT MORE... 2023-05-01
   # 
+
   # THE FUNCTION ABOVE find.shift DEFINES SHIFTS. ANYTIME BEFORE 1000 IS SHIFT 1, ETC.
   # get.data USES find.shift AND RETURNS ASSIGNED SHIFTS IN THE OUTPUT.
   
-  
+  # REGARDLESS OF STARTING TIME, THEY SHOULD BE SEPARATED INTO 3-HR BLOCKS
+
   # this turns dates in to character
   all.dates <- unique(x$Date)
   
