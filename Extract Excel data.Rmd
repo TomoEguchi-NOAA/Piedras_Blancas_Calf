@@ -17,39 +17,7 @@ data.dir <- "data/All data/"
 out.dir <- "data/Processed data v2/"  # for revising outputs
 out.formatted.dir <- "data/Formatted Annual Data v2/"
 
-extract.all.vars <- function(x) {
-  x %>%
-    mutate(Date = Date.date) %>%
-    select(-c(Date.date, Date.char)) %>%
-    relocate(Date)
-}
 
-extract.shift.vars <- function(x) {
-  x %>%
-  select(Date.char, Shift, Effort, Mother_Calf, Sea_State, Vis) %>%
-  transmute(Date = Date.char,
-            Shift = Shift,
-            Sea_State = Sea_State,
-            Vis = Vis,
-            Effort = Effort, 
-            Mother_Calf = Mother_Calf) -> x.out
-  return(x.out)
-}
-
-file.names <- function(out.dir, Year){
-  out.file.name.all <- paste0(out.dir, "Processed_all_data_",
-                              Year, ".csv")
-  out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
-                                Year, ".csv")
-  
-  out.file.name.formatted <- paste0(out.formatted.dir,
-                                    Year, " Formatted.csv")
-
-  file.names <- list(all = out.file.name.all,
-                     shift = out.file.name.shift,
-                     formatted = out.file.name.formatted)
-  return(file.names)
-}
 
 ```
 
@@ -71,9 +39,9 @@ THIS FILE NEEDS TO BE UPDATED AND ANNOTATED BETTER. EACH YEAR HAS A DIFFERENT FO
 ```{r}
 Year <- 1994
 # Inshore
-#G665 ?? deleted in Cow / Calf column 2023-05-08
+# G665 ?? deleted in Cow / Calf column 2023-05-08
 # C1164 Changed 130 to 730 in Time column 2023-05-08
-# C1508 Chagned 155 to 1155 in Time column 2023-05-08
+# C1508 Changed 155 to 1155 in Time column 2023-05-08
 
 # Offshore
 # C509 Changed 328 to 628 in Time column 2023-05-08
@@ -104,7 +72,7 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.names.inshore, col.names.offshore,
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
-                         start.time, max.shift = 5)
+                         start.time)
 
 files <- file.names(out.dir, Year)
 
@@ -165,7 +133,7 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.names.inshore, col.names.offshore,
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
-                         start.time, max.shift = 5)
+                         start.time)
 
 files <- file.names(out.dir, Year)
 
@@ -232,7 +200,7 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.names.inshore, col.names.offshore,
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
-                         start.time, max.shift = 5)
+                         start.time)
 
 files <- file.names(out.dir, Year)
 
@@ -292,7 +260,7 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.names.inshore, col.names.offshore,
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
-                         start.time, max.shift = 5)
+                         start.time)
 
 files <- file.names(out.dir, Year)
 
@@ -352,7 +320,7 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.names.inshore, col.names.offshore,
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
-                         start.time, max.shift = 5)
+                         start.time)
 
 files <- file.names(out.dir, Year)
 
@@ -414,7 +382,7 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.names.inshore, col.names.offshore,
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
-                         start.time, max.shift = 5)
+                         start.time)
 
 files <- file.names(out.dir, Year)
 
@@ -468,7 +436,7 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.names.inshore, col.names.offshore,
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
-                         start.time, max.shift = 5)
+                         start.time)
 
 files <- file.names(out.dir, Year)
 
@@ -533,7 +501,7 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.names.inshore, col.names.offshore,
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
-                         start.time, max.shift = 5)
+                         start.time)
 
 files <- file.names(out.dir, Year)
 
@@ -588,7 +556,7 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.names.inshore, col.names.offshore,
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
-                         start.time, max.shift = 5)
+                         start.time)
 
 files <- file.names(out.dir, Year)
 
@@ -643,7 +611,7 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.names.inshore, col.names.offshore,
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
-                         start.time, max.shift = 5)
+                         start.time)
 
 files <- file.names(out.dir, Year)
 
@@ -699,7 +667,7 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.names.inshore, col.names.offshore,
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
-                         start.time, max.shift = 5)
+                         start.time)
 
 
 files <- file.names(out.dir, Year)
@@ -755,7 +723,7 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.names.inshore, col.names.offshore,
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
-                         start.time, max.shift = 5)
+                         start.time)
 
 files <- file.names(out.dir, Year)
 
@@ -813,7 +781,7 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.names.inshore, col.names.offshore,
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
-                         start.time, max.shift = 5)
+                         start.time)
 
 files <- file.names(out.dir, Year)
 
@@ -868,7 +836,7 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.names.inshore, col.names.offshore,
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
-                         start.time, max.shift = 5)
+                         start.time)
 
 files <- file.names(out.dir, Year)
 
@@ -924,7 +892,7 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.names.inshore, col.names.offshore,
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
-                         start.time, max.shift = 5)
+                         start.time)
 
 files <- file.names(out.dir, Year)
 
@@ -978,7 +946,7 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.names.inshore, col.names.offshore,
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
-                         start.time, max.shift = 5)
+                         start.time)
 
 files <- file.names(out.dir, Year)
 
@@ -1036,7 +1004,7 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.names.inshore, col.names.offshore,
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
-                         start.time, max.shift = 5)
+                         start.time)
 
 files <- file.names(out.dir, Year)
 
@@ -1090,7 +1058,7 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.names.inshore, col.names.offshore,
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
-                         start.time, max.shift = 4)
+                         start.time)
 
 files <- file.names(out.dir, Year)
 
@@ -1148,7 +1116,7 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.names.inshore, col.names.offshore,
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
-                         start.time, max.shift = 4)
+                         start.time)
 
 files <- file.names(out.dir, Year)
 
@@ -1206,7 +1174,7 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.names.inshore, col.names.offshore,
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
-                         start.time, max.shift = 4)
+                         start.time)
 
 files <- file.names(out.dir, Year)
 
@@ -1261,7 +1229,7 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.names.inshore, col.names.offshore,
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
-                         start.time, max.shift = 4)
+                         start.time)
 
 files <- file.names(out.dir, Year)
 
@@ -1322,7 +1290,7 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.names.inshore, col.names.offshore,
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
-                         start.time, max.shift = 4)
+                         start.time)
 
 files <- file.names(out.dir, Year)
 
@@ -1384,7 +1352,7 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.names.inshore, col.names.offshore,
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
-                         start.time, max.shift = 4)
+                         start.time)
 
 files <- file.names(out.dir, Year)
 
@@ -1437,8 +1405,7 @@ data.all <- get.data(Year = Year,
                      sheet.name = sheet.name,
                      col.types = col.types,
                      col.names = all_of(col.names),
-                     start.time = start.time,
-                     max.shift = 4) %>%
+                     start.time = start.time) %>%
   extract.all.vars()
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
@@ -1498,8 +1465,7 @@ data.all <- get.data(Year = Year,
                      sheet.name = sheet.name,
                      col.types = col.types,
                      col.names = all_of(col.names),
-                     start.time = start.time,
-                     max.shift = 4)%>% 
+                     start.time = start.time)%>% 
   extract.all.vars()
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
@@ -1567,8 +1533,7 @@ data.all <- get.data(Year = Year,
                      sheet.name = sheet.name,
                      col.types = col.types,
                      col.names = all_of(col.names),
-                     start.time = start.time,
-                     max.shift = 4)%>% 
+                     start.time = start.time)%>% 
   extract.all.vars()
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
@@ -1630,8 +1595,7 @@ data.all <- get.data(Year = Year,
                      sheet.name = sheet.name,
                      col.types = col.types,
                      col.names = all_of(col.names),
-                     start.time = start.time,
-                     max.shift = 4)%>% 
+                     start.time = start.time)%>% 
   extract.all.vars()
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
@@ -1698,8 +1662,7 @@ data.all <- get.data(Year = Year,
                      sheet.name = sheet.name,
                      col.types = col.types,
                      col.names = all_of(col.names),
-                     start.time = start.time,
-                     max.shift = 4)%>% 
+                     start.time = start.time)%>% 
   extract.all.vars()
 
 # calculate effort and other statistics per 3-hr shift, using find.effort

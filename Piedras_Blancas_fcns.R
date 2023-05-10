@@ -7,15 +7,14 @@ get.all.data <- function(sheet.name.inshore, sheet.name.offshore,
                          col.names.inshore, col.names.offshore,
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
-                         start.time, max.shift){
+                         start.time){
   
   data.inshore <- get.data(Year = Year, 
                            xls.file.name = xls.file.name.inshore, 
                            sheet.name = sheet.name.inshore,
                            col.types = col.types.inshore, 
                            col.names = col.names.inshore, 
-                           start.time = start.time,
-                           max.shift = max.shift) %>%
+                           start.time = start.time) %>%
     mutate(Area = "in")
   
   data.offshore <- get.data(Year = Year, 
@@ -23,8 +22,7 @@ get.all.data <- function(sheet.name.inshore, sheet.name.offshore,
                             sheet.name = sheet.name.offshore,
                             col.types = col.types.offshore, 
                             col.names = col.names.offshore, 
-                            start.time = start.time,
-                            max.shift = max.shift)%>%
+                            start.time = start.time)%>%
     mutate(Area = "off")
   
   data.offshore %>% 
@@ -33,7 +31,7 @@ get.all.data <- function(sheet.name.inshore, sheet.name.offshore,
     arrange(Date.date, Minutes_since_0000) %>% 
     extract.all.vars() -> data.all
   
-  data.shift <- find.effort(data.all, T0 = start.time) #%>% extract.shift.vars()
+  data.shift <- find.effort(data.all, T0 = start.time) 
   
   formatted.all.data <- format.output(data.shift, max.shift = max(data.shift$Shift))
   
@@ -52,8 +50,7 @@ get.all.data <- function(sheet.name.inshore, sheet.name.offshore,
 # T0 is the beginning of the first shift (start.time)
 
 get.data <- function(Year, xls.file.name, sheet.name,
-                     col.types, col.names, start.time,
-                     max.shift){
+                     col.types, col.names, start.time){
   
   if (length(col.names) < 8){
     data.out <- read_excel(xls.file.name,
@@ -66,7 +63,7 @@ get.data <- function(Year, xls.file.name, sheet.name,
                 Time = .data[[col.names[[3]]]],
                 Minutes_since_T0 = sapply(Time, FUN = char_time2min, start.time),
                 Minutes_since_0000 = sapply(Time, FUN = char_time2min),
-                Shift = sapply(Minutes_since_0000, FUN = find.shift, max.shift = max.shift),
+                Shift = sapply(Minutes_since_0000, FUN = find.shift),
                 Obs = .data[[col.names[[4]]]],
                 SeaState = .data[[col.names[[5]]]],
                 Vis = .data[[col.names[[6]]]],
@@ -85,7 +82,7 @@ get.data <- function(Year, xls.file.name, sheet.name,
                 Time = .data[[col.names[[3]]]],
                 Minutes_since_T0 = sapply(Time, FUN = char_time2min, start.time),
                 Minutes_since_0000 = sapply(Time, FUN = char_time2min),
-                Shift = sapply(Minutes_since_0000, FUN = find.shift, max.shift = max.shift),
+                Shift = sapply(Minutes_since_0000, FUN = find.shift),
                 Obs = .data[[col.names[[4]]]],
                 SeaState = .data[[col.names[[5]]]],
                 Vis = .data[[col.names[[6]]]],
@@ -197,7 +194,7 @@ minutes2time_char <- function(min_0000){
 }
 
 # change max.shift if needed. max.shift can be up to 5
-find.shift <- function(x0, max.shift = 4){
+find.shift <- function(x0){
   x <- as.numeric(x0)
   if (!is.na(x)){
     if (x < 600){
@@ -215,11 +212,7 @@ find.shift <- function(x0, max.shift = 4){
     } else if (x > 960 & x < 1140){
       shift <- "4"
     } else if (x == 1140){
-      if (max.shift > 4){
-        shift <- "4/5"        
-      } else {
-        shift <- "4"
-      }
+      shift <- "4/5"        
     } else if (x > 1140 & x <= 1320){ 
       shift <- "5"
     } else {
@@ -257,6 +250,10 @@ find.effort <- function(x, T0){
   # get.data USES find.shift AND RETURNS ASSIGNED SHIFTS IN THE OUTPUT.
   
   # REGARDLESS OF STARTING TIME, THEY SHOULD BE SEPARATED INTO 3-HR BLOCKS
+  
+  # 2023-05-10 THIS IS STILL NOT WORKING PROPERLY. EFFORT IS NOT SUMMED CORRECTLY, PARTIALLY
+  # DUE TO NON-MATCHING 1/5 (ON AND OFF EFFORT MARKERS) EVENT CODE. SEA STATE AND VISIBILITY
+  # FILTERS NEED TO BE MORE EFFICIENT. 
 
   # this turns dates in to character
   all.dates <- unique(x$Date)
@@ -271,12 +268,33 @@ find.effort <- function(x, T0){
   
   out.list <- list()
   d <- k1 <- c <- k2 <- 1
+  d <- 2
+  k4 <- 1
   for (d in 1:length(all.dates)){
     # pick just one day's worth of data
     one.day <- filter(x, Date == as.Date(all.dates[d])) %>% arrange(Minutes_since_0000)
     
+    # Find start and end time for the day:
+    one.day %>%
+      arrange(by = Minutes_since_0000) -> one.day
+    
+    # Check to see if the line is the end of one and the beginning of the next
+    shift <- one.day$Shift[1]
+    if (length(grep("/", shift)) == 0){
+      shift.first <- as.numeric(shift)
+    } else {
+      shift.first <- strsplit(shift, "/")[[1]][2] %>% as.numeric()
+    }
+    
+    shift <- one.day$Shift[nrow(one.day)]
+    if (length(grep("/", shift)) == 0){
+      shift.last <- as.numeric(shift)
+    } else {
+      shift.last <- strsplit(shift, "/")[[1]][1] %>% as.numeric()
+    }
+    
     # go through one shift at a time
-    for (k4 in 1:5){
+    for (k4 in shift.first:shift.last){
       shift.idx <- grep(as.character(k4), one.day$Shift)
       
       one.shift <- one.day[shift.idx,]
@@ -306,7 +324,13 @@ find.effort <- function(x, T0){
           one.shift.eft <- rbind(one.shift.eft, one.shift[nrow(one.shift),])
           one.shift.eft[nrow(one.shift.eft), "Event"] <- 5
           one.shift.eft[nrow(one.shift.eft), "Minutes_since_0000"] <- shift.ends[k4]
+          one.shift.eft[nrow(one.shift.eft), "Time"] <- minutes2time_char(shift.ends[k4])
         }
+        
+        # Figure out off effort time due to visibility and sea state (> 4)
+        one.shift.eft %>% 
+          mutate(Effort = ifelse((Vis > 4 | SeaState > 4),
+                                 "off", "on")) -> one.shift.eft
         
         # find out how many on/off effort existed
         row.1 <- which(one.shift.eft$Event == 1)
@@ -343,14 +367,76 @@ find.effort <- function(x, T0){
           row.5 <- row.5.1[!is.na(row.5.1)]
         }
         
-        
+        one.shift.eft <- one.shift.eft[!is.na(one.shift.eft$Effort),]
         # calculate effort for each "on" period per shift
-        tmp.eft <- 0
-        for (k2 in 1:length(row.1)){
-          tmp <- one.shift.eft[row.1[k2]:row.5[k2],] 
-          tmp.eft <- tmp.eft + (max(tmp$Minutes_since_0000) - min(tmp$Minutes_since_0000))  
+        #tmp.eft <- 0
+        idx.off <- which(one.shift.eft$Effort == "off")
+        idx.on <- which(one.shift.eft$Effort == "on")
+        
+        if (length(idx.on) > 0){
+          for (k2 in min(idx.on):nrow(one.shift.eft)){
+            if (k2 == min(idx.on)){
+              tmp.eft <- 0
+              time.0 <- one.shift.eft[k2, "Minutes_since_0000"]
+              effort <- "on"
+            } else {
+              if (one.shift.eft[k2, "Effort"] == "off" & effort == "on"){
+                d.time <- one.shift.eft[k2, "Minutes_since_0000"] - time.0
+                tmp.eft <- tmp.eft + d.time
+                effort <- "off"
+              } else if (one.shift.eft[k2, "Effort"] == "on" & effort == "off"){
+                time.0 <- one.shift.eft[k2, "Minutes_since_0000"]
+                effort <- "on"
+              } else if (one.shift.eft[k2, "Effort"] == "on" & effort == "on"){
+                d.time <- one.shift.eft[k2, "Minutes_since_0000"] - time.0
+                tmp.eft <- tmp.eft + d.time
+                effort <- "on"
+                time.0 <- one.shift.eft[k2, "Minutes_since_0000"]
+              }
+            }
+            
+          }
           
+        } else {
+          tmp.eft <- 0
         }
+        
+        
+        # for (k2 in 1:length(row.1)){
+        #   tmp <- one.shift.eft[row.1[k2]:row.5[k2],] 
+        #   
+        #   # subtract off-on periods
+        #   if (length(idx.off) > 0){
+        #     if (length(idx.off) == nrow(tmp)){
+        #       tmp.eft <- 0
+        #     } else {
+        #       
+        #       if (min(idx.off) < max(idx.on)){
+        #         # this is the total but off effort due to sea state and visibility 
+        #         # needs to be subtracted if there is any
+        #         tmp.eft <- tmp.eft + (max(tmp$Minutes_since_0000) - min(tmp$Minutes_since_0000))  
+        #         
+        #         # if the minimum of off index is less than the maximum of on index, which 
+        #         # happens when there was at least one on effort after a temporary off 
+        #         # effort.
+        #         for (k5 in 1:length(idx.off)){
+        #           off.time <- tmp$Minutes_since_0000[min(idx.on[which(idx.on > idx.off[k5])])] - 
+        #             tmp$Minutes_since_0000[idx.off[k5]]
+        #           tmp.eft <- tmp.eft - off.time
+        #           
+        #         }
+        #         
+        #       } else {
+        #         # if the minimum of off effort index is greater than the maximum of on index,
+        #         # which happens when the effort was turned off and continued to be off until
+        #         # the end of the shift
+        #         on.time <- tmp$Minutes_since_0000[idx.off[1]] - tmp$Minutes_since_0000[1]
+        #         tmp.eft <- tmp.eft + on.time
+        #       }
+        #     }
+        #     
+        #   }
+        # }
         
         # Sometimes, there is no Vis (or also sea state) update in an entire
         # shift. Use one from previous shift in those cases
@@ -369,7 +455,7 @@ find.effort <- function(x, T0){
         out.list[[c]] <- data.frame(Date = all.dates[d],
                                     Minutes_since_0000 = shift.begins[k4],
                                     Shift = k4,
-                                    Effort = tmp.eft,
+                                    Effort = unname(tmp.eft),
                                     Mother_Calf = sum(one.shift$Mother_Calf, 
                                                       na.rm = T),
                                     Sea_State = ifelse(!is.infinite(max.sea.state),
@@ -450,4 +536,38 @@ format.output <- function(data.shift, max.shift){
   formatted.all.data[is.na(formatted.all.data)] <- 0
   
   return(formatted.all.data)
+}
+
+extract.all.vars <- function(x) {
+  x %>%
+    mutate(Date = Date.date) %>%
+    select(-c(Date.date, Date.char)) %>%
+    relocate(Date)
+}
+
+extract.shift.vars <- function(x) {
+  x %>%
+    select(Date.char, Shift, Effort, Mother_Calf, Sea_State, Vis) %>%
+    transmute(Date = Date.char,
+              Shift = Shift,
+              Sea_State = Sea_State,
+              Vis = Vis,
+              Effort = Effort, 
+              Mother_Calf = Mother_Calf) -> x.out
+  return(x.out)
+}
+
+file.names <- function(out.dir, Year){
+  out.file.name.all <- paste0(out.dir, "Processed_all_data_",
+                              Year, "_v2.csv")
+  out.file.name.shift <- paste0(out.dir, "Processed_by_shift_data_", 
+                                Year, "_v2.csv")
+  
+  out.file.name.formatted <- paste0(out.formatted.dir,
+                                    Year, " Formatted_v2.csv")
+  
+  file.names <- list(all = out.file.name.all,
+                     shift = out.file.name.shift,
+                     formatted = out.file.name.formatted)
+  return(file.names)
 }

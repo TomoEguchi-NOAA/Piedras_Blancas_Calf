@@ -11,12 +11,16 @@ library(tidyverse)
 library(lubridate)
 library(flextable)
 library(readr)
+
+source("Piedras_Blancas_fcns.R")
+
 ```
 
 
 ```{r}
 dir.1 <- "data/Formatted Annual Data/"
 dir.2 <- "data/Formatted Annual Data v2/"
+data.dir <- "data/All data/"
 
 files.1 <- list.files(path = dir.1, 
                     pattern = "Formatted.csv")
@@ -42,7 +46,7 @@ col.def.1.1997 <- cols(Week = col_integer(),
                        Sightings = col_integer())
 
 files.2 <- list.files(path = dir.2, 
-                    pattern = "Formatted.csv")
+                    pattern = "Formatted_v2.csv")
 
 col.def.2 <- cols(Week = col_integer(),
                   Date = col_date(format = "%Y-%m-%d"),
@@ -70,14 +74,24 @@ fcn.compare.data <- function(data.1, data.2, year){
     mutate(dif.effort = daily.effort.1 - daily.effort.2,
            dif.sightings = daily.sightings.1 - daily.sightings.2) -> daily.summary.1.2
 
-  p. <- ggplot(daily.summary.1.2) +
+  daily.summary.1.2 %>% 
+    filter(!is.na(dif.effort)) %>%
+    filter(!is.na(dif.sightings)) -> daily.summary.1.2
+  
+  p.1 <- ggplot(daily.summary.1.2) +
     geom_point(aes(x = as.Date(Date.char), y = dif.effort)) +
+    xlab("Date") + 
+    ylab("Differences in effort") +
+    ggtitle(year)
+    
+  p.2 <- ggplot(daily.summary.1.2) +
     geom_point(aes(x = as.Date(Date.char), y = dif.sightings),
                color = "red") +
     xlab("Date") + 
-    ylab("Differences in effort (black) and # sightings (red)") +
+    ylab("Differences in # sightings") +
     ggtitle(year)
-    
+  
+  p. <- cowplot::plot_grid(p.1, p.2)
   
   out.list <- list(data.1 = data.1,
                    data.2 = data.2,
@@ -122,7 +136,7 @@ for (k in 1:length(years)){
     
   }
   
-  data.2 <- read_csv(file = paste0(dir.2, Y, " Formatted.csv"),
+  data.2 <- read_csv(file = paste0(dir.2, Y, " Formatted_v2.csv"),
                      col_types = col.def.2)
   
   daily.summary.list[[k]]  <- fcn.compare.data(data.1, data.2, Y)
@@ -142,8 +156,42 @@ daily.summary.list[[which(years == Y)]]$figure
 
 There are a lot of differences between the two. Need to look into this a bit more. 
 
+Get the raw data
+```{r}
+# Code chunk from Extract Excel data.Rmd
+dir.name <- paste0("C_C ", Y)
+start.time <- "630"
+
+xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
+xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
+xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
+
+sheet.name.inshore <- "INSHORE LOG"
+sheet.name.offshore <- NULL
+col.types.inshore <- c("date", "numeric", "text", "numeric", "numeric",
+                       "numeric", "numeric", "text", "text")
+
+col.names.inshore <- c("Date", "Event", "Time", "Obs. Code", "Sea State",
+                       "Vis. IN", "Cow  / Calf")
+
+col.types.offshore <- c("date", "numeric", "text", "numeric", "numeric",
+                        "numeric", "numeric", "numeric", "text", "text")
+
+col.names.offshore <- c("Date", "Event", "Time", "Obs.", "Sea State",
+                        "Vis. Code", "Cow/Calf")
+
+out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                         col.types.inshore, col.types.offshore,
+                         col.names.inshore, col.names.offshore,
+                         Y, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time)
+```
+
+
 Effort:
 ```{r}
+
 daily.summary.list[[which(years == Y)]]$daily.summary.1.2 %>%
   filter(dif.effort != 0) %>%
   dplyr::select(Date.char) %>%
@@ -154,9 +202,10 @@ for (k in 1:length(date.dif.effort)){
   daily.summary.list[[which(years == Y)]]$data.1 %>%
     filter(Date == as.Date(date.dif.effort[k])) -> data.1.dif
   
-   daily.summary.list[[which(years == Y)]]$data.2 %>%
+  daily.summary.list[[which(years == Y)]]$data.2 %>%
     filter(Date == as.Date(date.dif.effort[k])) -> data.2.dif
   
+  raw.data <- out.list$data.all %>% filter(Date == as.Date(date.dif.effort[k]))   
 }
 
 ```
