@@ -278,6 +278,27 @@ find.effort <- function(x, T0){
     one.day %>%
       arrange(by = Minutes_since_0000) -> one.day
     
+    # fill in Seastate and visibility
+    sea.state <- one.day[1, "SeaState"]
+    vis <- one.day[1, "SeaState"]
+    for (k6 in 2:nrow(one.day)){
+      if (is.na(one.day[k6, "SeaState"])){
+        one.day[k6, "SeaState"] <- sea.state
+      } else {
+        sea.state <- one.day[k6, "SeaState"]
+      }
+      
+      if (is.na(one.day[k6, "Vis"])){
+        one.day[k6, "Vis"] <- vis
+      } else {
+        vis <- one.day[k6, "Vis"]
+      }
+      
+    }
+    
+    # Visibility is coded in characters. This needs to be converted into double in order
+    # to find maximum value within each shift. 2023-05-10
+    
     # Check to see if the line is the end of one and the beginning of the next
     shift <- one.day$Shift[1]
     if (length(grep("/", shift)) == 0){
@@ -325,6 +346,7 @@ find.effort <- function(x, T0){
           one.shift.eft[nrow(one.shift.eft), "Event"] <- 5
           one.shift.eft[nrow(one.shift.eft), "Minutes_since_0000"] <- shift.ends[k4]
           one.shift.eft[nrow(one.shift.eft), "Time"] <- minutes2time_char(shift.ends[k4])
+          one.shift.eft[nrow(one.shift.eft), "Minutes_since_T0"] <- shift.ends[k4] - one.shift.eft[1,"Minutes_since_0000"]
         }
         
         # Figure out off effort time due to visibility and sea state (> 4)
@@ -332,41 +354,41 @@ find.effort <- function(x, T0){
           mutate(Effort = ifelse((Vis > 4 | SeaState > 4),
                                  "off", "on")) -> one.shift.eft
         
-        # find out how many on/off effort existed
-        row.1 <- which(one.shift.eft$Event == 1)
-        row.5 <- which(one.shift.eft$Event == 5)
-        
-        # sometimes too many event == 1 and event == 5
-        if (length(row.1) > 1 & length(row.5) > 1){
-          for (k3 in 2:length(row.1)){
-            if (row.1[k3] < row.5[k3-1]){
-              row.1[k3] <- NA
-            } 
-            
-          }
-          row.1 <- row.1[!is.na(row.1)]
-          
-        }
-        
-        # if they don't match, adjust accordingly.
-        if (length(row.1) != length(row.5)){
-          nrow <- min(length(row.1), length(row.5))
-          row.1.1 <- vector(mode = "numeric", length = nrow)
-          row.5.1 <- vector(mode = "numeric", length = nrow)
-          for (k2 in 1:nrow){
-            if (k2 == 1){
-              row.1.1[k2] <- row.1[k2]
-              row.5.1[k2] <- row.5[k2]
-            } else {
-              row.1.1[k2] <- first(row.1[row.1 > row.5.1[k2-1]])
-              row.5.1[k2] <- first(row.5[row.5 > row.1.1[k2]])
-            }
-            
-          }
-          row.1 <- row.1.1[!is.na(row.1.1)]
-          row.5 <- row.5.1[!is.na(row.5.1)]
-        }
-        
+        # # find out how many on/off effort existed
+        # row.1 <- which(one.shift.eft$Event == 1)
+        # row.5 <- which(one.shift.eft$Event == 5)
+        # 
+        # # sometimes too many event == 1 and event == 5
+        # if (length(row.1) > 1 & length(row.5) > 1){
+        #   for (k3 in 2:length(row.1)){
+        #     if (row.1[k3] < row.5[k3-1]){
+        #       row.1[k3] <- NA
+        #     } 
+        #     
+        #   }
+        #   row.1 <- row.1[!is.na(row.1)]
+        #   
+        # }
+        # 
+        # # if they don't match, adjust accordingly.
+        # if (length(row.1) != length(row.5)){
+        #   nrow <- min(length(row.1), length(row.5))
+        #   row.1.1 <- vector(mode = "numeric", length = nrow)
+        #   row.5.1 <- vector(mode = "numeric", length = nrow)
+        #   for (k2 in 1:nrow){
+        #     if (k2 == 1){
+        #       row.1.1[k2] <- row.1[k2]
+        #       row.5.1[k2] <- row.5[k2]
+        #     } else {
+        #       row.1.1[k2] <- first(row.1[row.1 > row.5.1[k2-1]])
+        #       row.5.1[k2] <- first(row.5[row.5 > row.1.1[k2]])
+        #     }
+        #     
+        #   }
+        #   row.1 <- row.1.1[!is.na(row.1.1)]
+        #   row.5 <- row.5.1[!is.na(row.5.1)]
+        # }
+        # 
         one.shift.eft <- one.shift.eft[!is.na(one.shift.eft$Effort),]
         # calculate effort for each "on" period per shift
         #tmp.eft <- 0
@@ -440,6 +462,7 @@ find.effort <- function(x, T0){
         
         # Sometimes, there is no Vis (or also sea state) update in an entire
         # shift. Use one from previous shift in those cases
+        # These should not happen any longer but keep it anyways. 2023-05-10
         if (sum(!is.na(one.shift$SeaState)) > 0){
           max.sea.state <- max(one.shift$SeaState, na.rm = T)          
         } else {
