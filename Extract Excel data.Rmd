@@ -55,14 +55,14 @@ xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 
 sheet.name.inshore <- "INSHORE LOG"
 sheet.name.offshore <- NULL
-col.types.inshore <- c("date", "numeric", "text", "numeric", "numeric",
-                       "numeric", "numeric", "text", "text")
+col.types.inshore <- c("date", "numeric", "text", "numeric", "text",
+                       "text", "numeric", "text", "text")
 
 col.names.inshore <- c("Date", "Event", "Time", "Obs. Code", "Sea State",
                        "Vis. IN", "Cow  / Calf")
 
-col.types.offshore <- c("date", "numeric", "text", "numeric", "numeric",
-                        "numeric", "numeric", "numeric", "text", "text")
+col.types.offshore <- c("date", "numeric", "text", "numeric", "text",
+                        "text", "numeric", "numeric", "text", "text")
 
 col.names.offshore <- c("Date", "Event", "Time", "Obs.", "Sea State",
                         "Vis. Code", "Cow/Calf")
@@ -74,21 +74,9 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-files <- file.names(out.dir, Year)
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
-if (!file.exists(files$all))
-  write_csv(out.list$data.all,
-            file = files$all)
-
-if (!file.exists(files$shift))
-  write_csv(out.list$data.shift,
-            file = files$shift)
-
-if (!file.exists(files$formatted))
-  write_csv(out.list$formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
 
 ```
 
@@ -114,15 +102,15 @@ xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 
 sheet.name.inshore <- "Inshore Data"
 sheet.name.offshore <- "Offshore Data"
-col.types.inshore <- c("date", "numeric", "text", "numeric", "numeric", 
-                       "numeric", "numeric", "numeric", "text", "text", 
+col.types.inshore <- c("date", "numeric", "text", "numeric", "text", 
+                       "text", "numeric", "numeric", "text", "text", 
                        "text", "text", "text", "text", "text", "text")
 
 col.names.inshore <- c("Date",	"Event Code",	"Time",	"Observer Code",	
                        "Sea State",	"Vis In",	"C/C Pairs")
 
 col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "numeric", "numeric", "numeric", "numeric", 
+                        "text", "text", "numeric", "numeric", 
                         "numeric", "text", "numeric", "text")
 
 col.names.offshore <- c("Date",	"Event",	"Time",	"OBS.", 
@@ -135,22 +123,8 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-files <- file.names(out.dir, Year)
-
-if (!file.exists(files$all))
-  write_csv(out.list$data.all,
-            file = files$all)
-
-if (!file.exists(files$shift))
-  write_csv(out.list$data.shift,
-            file = files$shift)
-
-if (!file.exists(files$formatted))
-  write_csv(out.list$formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
-
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
 
 ```
@@ -183,7 +157,7 @@ col.names.inshore <- c("DATE",	"EVENT CODE",	"TIME", "OBS.",
                        "SEA STATE",	"VIS (IN/OUT)",	"C/C")
 
 col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "numeric", "text", "numeric", "numeric", 
+                       "text", "text", "numeric", "numeric", 
                        "numeric", "text", "text", 
                        "text", "text", "text")
 
@@ -192,7 +166,7 @@ col.names.offshore <- c("DATE",	"EVENT CODE",	"TIME", 	"OBS",
                        	"SEA ST.", "VIS",	"C/C")
 
 col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "numeric", "numeric", "numeric", "numeric", 
+                        "text", "text", "numeric", "numeric", 
                         "numeric", "text",  "text")
 
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
@@ -202,21 +176,9 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-files <- file.names(out.dir, Year)
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
-if (!file.exists(files$all))
-  write_csv(out.list$data.all,
-            file = files$all)
-
-if (!file.exists(files$shift))
-  write_csv(out.list$data.shift,
-            file = files$shift)
-
-if (!file.exists(files$formatted))
-  write_csv(out.list$formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
 
 
 ```
@@ -262,22 +224,8 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-files <- file.names(out.dir, Year)
-
-if (!file.exists(files$all))
-  write_csv(out.list$data.all,
-            file = files$all)
-
-if (!file.exists(files$shift))
-  write_csv(out.list$data.shift,
-            file = files$shift)
-
-if (!file.exists(files$formatted))
-  write_csv(out.list$formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
-
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
 ```
 
@@ -304,7 +252,7 @@ col.names.inshore <- c("Date",	"Event Code",	"Time",	"Obs",
                        "Vis (I/O)", "Sea State",	"c/c"	)
 
 col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "numeric", "text", "numeric", "numeric", 
+                       "text", "text", "numeric", "numeric", 
                        "numeric", "text", "text", "text", 
                        "text", "text")
 
@@ -312,7 +260,7 @@ col.names.offshore <- c("Date",	"Event Code",	"Time",	"Obs",
                         "Vis",	"SeaState",	"c/c")
 
 col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
   
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
@@ -322,21 +270,9 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-files <- file.names(out.dir, Year)
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
-if (!file.exists(files$all))
-  write_csv(out.list$data.all,
-            file = files$all)
-
-if (!file.exists(files$shift))
-  write_csv(out.list$data.shift,
-            file = files$shift)
-
-if (!file.exists(files$formatted))
-  write_csv(out.list$formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
 
 ```
 
@@ -366,7 +302,7 @@ col.names.inshore <- c("Date",	"Event Code",	"Time", 	"Obs. Code",
                        "Vis", "Sea State", "C/C")
 
 col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "numeric", "text", "numeric", "numeric", 
+                       "text", "text", "numeric", "numeric", 
                        "numeric", "text", "text", "text",
                        "text", "text", "text")
 
@@ -374,7 +310,7 @@ col.names.offshore <- c("Date",	"Event Code",	"Time",	"Observer",
                         "Vis. Code",	"Sea State",	"C/C")
 
 col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
@@ -384,21 +320,9 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-files <- file.names(out.dir, Year)
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
-if (!file.exists(files$all))
-  write_csv(out.list$data.all,
-            file = files$all)
-
-if (!file.exists(files$shift))
-  write_csv(out.list$data.shift,
-            file = files$shift)
-
-if (!file.exists(files$formatted))
-  write_csv(out.list$formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
 ```
 
 
@@ -420,7 +344,7 @@ col.names.inshore <- c("DATE",	"EVENT",	"TIME",	"OBS.",
                        "VIS (IN/OUT)",	"SEA STATE",	"C/C")
 
 col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "numeric", "text", "numeric", "numeric", 
+                       "text", "text", "numeric", "numeric", 
                        "text", "text", "text", "text",
                        "text", "text")
 
@@ -428,7 +352,7 @@ col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS.",
                         "VIS CODE",	"SEA STATE",	"C/C")
 
 col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text", "numeric", "numeric", 
                         "text", "text",  "text")
 
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
@@ -438,21 +362,9 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-files <- file.names(out.dir, Year)
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
-if (!file.exists(files$all))
-  write_csv(out.list$data.all,
-            file = files$all)
-
-if (!file.exists(files$shift))
-  write_csv(out.list$data.shift,
-            file = files$shift)
-
-if (!file.exists(files$formatted))
-  write_csv(out.list$formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
 
 ```
 
@@ -485,7 +397,7 @@ col.names.inshore <- c("DATE",	"EVENT",	"TIME",	"OBS.",
                        "VIS I/O",	"SEA ST",	"C/C"	)
 
 col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "numeric", "text", "numeric", "numeric", 
+                       "text", "text", "numeric", "numeric", 
                        "text", "text", "text", "text",
                        "text", "text")
 
@@ -493,7 +405,7 @@ col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",
                         "VIS",	"SEA STATE",	"C/C")
 
 col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
@@ -503,21 +415,9 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-files <- file.names(out.dir, Year)
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
-if (!file.exists(files$all))
-  write_csv(out.list$data.all,
-            file = files$all)
-
-if (!file.exists(files$shift))
-  write_csv(out.list$data.shift,
-            file = files$shift)
-
-if (!file.exists(files$formatted))
-  write_csv(out.list$formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
 
 ```
 
@@ -540,7 +440,7 @@ col.names.inshore <- c("DATE",	"EVENT",	"TIME", 	"OBS",
                        "VIS (I/O)",	"SS",	"C/C")
 
 col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "numeric", "text", "numeric", "numeric", 
+                       "text", "text", "numeric", "numeric", 
                        "text", "text", "text", "text",
                        "text", "text")
 
@@ -548,7 +448,7 @@ col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",
                         "VIS",	"SS",	"C/C")
 
 col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
@@ -558,21 +458,8 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-files <- file.names(out.dir, Year)
-
-if (!file.exists(files$all))
-  write_csv(out.list$data.all,
-            file = files$all)
-
-if (!file.exists(files$shift))
-  write_csv(out.list$data.shift,
-            file = files$shift)
-
-if (!file.exists(files$formatted))
-  write_csv(out.list$formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
 ```
 
@@ -581,6 +468,9 @@ if (!file.exists(files$formatted))
 ## 2003
 
 ```{r}
+# Inshore:
+# Row 368. Time = 700. Changed to 900.
+
 Year <- 2003
 dir.name <- paste0("C_C ", Year)
 start.time <- "630"
@@ -595,7 +485,7 @@ col.names.inshore <- c("DATE",	"EVENT",	"TIME", 	"OBS",
                        "VIS (I/O)",	"SS",	"C/C")
 
 col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "numeric", "text", "numeric", "numeric", 
+                       "text", "text", "numeric", "numeric", 
                        "text", "text", "text", "text",
                        "text", "text")
 
@@ -603,7 +493,7 @@ col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",
                         "VIS",	"SS",	"C/C")
 
 col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
@@ -613,21 +503,9 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-files <- file.names(out.dir, Year)
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
-if (!file.exists(files$all))
-  write_csv(out.list$data.all,
-            file = files$all)
-
-if (!file.exists(files$shift))
-  write_csv(out.list$data.shift,
-            file = files$shift)
-
-if (!file.exists(files$formatted))
-  write_csv(out.list$formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
 
 
 ```
@@ -651,7 +529,7 @@ col.names.inshore <- c("DATE",	"EVENT",	"TIME", 	"OBS",
                        "VIS (I/O)",	"SS",	"C/C")
 
 col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "numeric", "text", "numeric", "numeric", 
+                       "text", "text", "numeric", "numeric", 
                        "text", "text", "text", "text",
                        "text", "text")
 
@@ -659,7 +537,7 @@ col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",
                         "VIS",	"SS",	"C/C")
 
 col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
@@ -670,21 +548,8 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          start.time)
 
 
-files <- file.names(out.dir, Year)
-
-if (!file.exists(files$all))
-  write_csv(out.list$data.all,
-            file = files$all)
-
-if (!file.exists(files$shift))
-  write_csv(out.list$data.shift,
-            file = files$shift)
-
-if (!file.exists(files$formatted))
-  write_csv(out.list$formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
 ```
 
@@ -707,7 +572,7 @@ col.names.inshore <- c("DATE",	"EVENT",	"TIME", 	"OBS",
                        "VIS (I/O)",	"SS",	"C/C")
 
 col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "numeric", "text", "numeric", "numeric", 
+                       "text", "text", "numeric", "numeric", 
                        "text", "text", "text", "text", 
                        "text", "text")
 
@@ -715,7 +580,7 @@ col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",
                         "VIS",	"SS",	"C/C")
 
 col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
@@ -725,21 +590,9 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-files <- file.names(out.dir, Year)
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
-if (!file.exists(files$all))
-  write_csv(out.list$data.all,
-            file = files$all)
-
-if (!file.exists(files$shift))
-  write_csv(out.list$data.shift,
-            file = files$shift)
-
-if (!file.exists(files$formatted))
-  write_csv(out.list$formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
 ```
 
 
@@ -765,7 +618,7 @@ col.names.inshore <- c("DATE",	"EVENT", 	"TIME",	"OBS#",
                        "VIS IN",	"SEA ST",	"C/C")
 
 col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "numeric", "text", "numeric", "numeric", 
+                       "text", "text", "numeric", "numeric", 
                        "text", "text", "text", "text", 
                        "text", "text", "text")
 
@@ -773,7 +626,7 @@ col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",
                         "VIS",	"SEA ST",	"C/C")
 
 col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
@@ -783,21 +636,9 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-files <- file.names(out.dir, Year)
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
-if (!file.exists(files$all))
-  write_csv(out.list$data.all,
-            file = files$all)
-
-if (!file.exists(files$shift))
-  write_csv(out.list$data.shift,
-            file = files$shift)
-
-if (!file.exists(files$formatted))
-  write_csv(out.list$formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
 
 ```
 
@@ -820,7 +661,7 @@ col.names.inshore <- c("DATE",	"EVENT", 	"TIME",	"OBS#",
                        "VIS IN",	"SEA ST",	"C/C")
 
 col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "numeric", "text", "numeric", "numeric", 
+                       "text", "text", "numeric", "numeric", 
                        "text", "text", "text", "text", 
                        "text", "text", "text", "text")
 
@@ -828,7 +669,7 @@ col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",
                         "VIS",	"SEA ST",	"C/C")
 
 col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
@@ -838,21 +679,8 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-files <- file.names(out.dir, Year)
-
-if (!file.exists(files$all))
-  write_csv(out.list$data.all,
-            file = files$all)
-
-if (!file.exists(files$shift))
-  write_csv(out.list$data.shift,
-            file = files$shift)
-
-if (!file.exists(files$formatted))
-  write_csv(out.list$formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
 ```
 
@@ -876,7 +704,7 @@ col.names.inshore <- c("DATE",	"EVENT", 	"TIME",	"OBS#",
                        "VIS IN",	"SEA ST",	"C/C")
 
 col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "numeric", "text", "numeric", "numeric", 
+                       "text", "text", "numeric", "numeric", 
                        "text", "text", "text", "text", 
                        "text", "text", "text")
 
@@ -884,7 +712,7 @@ col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",
                         "VIS",	"SEA ST",	"C/C")
 
 col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
@@ -894,21 +722,9 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-files <- file.names(out.dir, Year)
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
-if (!file.exists(files$all))
-  write_csv(out.list$data.all,
-            file = files$all)
-
-if (!file.exists(files$shift))
-  write_csv(out.list$data.shift,
-            file = files$shift)
-
-if (!file.exists(files$formatted))
-  write_csv(out.list$formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
 
 ```
 
@@ -930,7 +746,7 @@ col.names.inshore <- c("DATE",	"EVENT", 	"TIME",	"OBS#",
                        "VIS IN",	"SEA ST",	"C/C")
 
 col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "numeric", "text", "numeric", "numeric", 
+                       "text", "text", "numeric", "numeric", 
                        "text", "text", "text", "text", 
                        "text", "text", "text")
 
@@ -938,7 +754,7 @@ col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",
                         "VIS",	"SEA ST",	"C/C")
 
 col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
@@ -948,21 +764,9 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-files <- file.names(out.dir, Year)
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
-if (!file.exists(files$all))
-  write_csv(out.list$data.all,
-            file = files$all)
-
-if (!file.exists(files$shift))
-  write_csv(out.list$data.shift,
-            file = files$shift)
-
-if (!file.exists(files$formatted))
-  write_csv(out.list$formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
 
 ```
 
@@ -988,7 +792,7 @@ col.names.inshore <- c("DATE",	"EVENT", 	"TIME",	"OBS#",
                        "VIS IN",	"SEA ST",	"C/C")
 
 col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "numeric", "text", "numeric", "numeric", 
+                       "text", "text", "numeric", "numeric", 
                        "text", "text", "text", "text", 
                        "text", "text", "text")
 
@@ -996,7 +800,7 @@ col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",
                         "VIS",	"SEA ST",	"C/C")
 
 col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
@@ -1006,21 +810,9 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-files <- file.names(out.dir, Year)
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
-if (!file.exists(files$all))
-  write_csv(out.list$data.all,
-            file = files$all)
-
-if (!file.exists(files$shift))
-  write_csv(out.list$data.shift,
-            file = files$shift)
-
-if (!file.exists(files$formatted))
-  write_csv(out.list$formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
 ```
 
 
@@ -1042,7 +834,7 @@ col.names.inshore <- c("DATE",	"EVENT", 	"TIME",	"OBS#",
                        "VIS IN",	"SEA ST",	"C/C")
 
 col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "numeric", "text", "numeric", "numeric", 
+                       "text", "text", "numeric", "numeric", 
                        "text", "text", "text", "text", 
                        "text", "text", "text")
 
@@ -1050,7 +842,7 @@ col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",
                         "VIS",	"SEA ST",	"C/C")
 
 col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
@@ -1060,21 +852,9 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-files <- file.names(out.dir, Year)
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
-if (!file.exists(files$all))
-  write_csv(out.list$data.all,
-            file = files$all)
-
-if (!file.exists(files$shift))
-  write_csv(out.list$data.shift,
-            file = files$shift)
-
-if (!file.exists(files$formatted))
-  write_csv(out.list$formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
 
 ```
 
@@ -1100,7 +880,7 @@ col.names.inshore <- c("DATE",	"EVENT", 	"TIME",	"OBS#",
                        "VIS IN",	"SEA ST",	"C/C")
 
 col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "numeric", "text", "numeric", "numeric", 
+                       "text", "text", "numeric", "numeric", 
                        "text", "text", "text", "text", 
                        "text", "text", "text")
 
@@ -1108,7 +888,7 @@ col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",
                         "VIS",	"SEA ST",	"C/C")
 
 col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
@@ -1118,21 +898,9 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-files <- file.names(out.dir, Year)
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
-if (!file.exists(files$all))
-  write_csv(out.list$data.all,
-            file = files$all)
-
-if (!file.exists(files$shift))
-  write_csv(out.list$data.shift,
-            file = files$shift)
-
-if (!file.exists(files$formatted))
-  write_csv(out.list$formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
 
 ```
 
@@ -1141,8 +909,11 @@ if (!file.exists(files$formatted))
 ## 2013
 
 ```{r}
+# Inshore:
+# Row 613 Time = 741. Changed to 941. 2023-05-11
+
 # Offshore:
-# Row 450 T"IME = 100. Changed to 1600. 2023-05-09
+# Row 450 TIME = 100. Changed to 1600. 2023-05-09
 
 Year <- 2013
 dir.name <- paste0("C_C ", Year)
@@ -1158,7 +929,7 @@ col.names.inshore <- c("DATE",	"EVENT", 	"TIME",	"OBS#",
                        "VIS IN",	"SEA ST",	"C/C")
 
 col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "numeric", "text", "numeric", "numeric", 
+                       "text", "text", "numeric", "numeric", 
                        "text", "text", "text", "text", 
                        "text", "text", "text")
 
@@ -1166,7 +937,7 @@ col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",
                         "VIS",	"SEA ST",	"C/C")
 
 col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
@@ -1176,21 +947,9 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-files <- file.names(out.dir, Year)
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
-if (!file.exists(files$all))
-  write_csv(out.list$data.all,
-            file = files$all)
-
-if (!file.exists(files$shift))
-  write_csv(out.list$data.shift,
-            file = files$shift)
-
-if (!file.exists(files$formatted))
-  write_csv(out.list$formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
 ```
 
 
@@ -1213,7 +972,7 @@ col.names.inshore <- c("DATE",	"EVENT", 	"TIME",	"OBS#",
                        "VIS IN",	"SEA ST",	"C/C", "IN/OFF")
 
 col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "numeric", "text", "numeric", "numeric", 
+                       "text", "text", "numeric", "numeric", 
                        "text", "text", "text", "text", 
                        "text", "text", "text")
 
@@ -1221,7 +980,7 @@ col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",
                         "VIS",	"SEA ST",	"C/C")
 
 col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
@@ -1231,24 +990,8 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-files <- file.names(out.dir, Year)
-
-if (!file.exists(files$all))
-  write_csv(out.list$data.all,
-            file = files$all,
-            quote = "none")
-
-if (!file.exists(files$shift))
-  write_csv(out.list$data.shift,
-            file = files$shift, 
-            quote = "none")
-
-# Need to remove NA to be used in Collating and Formatting v2.R
-if (!file.exists(files$formatted))
-  write_csv(out.list$formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
 
 ```
@@ -1274,7 +1017,7 @@ col.names.inshore <- c("DATE",	"EVENT", 	"TIME",	"OBS#",
                        "VIS IN",	"SEA ST",	"C/C", "IN/OFF")
 
 col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "numeric", "text", "numeric", "numeric", 
+                       "text", "text", "numeric", "numeric", 
                        "text", "text", "text", "text", 
                        "text", "text", "text")
 
@@ -1282,7 +1025,7 @@ col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",
                         "VIS",	"SEA ST",	"C/C")
 
 col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
@@ -1292,24 +1035,8 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-files <- file.names(out.dir, Year)
-
-if (!file.exists(files$all))
-  write_csv(out.list$data.all,
-            file = files$all,
-            quote = "none")
-
-if (!file.exists(files$shift))
-  write_csv(out.list$data.shift,
-            file = files$shift, 
-            quote = "none")
-
-# Need to remove NA to be used in Collating and Formatting v2.R
-if (!file.exists(files$formatted))
-  write_csv(out.list$formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
 
 ```
@@ -1336,7 +1063,7 @@ col.names.inshore <- c("DATE",	"EVENT", 	"TIME",	"OBS#",
                        "VIS IN",	"SEA ST",	"C/C", "IN/OFF")
 
 col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "numeric", "text", "numeric", "numeric", 
+                       "text", "text", "numeric", "numeric", 
                        "text", "text", "text", "text", 
                        "text", "text", "text")
 
@@ -1344,7 +1071,7 @@ col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",
                         "VIS",	"SEA ST",	"C/C")
 
 col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "numeric", "text", "numeric", "numeric", 
+                        "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
@@ -1354,24 +1081,9 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-files <- file.names(out.dir, Year)
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
-if (!file.exists(files$all))
-  write_csv(out.list$data.all,
-            file = files$all,
-            quote = "none")
-
-if (!file.exists(files$shift))
-  write_csv(out.list$data.shift,
-            file = files$shift, 
-            quote = "none")
-
-# Need to remove NA to be used in Collating and Formatting v2.R
-if (!file.exists(files$formatted))
-  write_csv(out.list$formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
 ```
 
 
@@ -1394,13 +1106,13 @@ col.names <- c("DATE",	"EVENT", 	"TIME",	"OBS#",
                "VIS IN",	"SEA ST",	"C/C", "IN/OFF")
 
 col.types <- c("date", "numeric", "text", "text", 
-               "numeric", "text", "numeric", "numeric", 
+               "text", "text", "numeric", "numeric", 
                "text", "text", "text", "text", 
                "text", "text", "text", "text",
                "text", "text")
 
 # get the data using get.data function, which is in Piedras_Blancas_fcns.R
-data.all <- get.data(Year = Year,
+data.inshore <- get.data(Year = Year,
                      xls.file.name = xls.file.name.inshore,
                      sheet.name = sheet.name,
                      col.types = col.types,
@@ -1410,28 +1122,19 @@ data.all <- get.data(Year = Year,
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, T0 = start.time) #%>% extract.shift.vars()
+data.shift <- find.effort(data.inshore, T0 = start.time) #%>% extract.shift.vars()
 
-formatted.all.data <- format.output(data.shift, max.shift = max(data.shift$Shift))
+formatted.inshore <- format.output(data.shift, max.shift = max(data.shift$Shift))
 
-files <- file.names(out.dir, Year)
+out.list <- list(data.offshore = NA,
+              data.inshore = data.inshore,
+              shift.data.offshore = NA,
+              shift.data.inshore = data.shift,
+              formatted.data.offshore = NA,
+              formatted.data.inshore = formatted.inshore)
 
-if (!file.exists(files$all))
-  write_csv(data.all,
-            file = files$all,
-            quote = "none")
-
-if (!file.exists(files$shift))
-  write_csv(data.shift,
-            file = files$shift, 
-            quote = "none")
-
-# Need to remove NA to be used in Collating and Formatting v2.R
-if (!file.exists(files$formatted))
-  write_csv(formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
 
 ```
@@ -1454,45 +1157,35 @@ col.names <- c("DATE",	"EVENT", 	"TIME",	"OBS#",
                "VIS IN",	"SEA ST",	"C/C", "IN/OFF")
 
 col.types <- c("numeric", "date", "numeric", "text", "text", 
-                       "numeric", "text", "numeric", "numeric", 
-                       "text", "text", "text", "text", 
-                       "text", "text", "text", "text",
-                       "text", "text", "text", "text")
+               "text", "text", "numeric", "numeric", 
+               "text", "text", "text", "text", 
+               "text", "text", "text", "text",
+               "text", "text", "text", "text")
 
 # get the data using get.data function, which is in Piedras_Blancas_fcns.R
-data.all <- get.data(Year = Year,
+data.inshore <- get.data(Year = Year,
                      xls.file.name = xls.file.name.inshore,
                      sheet.name = sheet.name,
                      col.types = col.types,
                      col.names = all_of(col.names),
-                     start.time = start.time)%>% 
+                     start.time = start.time) %>%
   extract.all.vars()
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, T0 = start.time) #%>% extract.shift.vars()
+data.shift <- find.effort(data.inshore, T0 = start.time) #%>% extract.shift.vars()
 
-formatted.all.data <- format.output(data.shift, max.shift = max(data.shift$Shift))
+formatted.inshore <- format.output(data.shift, max.shift = max(data.shift$Shift))
 
+out.list <- list(data.offshore = NA,
+              data.inshore = data.inshore,
+              shift.data.offshore = NA,
+              shift.data.inshore = data.shift,
+              formatted.data.offshore = NA,
+              formatted.data.inshore = formatted.inshore)
 
-files <- file.names(out.dir, Year)
-
-if (!file.exists(files$all))
-  write_csv(data.all,
-            file = files$all,
-            quote = "none")
-
-if (!file.exists(files$shift))
-  write_csv(data.shift,
-            file = files$shift, 
-            quote = "none")
-
-# Need to remove NA to be used in Collating and Formatting v2.R
-if (!file.exists(files$formatted))
-  write_csv(formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
 
 ```
@@ -1522,46 +1215,35 @@ col.names <- c("DATE",	"EVENT", 	"TIME",	"OBS #",
                "VIS IN",	"SEA ST",	"C/C", "IN/OFF")
 
 col.types <- c("date", "numeric", "numeric", "text", "text", 
-                       "numeric", "text", "numeric", "numeric", 
-                       "text", "text", "text", "text", 
-                       "text", "text", "text", "text",
-                       "text", "text", "text")
+               "text", "text", "numeric", "numeric", 
+               "text", "text", "text", "text", 
+               "text", "text", "text", "text",
+               "text", "text", "text")
 
 # get the data using get.data function, which is in Piedras_Blancas_fcns.R
-data.all <- get.data(Year = Year,
+data.inshore <- get.data(Year = Year,
                      xls.file.name = xls.file.name.inshore,
                      sheet.name = sheet.name,
                      col.types = col.types,
                      col.names = all_of(col.names),
-                     start.time = start.time)%>% 
+                     start.time = start.time) %>%
   extract.all.vars()
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, T0 = start.time) #%>% extract.shift.vars()
+data.shift <- find.effort(data.inshore, T0 = start.time) #%>% extract.shift.vars()
 
-formatted.all.data <- format.output(data.shift, max.shift = max(data.shift$Shift))
+formatted.inshore <- format.output(data.shift, max.shift = max(data.shift$Shift))
 
+out.list <- list(data.offshore = NA,
+              data.inshore = data.inshore,
+              shift.data.offshore = NA,
+              shift.data.inshore = data.shift,
+              formatted.data.offshore = NA,
+              formatted.data.inshore = formatted.inshore)
 
-files <- file.names(out.dir, Year)
-
-if (!file.exists(files$all))
-  write_csv(data.all,
-            file = files$all,
-            quote = "none")
-
-if (!file.exists(files$shift))
-  write_csv(data.shift,
-            file = files$shift, 
-            quote = "none")
-
-# Need to remove NA to be used in Collating and Formatting v2.R
-if (!file.exists(files$formatted))
-  write_csv(formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
-
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
 ```
 
@@ -1584,44 +1266,35 @@ col.names <- c("DATE",	"EVENT", 	"TIME",	"OBS #",
                        "VIS IN",	"SEA ST",	"C/C", "IN/OFF")
 
 col.types <- c("date", "numeric", "numeric", "text", "text", 
-                       "numeric", "text", "numeric", "numeric", 
-                       "text", "text", "text", "text", 
-                       "text", "text", "text", "text",
-                       "text", "text", "text", "text", "text")
+               "text", "text", "numeric", "numeric", 
+               "text", "text", "text", "text", 
+               "text", "text", "text", "text",
+               "text", "text", "text", "text", "text")
 
 # get the data using get.data function, which is in Piedras_Blancas_fcns.R
-data.all <- get.data(Year = Year,
+data.inshore <- get.data(Year = Year,
                      xls.file.name = xls.file.name.inshore,
                      sheet.name = sheet.name,
                      col.types = col.types,
                      col.names = all_of(col.names),
-                     start.time = start.time)%>% 
+                     start.time = start.time) %>%
   extract.all.vars()
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, T0 = start.time) #%>% extract.shift.vars()
+data.shift <- find.effort(data.inshore, T0 = start.time) #%>% extract.shift.vars()
 
-formatted.all.data <- format.output(data.shift, max.shift = max(data.shift$Shift))
+formatted.inshore <- format.output(data.shift, max.shift = max(data.shift$Shift))
 
-files <- file.names(out.dir, Year)
+out.list <- list(data.offshore = NA,
+              data.inshore = data.inshore,
+              shift.data.offshore = NA,
+              shift.data.inshore = data.shift,
+              formatted.data.offshore = NA,
+              formatted.data.inshore = formatted.inshore)
 
-if (!file.exists(files$all))
-  write_csv(data.all,
-            file = files$all,
-            quote = "none")
-
-if (!file.exists(files$shift))
-  write_csv(data.shift,
-            file = files$shift, 
-            quote = "none")
-
-# Need to remove NA to be used in Collating and Formatting v2.R
-if (!file.exists(files$formatted))
-  write_csv(formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
 ```
 
@@ -1652,43 +1325,34 @@ col.names <- c("DATE", 	"EVENT", 	"TIME",	"OBS #",
 
 # these are column types of all columns in the spreadsheet. 
 col.types <- c("date", "numeric", "numeric", "text", "text", 
-               "numeric", "numeric", "numeric", "numeric", "text", 
+               "text", "text", "numeric", "numeric", "text", 
                "text", "text", "text", "numeric", "text", 
                "text", "text", "text")
 
 # get the data using get.data function, which is in Piedras_Blancas_fcns.R
-data.all <- get.data(Year = Year,
+data.inshore <- get.data(Year = Year,
                      xls.file.name = xls.file.name.inshore,
                      sheet.name = sheet.name,
                      col.types = col.types,
                      col.names = all_of(col.names),
-                     start.time = start.time)%>% 
+                     start.time = start.time) %>%
   extract.all.vars()
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.all, T0 = start.time) #%>% extract.shift.vars()
+data.shift <- find.effort(data.inshore, T0 = start.time) #%>% extract.shift.vars()
 
-formatted.all.data <- format.output(data.shift, max.shift = max(data.shift$Shift))
+formatted.inshore <- format.output(data.shift, max.shift = max(data.shift$Shift))
 
-files <- file.names(out.dir, Year)
+out.list <- list(data.offshore = NA,
+              data.inshore = data.inshore,
+              shift.data.offshore = NA,
+              shift.data.inshore = data.shift,
+              formatted.data.offshore = NA,
+              formatted.data.inshore = formatted.inshore)
 
-if (!file.exists(files$all))
-  write_csv(data.all ,
-            file = files$all,
-            quote = "none")
-
-if (!file.exists(files$shift))
-  write_csv(data.shift,
-            file = files$shift, 
-            quote = "none")
-
-# Need to remove NA to be used in Collating and Formatting v2.R
-if (!file.exists(files$formatted))
-  write_csv(formatted.all.data,
-            file = files$formatted, 
-            quote = "none",
-            na = "")
+# Creates file names and saves files
+files <- file.names(out.dir, Year, out.list)
 
 ```
 

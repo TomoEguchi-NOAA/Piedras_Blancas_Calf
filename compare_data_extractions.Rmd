@@ -46,7 +46,7 @@ col.def.1.1997 <- cols(Week = col_integer(),
                        Sightings = col_integer())
 
 files.2 <- list.files(path = dir.2, 
-                    pattern = "Formatted_v2.csv")
+                    pattern = "Formatted_inshore_v2.csv")
 
 col.def.2 <- cols(Week = col_integer(),
                   Date = col_date(format = "%Y-%m-%d"),
@@ -136,7 +136,7 @@ for (k in 1:length(years)){
     
   }
   
-  data.2 <- read_csv(file = paste0(dir.2, Y, " Formatted_v2.csv"),
+  data.2 <- read_csv(file = paste0(dir.2, Y, " Formatted_inshore_v2.csv"),
                      col_types = col.def.2)
   
   daily.summary.list[[k]]  <- fcn.compare.data(data.1, data.2, Y)
@@ -192,28 +192,22 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
 Effort:
 ```{r}
 
-daily.summary.list[[which(years == Y)]]$daily.summary.1.2 %>%
-  filter(dif.effort != 0) %>%
-  dplyr::select(Date.char) %>%
-  pull() -> date.dif.effort
-
-k <- 1
-for (k in 1:length(date.dif.effort)){
-  daily.summary.list[[which(years == Y)]]$data.1 %>%
-    filter(Date == as.Date(date.dif.effort[k])) -> data.1.dif
-  
-  daily.summary.list[[which(years == Y)]]$data.2 %>%
-    filter(Date == as.Date(date.dif.effort[k])) -> data.2.dif
-  
-  raw.data <- out.list$data.all %>% filter(Date == as.Date(date.dif.effort[k]))   
-}
+effort.dif.list <- find.effort.dif(Y, daily.summary.list, out.list)
 
 ```
+
+Many differences come from the first shift starting at 0630, rather than 0700. In the v1 extraction algorithm, the first shift was assumed to start at 0700, so 30 min were removed, whereas the v2 algorithm counts all data. Spot checks show v2 doing a good job counting all. v1 seems to ignore sea state > 4. 
+
+There are a few shift 5... I think they should be deleted. 
 
 
 Sightings
 
 ```{r}
+
+START HERE TO CREATE A FUNCTION TO EXTRACT THE DIFFERENCS IN SIGHTING NUMBERS 2023-05-11
+
+effort.dif.list <- find.sighting.dif(Y, daily.summary.list, out.list)
 
 daily.summary.list[[which(years == Y)]]$daily.summary.1.2 %>%
   filter(dif.sightings != 0) %>%
