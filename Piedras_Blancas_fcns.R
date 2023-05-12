@@ -33,18 +33,22 @@ get.all.data <- function(sheet.name.inshore, sheet.name.offshore,
   #   arrange(Date.date, Minutes_since_0000) %>% 
   #   extract.all.vars() -> data.all
   
-  data.shift.offshore <- find.effort(data.offshore, T0 = start.time) 
-  data.shift.inshore <- find.effort(data.inshore, T0 = start.time) 
+  shift.offshore <- find.effort(data.offshore, T0 = start.time) 
+  shift.inshore <- find.effort(data.inshore, T0 = start.time) 
   
-  formatted.offshore <- format.output(data.shift.offshore, max.shift = max(data.shift.offshore$Shift))
-  formatted.inshore <- format.output(data.shift.inshore, max.shift = max(data.shift.inshore$Shift))
+  formatted.offshore <- format.output(shift.offshore$out.df, 
+                                      max.shift = max(shift.offshore$out.df$Shift))
+  formatted.inshore <- format.output(shift.inshore$out.df, 
+                                     max.shift = max(shift.inshore$out.df$Shift))
   
   return(list(data.offshore = data.offshore,
               data.inshore = data.inshore,
-              shift.data.offshore = data.shift.offshore,
-              shift.data.inshore = data.shift.inshore,
+              shift.data.offshore = shift.offshore$out.df,
+              shift.data.inshore = shift.inshore$out.df,
               formatted.data.offshore = formatted.offshore,
-              formatted.data.inshore = formatted.inshore))
+              formatted.data.inshore = formatted.inshore,
+              shift.all.offshore = shift.offshore$shift.df,
+              shift.all.inshore = shift.inshore$shift.df))
 }
 
 
@@ -181,9 +185,10 @@ find.effort <- function(x, T0){
   shift.begins <- c(T0.minutes, shift.ends)
   
   out.list <- list()
+  shift.list <- list()
   d <- k1 <- c <- k2 <- 1
-  d <- 1
-  k4 <- 1
+  d <- 29
+  k4 <- 3
   for (d in 1:length(all.dates)){
     # pick just one day's worth of data
     one.day <- filter(x, Date == as.Date(all.dates[d])) %>% arrange(Minutes_since_0000)
@@ -235,7 +240,9 @@ find.effort <- function(x, T0){
         shift.last <- strsplit(shift, "/")[[1]][1] %>% as.numeric()
       }
       
-      # go through one shift at a time
+      # go through one shift at a time but remove the 5th shift
+      if (shift.last > 4) shift.last <- 4
+      
       for (k4 in shift.first:shift.last){
         shift.idx <- grep(as.character(k4), one.day$Shift)
         
@@ -257,7 +264,11 @@ find.effort <- function(x, T0){
           if (one.shift[1,"Event"] != 1){
             one.shift.eft <- rbind(one.shift[1,], one.shift)
             one.shift.eft[1, "Event"] <- 1
+            one.shift.eft[1, "Time"] <- minutes2time_char(shift.begins[k4])
+            one.shift.eft[1, "Minutes_since_T0"] <- shift.begins[k4] - char_time2min(T0)
             one.shift.eft[1, "Minutes_since_0000"] <- shift.begins[k4]
+            one.shift.eft[1, "Mother_Calf"] <- NA
+
           } else {
             one.shift.eft <- one.shift
           }
@@ -265,9 +276,10 @@ find.effort <- function(x, T0){
           if (one.shift[nrow(one.shift), "Event"] != 5){
             one.shift.eft <- rbind(one.shift.eft, one.shift[nrow(one.shift),])
             one.shift.eft[nrow(one.shift.eft), "Event"] <- 5
-            one.shift.eft[nrow(one.shift.eft), "Minutes_since_0000"] <- shift.ends[k4]
             one.shift.eft[nrow(one.shift.eft), "Time"] <- minutes2time_char(shift.ends[k4])
-            one.shift.eft[nrow(one.shift.eft), "Minutes_since_T0"] <- shift.ends[k4] - one.shift.eft[1,"Minutes_since_0000"]
+            one.shift.eft[nrow(one.shift.eft), "Minutes_since_T0"] <- shift.ends[k4] - char_time2min(T0)
+            one.shift.eft[nrow(one.shift.eft), "Minutes_since_0000"] <- shift.ends[k4]
+            one.shift.eft[nrow(one.shift.eft), "Mother_Calf"] <- NA 
           }
           
           # Figure out off effort time due to visibility and sea state (> 4)
@@ -365,16 +377,19 @@ find.effort <- function(x, T0){
           }
           
           out.list[[c]] <- data.frame(Date = all.dates[d],
-                                      Minutes_since_0000 = shift.begins[k4],
+                                      Minutes_since_0000 = one.shift.eft[1, "Minutes_since_0000"],
                                       Shift = k4,
                                       Effort = unname(tmp.eft),
-                                      Mother_Calf = sum(one.shift$Mother_Calf, 
-                                                        na.rm = T),
+                                      Mother_Calf = one.shift.eft %>%
+                                        filter(Effort == "on") %>%
+                                        summarize(MandC = sum(Mother_Calf, na.rm = TRUE)) %>%
+                                        pull(),
                                       Sea_State = ifelse(!is.infinite(max.sea.state),
                                                          max.sea.state, NA),
                                       Vis = ifelse(!is.infinite(max.Vis),
                                                    max.Vis, NA))
           
+          shift.list[[c]] <- one.shift.eft
           c <- c + 1
           
         }
@@ -384,10 +399,12 @@ find.effort <- function(x, T0){
   }
   
   out.df <- do.call(rbind, out.list)
+  shift.df <- do.call(rbind, shift.list)
   # out.df %>% 
   #   mutate(Date = as.Date(Date.char, 
   #                              format = "%Y-%m-%d")) -> out.df.1
-  return(out.df)
+  return(list(out.df = out.df,
+              shift.df = shift.df))
 }
 
 # extract MCMC diagnostic statistics, including Rhat, loglikelihood, DIC, and LOOIC
@@ -506,11 +523,9 @@ format.output <- function(data.shift, max.shift){
   # create a data frame with the full set of date/shift for dates with observations
   day.shifts <- data.frame(Date = rep(unique(data.shift$Date),
                                            each = max.shift),
-                           Shift = ifelse(max.shift == 4, 
-                                          rep(c(1,2,3,4), 
-                                              times = length(unique(data.shift$Date))),
-                                          rep(c(1,2,3,4,5), 
-                                              times = length(unique(data.shift$Date)))))
+                           Shift = rep(c(1,2,3,4), 
+                                       times = length(unique(data.shift$Date))))
+  
   # Combine the full set of date/shift with the observed - some shifts are NAs because
   # they were not in the dataset
   day.shifts %>% 
@@ -523,7 +538,7 @@ format.output <- function(data.shift, max.shift){
                         by = "week")
   
   # select necessary data from per-shift data frame, mutate the column names
-  # the create a new data frame
+  # then create a new data frame
   data.shift %>% 
     select(Shift, Date, Effort, Mother_Calf) %>%
     mutate(Date = Date,
@@ -538,9 +553,9 @@ format.output <- function(data.shift, max.shift){
                         as.Date(max(data.shift$Date)),
                         by = "day")
   
-  # create all shists, incluyding nights
+  # create all shifts, including nights
   all.shifts <- data.frame(Date = rep(all.dates,
-                                           each = 8),
+                                      each = 8),
                            Shift = rep(c(1:8), 
                                        times = length(all.dates),
                                        by = "day"))
@@ -605,33 +620,34 @@ file.names <- function(out.dir, Year, out.list){
                 formatted.inshore = out.file.name.formatted.inshore,
                 formatted.offshore = out.file.name.formatted.offshore)
   
-  if (!file.exists(files$inshore))
+  #if (!file.exists(files$inshore))
     write_csv(out.list$data.inshore,
               file = files$inshore,
               quote = "none")
   
-  if (!file.exists(files$offshore) & !is.na(out.list$data.offshore))
+  # NEWER DATASETS DO NOT HAVE OFFSHORE LOGS (>2016). 
+  if (!is.null(out.list$data.offshore))
     write_csv(out.list$data.offshore,
               file = files$offshore,
               quote = "none")
   
-  if (!file.exists(files$shift.inshore))
+  #if (!file.exists(files$shift.inshore))
     write_csv(out.list$shift.data.inshore,
               file = files$shift.inshore, 
               quote = "none")
   
-  if (!file.exists(files$shift.offshore) & !is.na(out.list$shift.data.offshore))
+  if (!is.null(out.list$shift.data.offshore))
     write_csv(out.list$shift.data.offshore,
               file = files$shift.offshore, 
               quote = "none")
   
-  if (!file.exists(files$formatted.inshore))
+  #if (!file.exists(files$formatted.inshore))
     write_csv(out.list$formatted.data.inshore,
               file = files$formatted.inshore, 
               quote = "none",
               na = "")
   
-  if (!file.exists(files$formatted.offshore) & !is.na(out.list$formatted.data.offshore))
+  if (!is.null(out.list$formatted.data.offshore))
     write_csv(out.list$formatted.data.offshore,
               file = files$formatted.offshore, 
               quote = "none",
@@ -664,9 +680,55 @@ find.effort.dif <- function(Y, daily.summary.list, out.list){
       raw.data <- list(length(shift.dif[[k]]))
       k2 <- 1
       for (k2 in 1:length(shift.dif[[k]])){
-        raw.data[[k2]] <- out.list$data.inshore %>% 
-          filter(Date == as.Date(date.dif.effort[k])) %>%
-          filter(Shift == shift.dif[[k]][k2])
+        tmp.data <- out.list$shift.all.inshore %>% 
+          filter(Date == as.Date(date.dif.effort[k]))
+        
+        raw.data[[k2]] <- tmp.data[grep(shift.dif[[k]][k2], tmp.data$Shift),]
+      }
+      raw.data.all[[k]] <- raw.data
+      
+    }
+    
+  }
+  
+  return(list(date.dif = date.dif.effort,
+              dif.1 = data.1.dif,
+              dif.2 = data.2.dif,
+              dif.shift = shift.dif,
+              raw.data = raw.data.all))  
+}
+
+find.sightings.dif <- function(Y, daily.summary.list, out.list){
+  daily.summary.list[[which(years == Y)]]$daily.summary.1.2 %>%
+    filter(dif.sightings != 0) %>%
+    dplyr::select(Date.char) %>%
+    pull() -> date.dif.sightings
+  
+  raw.data.all <- shift.dif <- data.2.dif <- data.1.dif <- list(length(date.dif.sightings))
+  
+  k <- 1
+  for (k in 1:length(date.dif.sightings)){
+    daily.summary.list[[which(years == Y)]]$data.1 %>%
+      filter(Date == as.Date(date.dif.sightings[k])) -> data.1.dif[[k]]
+    
+    daily.summary.list[[which(years == Y)]]$data.2 %>%
+      filter(Date == as.Date(date.dif.sightings[k])) -> data.2.dif[[k]]
+    
+    # Absolute difference in effort is greater than 0.05 hr (3 min)
+    shift.dif[[k]] <- data.2.dif[[k]]$Shift[which(abs(data.1.dif[[k]]$Sightings - data.2.dif[[k]]$Sightings) != 0)]
+    
+    if (length(shift.dif[[k]]) > 0){
+      raw.data <- list(length(shift.dif[[k]]))
+      k2 <- 1
+      for (k2 in 1:length(shift.dif[[k]])){
+        tmp.data <- out.list$shift.all.inshore %>% 
+          filter(Date == as.Date(date.dif.sightings[k]))
+        
+        raw.data[[k2]] <- tmp.data[grep(shift.dif[[k]][k2], tmp.data$Shift),]
+        
+        # raw.data[[k2]] <- out.list$shift.all.inshore %>% 
+        #   filter(Date == as.Date(date.dif.sightings[k])) %>%
+        #   filter(Shift == shift.dif[[k]][k2])
         
       }
       raw.data.all[[k]] <- raw.data
@@ -675,8 +737,10 @@ find.effort.dif <- function(Y, daily.summary.list, out.list){
     
   }
   
-  return(list(dif.1 = data.1.dif,
+  return(list(date.dif = date.dif.sightings,
+              dif.1 = data.1.dif,
               dif.2 = data.2.dif,
               dif.shift = shift.dif,
               raw.data = raw.data.all))  
 }
+

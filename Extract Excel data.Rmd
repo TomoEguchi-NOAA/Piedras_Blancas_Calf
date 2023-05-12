@@ -17,7 +17,8 @@ data.dir <- "data/All data/"
 out.dir <- "data/Processed data v2/"  # for revising outputs
 out.formatted.dir <- "data/Formatted Annual Data v2/"
 
-
+# Regardless of if output file exists, this will overwrite the output files
+save.files <- TRUE
 
 ```
 
@@ -46,6 +47,7 @@ Year <- 1994
 # Offshore
 # C509 Changed 328 to 628 in Time column 2023-05-08
 
+
 dir.name <- paste0("C_C ", Year)
 start.time <- "630"
 
@@ -53,29 +55,35 @@ xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 
-sheet.name.inshore <- "INSHORE LOG"
-sheet.name.offshore <- NULL
-col.types.inshore <- c("date", "numeric", "text", "numeric", "text",
-                       "text", "numeric", "text", "text")
+# sheet.name.inshore <- "INSHORE LOG"
+# sheet.name.offshore <- NULL
+# col.types.inshore <- c("date", "numeric", "text", "numeric", "text",
+#                        "text", "numeric", "text", "text")
+# 
+# col.names.inshore <- c("Date", "Event", "Time", "Obs. Code", "Sea State",
+#                        "Vis. IN", "Cow  / Calf")
+# 
+# col.types.offshore <- c("date", "numeric", "text", "numeric", "text",
+#                         "text", "numeric", "numeric", "text", "text")
+# 
+# col.names.offshore <- c("Date", "Event", "Time", "Obs.", "Sea State",
+#                         "Vis. Code", "Cow/Calf")
 
-col.names.inshore <- c("Date", "Event", "Time", "Obs. Code", "Sea State",
-                       "Vis. IN", "Cow  / Calf")
-
-col.types.offshore <- c("date", "numeric", "text", "numeric", "text",
-                        "text", "numeric", "numeric", "text", "text")
-
-col.names.offshore <- c("Date", "Event", "Time", "Obs.", "Sea State",
-                        "Vis. Code", "Cow/Calf")
-
-out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                         col.types.inshore, col.types.offshore,
-                         col.names.inshore, col.names.offshore,
+out.list <- get.all.data(list.sheet.name.inshore$Y1994, 
+                         list.sheet.name.offshore$Y1994,
+                         list.col.types.inshore$Y1994, 
+                         list.col.types.offshore$Y1994,
+                         list.col.names.inshore$Y1994, 
+                         list.col.names.offshore$Y1994,
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
 
 
 ```
@@ -123,8 +131,12 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
+
 
 
 ```
@@ -151,23 +163,25 @@ xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 # c("Date", "Event", "Time", "Obs. Code", 
 # "Sea State", "Vis. IN", "Cow  / Calf")
 
-sheet.name.inshore <- "data"
-sheet.name.offshore <- "Sheet1"
-col.names.inshore <- c("DATE",	"EVENT CODE",	"TIME", "OBS.",	
-                       "SEA STATE",	"VIS (IN/OUT)",	"C/C")
-
-col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "text", "text", "numeric", "numeric", 
-                       "numeric", "text", "text", 
-                       "text", "text", "text")
 
 
-col.names.offshore <- c("DATE",	"EVENT CODE",	"TIME", 	"OBS",
-                       	"SEA ST.", "VIS",	"C/C")
-
-col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "text", "text", "numeric", "numeric", 
-                        "numeric", "text",  "text")
+# sheet.name.inshore <- "data"
+# sheet.name.offshore <- "Sheet1"
+# col.names.inshore <- c("DATE",	"EVENT CODE",	"TIME", "OBS.",	
+#                        "SEA STATE",	"VIS (IN/OUT)",	"C/C")
+# 
+# col.types.inshore <- c("date", "numeric", "text", "numeric", 
+#                        "text", "text", "numeric", "numeric", 
+#                        "numeric", "text", "text", 
+#                        "text", "text", "text")
+# 
+# 
+# col.names.offshore <- c("DATE",	"EVENT CODE",	"TIME", 	"OBS",
+#                        	"SEA ST.", "VIS",	"C/C")
+# 
+# col.types.offshore <- c("date", "numeric", "text", "numeric", 
+#                         "text", "text", "numeric", "numeric", 
+#                         "numeric", "text",  "text")
 
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.types.inshore, col.types.offshore,
@@ -176,8 +190,12 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
+
 
 
 
@@ -198,6 +216,8 @@ start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
+
+
 
 sheet.name.inshore <- "LOGS"
 sheet.name.offshore <- "LOGS"
@@ -224,8 +244,12 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
+
 
 ```
 
@@ -244,6 +268,8 @@ start.time <- "630"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
+
+
 
 sheet.name.inshore <- "LOG"
 sheet.name.offshore <- "LOGS"
@@ -270,8 +296,12 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
+
 
 
 ```
@@ -313,6 +343,8 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+
+
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.types.inshore, col.types.offshore,
                          col.names.inshore, col.names.offshore,
@@ -320,8 +352,12 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
+
 
 ```
 
@@ -355,6 +391,8 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "text", "text", "numeric", "numeric", 
                         "text", "text",  "text")
 
+
+
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.types.inshore, col.types.offshore,
                          col.names.inshore, col.names.offshore,
@@ -362,8 +400,12 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
+
 
 
 ```
@@ -408,6 +450,8 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+
+
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.types.inshore, col.types.offshore,
                          col.names.inshore, col.names.offshore,
@@ -415,8 +459,11 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
 
 
 ```
@@ -451,6 +498,8 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+
+
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.types.inshore, col.types.offshore,
                          col.names.inshore, col.names.offshore,
@@ -458,8 +507,12 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
+
 
 ```
 
@@ -496,6 +549,8 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+
+
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.types.inshore, col.types.offshore,
                          col.names.inshore, col.names.offshore,
@@ -503,8 +558,11 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
 
 
 
@@ -540,6 +598,8 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+
+
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.types.inshore, col.types.offshore,
                          col.names.inshore, col.names.offshore,
@@ -548,8 +608,12 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          start.time)
 
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
+
 
 ```
 
@@ -564,6 +628,7 @@ start.time <- "630"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
+
 
 sheet.name.inshore <- "LOGS"
 sheet.name.offshore <- "LOGS"
@@ -583,6 +648,8 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+
+
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.types.inshore, col.types.offshore,
                          col.names.inshore, col.names.offshore,
@@ -590,8 +657,12 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
+
 
 ```
 
@@ -629,6 +700,8 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+
+
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.types.inshore, col.types.offshore,
                          col.names.inshore, col.names.offshore,
@@ -636,8 +709,12 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
+
 
 
 ```
@@ -672,6 +749,7 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.types.inshore, col.types.offshore,
                          col.names.inshore, col.names.offshore,
@@ -679,8 +757,12 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
+
 
 ```
 
@@ -715,6 +797,9 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+
+
+
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.types.inshore, col.types.offshore,
                          col.names.inshore, col.names.offshore,
@@ -722,8 +807,11 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
 
 
 ```
@@ -757,6 +845,8 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+
+
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.types.inshore, col.types.offshore,
                          col.names.inshore, col.names.offshore,
@@ -764,8 +854,11 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
 
 
 ```
@@ -803,6 +896,8 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+
+
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.types.inshore, col.types.offshore,
                          col.names.inshore, col.names.offshore,
@@ -810,8 +905,12 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
+
 
 ```
 
@@ -845,6 +944,8 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+
+
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.types.inshore, col.types.offshore,
                          col.names.inshore, col.names.offshore,
@@ -852,8 +953,12 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
+
 
 
 ```
@@ -887,9 +992,7 @@ col.types.inshore <- c("date", "numeric", "text", "numeric",
 col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",	
                         "VIS",	"SEA ST",	"C/C")
 
-col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "text", "text", "numeric", "numeric", 
-                        "text", "text",  "text", "text")
+
 
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.types.inshore, col.types.offshore,
@@ -898,8 +1001,11 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
 
 
 ```
@@ -940,6 +1046,205 @@ col.types.offshore <- c("date", "numeric", "text", "numeric",
                         "text", "text", "numeric", "numeric", 
                         "text", "text",  "text", "text")
 
+col.types.offshore <- c("date", "numeric", "text", "numeric", 
+                        "text", "text", "numeric", "numeric", 
+                        "text", "text",  "text", "text")
+
+START HERE TO COMPLETE THE FOLLOWING LISTS TO CLEAN UP THE CODE. 2023-05-12
+
+list.sheet.names.inshore <- list(Y1994 = "INSHORE LOG", Y1995 = "Inshore Data", Y1996 = "data",
+                                 Y1997 = "LOGS", Y1998 = "LOGS", Y1999 = "DATA",
+                                 Y2000 = "DATA", Y2001 = "LOGS", Y2002 = "LOGS",
+                                 Y2003 = "logs", Y2004 = "DATA", Y2005 = "LOGS",
+                                 Y2006 = "LOGS", Y2007 = "log", Y2008 = "LOG",
+                                 Y2009 = "LOGS", Y2010 = "LOGS", Y2011 = "LOGS",
+                                 Y2012 = "LOGS")
+list.sheet.names.offshore <- list(Y1994 = NULL, Y1995 = "Offshore Data", Y1996 = "Sheet1",
+                                  Y1997 = "LOGS", Y1998 = "LOGS", Y1999 = "DATA",
+                                  Y2000 = "LOGS", Y2001 = "LOGS", Y2002 = "LOG",
+                                  Y2003 = "logs", Y2004 = "DATA", Y2005 = "LOGS",
+                                  Y2006 = "LOGS", Y2007 = "log", Y2008 = "LOGS",
+                                  Y2009 = "LOGS", Y2010 = "LOGS", Y2011 = "LOGS",
+                                  Y2012 = "LOGS")
+list.col.types.inshore <- list(Y1994 = c("date", "numeric", "text", "numeric", "text",
+                                         "text", "numeric", "text", "text"),
+                               Y1995 = c("date", "numeric", "text", "numeric", "text", 
+                                         "text", "numeric", "numeric", "text", "text", 
+                                         "text", "text", "text", "text", "text", "text"),
+                               Y1996 = c("date", "numeric", "text", "numeric", 
+                                         "text", "text", "numeric", "numeric", 
+                                         "numeric", "text", "text", 
+                                         "text", "text", "text"),
+                               Y1997 = c("date", "numeric", "text", "numeric", "numeric", 
+                                         "numeric", "text", "text", "text", 
+                                         "text", "numeric", "text", "text", 
+                                         "text"),
+                               Y1998 = c("date", "numeric", "text", "numeric", 
+                                         "text", "text", "numeric", "numeric", 
+                                         "numeric", "text", "text", "text", 
+                                         "text", "text"),
+                               Y1999 = c("date", "numeric", "text", "numeric", 
+                                         "text", "text", "numeric", "numeric", 
+                                         "numeric", "text", "text", "text",
+                                         "text", "text", "text"),
+                               Y2000 = c("date", "numeric", "text", "numeric", 
+                                         "text", "text", "numeric", "numeric", 
+                                         "text", "text", "text", "text",
+                                         "text", "text"),
+                               Y2001 = c("date", "numeric", "text", "numeric", 
+                                         "text", "text", "numeric", "numeric", 
+                                         "text", "text", "text", "text",
+                                         "text", "text"),
+                               Y2002 =  c("date", "numeric", "text", "numeric", 
+                                          "text", "text", "numeric", "numeric", 
+                                          "text", "text", "text", "text",
+                                          "text", "text"),
+                               Y2003 = c("date", "numeric", "text", "numeric", 
+                                         "text", "text", "numeric", "numeric", 
+                                         "text", "text", "text", "text",
+                                         "text", "text"),
+                               Y2004 = c("date", "numeric", "text", "numeric", 
+                                         "text", "text", "numeric", "numeric", 
+                                         "text", "text", "text", "text",
+                                         "text", "text"),
+                               Y2005 = c("date", "numeric", "text", "numeric", 
+                                         "text", "text", "numeric", "numeric", 
+                                         "text", "text", "text", "text", 
+                                         "text", "text"),
+                               Y2006 = c("date", "numeric", "text", "numeric", 
+                                         "text", "text", "numeric", "numeric", 
+                                         "text", "text", "text", "text", 
+                                         "text", "text", "text"),
+                               Y2007 = c("date", "numeric", "text", "numeric", 
+                                         "text", "text", "numeric", "numeric", 
+                                         "text", "text", "text", "text", 
+                                         "text", "text", "text", "text"),
+                               Y2008 = c("date", "numeric", "text", "numeric", "text", "text", "numeric", "numeric", 
+                                         "text", "text", "text", "text", "text", "text", "text"),
+                               Y2009 = c("date", "numeric", "text", "numeric", "text", "text", "numeric", "numeric", 
+                                         "text", "text", "text", "text", "text", "text", "text"),
+                               Y2010 = c("date", "numeric", "text", "numeric", 
+                                         "text", "text", "numeric", "numeric", 
+                                         "text", "text", "text", "text", 
+                                         "text", "text", "text"),
+                               Y2011 =  c("date", "numeric", "text", "numeric", 
+                                          "text", "text", "numeric", "numeric", 
+                                          "text", "text", "text", "text", 
+                                          "text", "text", "text"),
+                               Y2012 = c("date", "numeric", "text", "numeric", 
+                                         "text", "text", "numeric", "numeric", 
+                                         "text", "text", "text", "text", 
+                                         "text", "text", "text"))
+list.col.types.offshore <- list(Y1994 = c("date", "numeric", "text", "numeric", "text",
+                                          "text", "numeric", "numeric", "text", "text"),
+                                Y1995 = c("date", "numeric", "text", "numeric", 
+                                          "text", "text", "numeric", "numeric", 
+                                          "numeric", "text", "numeric", "text"),
+                                Y1996 =  c("date", "numeric", "text", "numeric", 
+                                           "text", "text", "numeric", "numeric", 
+                                           "numeric", "text",  "text"),
+                                Y1997 = c("date", "numeric", "text", "numeric", 
+                                          "numeric", "text", "text", "numeric", 
+                                          "text", "text",  "numeric", "text"),
+                                Y1998 = c("date", "numeric", "text", "numeric", 
+                                          "text", "text", "numeric", "numeric", 
+                                          "text", "text",  "text", "text"),
+                                Y1999 = c("date", "numeric", "text", "numeric", 
+                                          "text", "text", "numeric", "numeric", 
+                                          "text", "text",  "text", "text"),
+                                Y2000 = c("date", "numeric", "text", "numeric", 
+                                          "text", "text", "numeric", "numeric", 
+                                          "text", "text",  "text"),
+                                Y2001 =  c("date", "numeric", "text", "numeric", 
+                                           "text", "text", "numeric", "numeric", 
+                                           "text", "text",  "text", "text"),
+                                Y2002 = c("date", "numeric", "text", "numeric", 
+                                          "text", "text", "numeric", "numeric", 
+                                          "text", "text",  "text", "text"),
+                                Y2003 =  c("date", "numeric", "text", "numeric", 
+                                           "text", "text", "numeric", "numeric", 
+                                           "text", "text",  "text", "text"),
+                                Y2004 = c("date", "numeric", "text", "numeric", 
+                                          "text", "text", "numeric", "numeric", 
+                                          "text", "text",  "text", "text"),
+                                Y2005 = c("date", "numeric", "text", "numeric", 
+                                          "text", "text", "numeric", "numeric", 
+                                          "text", "text",  "text", "text"),
+                                Y2006 =  c("date", "numeric", "text", "numeric", 
+                                           "text", "text", "numeric", "numeric", 
+                                           "text", "text",  "text", "text"),
+                                Y2007 = c("date", "numeric", "text", "numeric", 
+                                          "text", "text", "numeric", "numeric", 
+                                          "text", "text",  "text", "text"),
+                                Y2008 = c("date", "numeric", "text", "numeric", 
+                                          "text", "text", "numeric", "numeric", 
+                                          "text", "text",  "text", "text"),
+                                Y2009 = c("date", "numeric", "text", "numeric", 
+                                          "text", "text", "numeric", "numeric", 
+                                          "text", "text",  "text", "text"),
+                                Y2010 = c("date", "numeric", "text", "numeric", 
+                                          "text", "text", "numeric", "numeric", 
+                                          "text", "text",  "text", "text"),
+                                Y2011 =  c("date", "numeric", "text", "numeric", 
+                                           "text", "text", "numeric", "numeric", 
+                                           "text", "text",  "text", "text"),
+                                Y2012 =  c("date", "numeric", "text", "numeric", 
+                                           "text", "text", "numeric", "numeric", 
+                                           "text", "text",  "text", "text"))
+list.col.names.inshore <- list(Y1994 = c("Date", "Event", "Time", "Obs. Code", "Sea State",
+                                         "Vis. IN", "Cow  / Calf"),
+                               Y1995 = c("Date",	"Event Code",	"Time",	"Observer Code",	
+                                         "Sea State",	"Vis In",	"C/C Pairs"),
+                               Y1996 = c("DATE",	"EVENT CODE",	"TIME", "OBS.",	
+                                         "SEA STATE",	"VIS (IN/OUT)",	"C/C"),
+                               Y1997 = c("DATE",	"EVENT",	"TIME", "OBSER", 
+                                         "SEA STATE", "VIS I/O", "C/C"),
+                               Y1998 = c("Date",	"Event Code",	"Time",	"Obs",
+                                         "Vis (I/O)", "Sea State",	"c/c"	),
+                               Y1999 = c("Date",	"Event Code",	"Time", 	"Obs. Code",
+                                         "Vis", "Sea State", "C/C"),
+                               Y2000 = c("DATE",	"EVENT",	"TIME",	"OBS.",	"VIS (IN/OUT)",	"SEA STATE",	"C/C"),
+                               Y2001 = c("DATE",	"EVENT",	"TIME",	"OBS.", "VIS I/O",	"SEA ST",	"C/C"	),
+                               Y2002 = c("DATE",	"EVENT",	"TIME", 	"OBS", "VIS (I/O)",	"SS",	"C/C"),
+                               Y2003 = c("DATE",	"EVENT",	"TIME", 	"OBS", "VIS (I/O)",	"SS",	"C/C"),
+                               Y2004 = c("DATE",	"EVENT",	"TIME", 	"OBS", "VIS (I/O)",	"SS",	"C/C"),
+                               Y2005 = c("DATE",	"EVENT",	"TIME", 	"OBS", "VIS (I/O)",	"SS",	"C/C"),
+                               Y2006 =  c("DATE",	"EVENT", 	"TIME",	"OBS#", "VIS IN",	"SEA ST",	"C/C"),
+                               Y2007 = c("DATE",	"EVENT", 	"TIME",	"OBS#", "VIS IN",	"SEA ST",	"C/C"),
+                               Y2008 = c("DATE",	"EVENT", 	"TIME",	"OBS#", "VIS IN",	"SEA ST",	"C/C"),
+                               Y2009 =  c("DATE",	"EVENT", 	"TIME",	"OBS#", "VIS IN",	"SEA ST",	"C/C"),
+                               Y2010 = c("DATE",	"EVENT", 	"TIME",	"OBS#", "VIS IN",	"SEA ST",	"C/C"),
+                               Y2011 = c("DATE",	"EVENT", 	"TIME",	"OBS#", "VIS IN",	"SEA ST",	"C/C"),
+                               Y2012 = c("DATE",	"EVENT", 	"TIME",	"OBS#", "VIS IN",	"SEA ST",	"C/C"))
+list.col.names.offshore <- list(Y1994 = c("Date", "Event", "Time", "Obs.", "Sea State",
+                                          "Vis. Code", "Cow/Calf"),
+                                Y1995 = c("Date",	"Event",	"Time",	"OBS.", 
+                                          "Sea", "Vis.", 	"Cow/Calf"),
+                                Y1996 = c("DATE",	"EVENT CODE",	"TIME", 	"OBS",
+                                          "SEA ST.", "VIS",	"C/C"),
+                                Y1997 = c("DATE",	"EVENT CODE",	"TIME", "OBS",
+                                          "S STATE", "VIS", "COW/CA"),
+                                Y1998 = c("Date",	"Event Code",	"Time",	"Obs",	
+                                          "Vis",	"SeaState",	"c/c"),
+                                Y1999 = c("Date",	"Event Code",	"Time",	"Observer",	
+                                          "Vis. Code",	"Sea State",	"C/C"),
+                                Y2000 = c("DATE",	"EVENT",	"TIME",	"OBS.",
+                                          "VIS CODE",	"SEA STATE",	"C/C"),
+                                Y2001 =  c("DATE",	"EVENT",	"TIME",	"OBS",
+                                           "VIS",	"SEA STATE",	"C/C"),
+                                Y2002 = c("DATE",	"EVENT",	"TIME",	"OBS", "VIS",	"SS",	"C/C"),
+                                Y2003 = c("DATE",	"EVENT",	"TIME",	"OBS", "VIS",	"SS",	"C/C"),
+                                Y2004 = c("DATE",	"EVENT",	"TIME",	"OBS", "VIS",	"SS",	"C/C"),
+                                Y2005 = c("DATE",	"EVENT",	"TIME",	"OBS", "VIS",	"SS",	"C/C"),
+                                Y2006 = c("DATE",	"EVENT",	"TIME",	"OBS", "VIS",	"SEA ST",	"C/C"),
+                                Y2007 = c("DATE",	"EVENT",	"TIME",	"OBS", "VIS",	"SEA ST",	"C/C"),
+                                Y2008 = c("DATE",	"EVENT",	"TIME",	"OBS", "VIS",	"SEA ST",	"C/C"),
+                                Y2009 = c("DATE",	"EVENT",	"TIME",	"OBS", "VIS",	"SEA ST",	"C/C"),
+                                Y2010 = c("DATE",	"EVENT",	"TIME",	"OBS", "VIS",	"SEA ST",	"C/C"),
+                                Y2011 = c("DATE",	"EVENT",	"TIME",	"OBS", "VIS",	"SEA ST",	"C/C"),
+                                Y2012 =  c("DATE", "EVENT",	"TIME",	"OBS", "VIS",	"SEA ST",	"C/C"))
+
+
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.types.inshore, col.types.offshore,
                          col.names.inshore, col.names.offshore,
@@ -947,8 +1252,12 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
+
 
 ```
 
@@ -990,8 +1299,12 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
+
 
 
 ```
@@ -1035,8 +1348,11 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
 
 
 ```
@@ -1081,8 +1397,12 @@ out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
+
 
 ```
 
@@ -1124,17 +1444,22 @@ data.inshore <- get.data(Year = Year,
 # function in Piedras_Blancas_fcns.R
 data.shift <- find.effort(data.inshore, T0 = start.time) #%>% extract.shift.vars()
 
-formatted.inshore <- format.output(data.shift, max.shift = max(data.shift$Shift))
+formatted.inshore <- format.output(data.shift$out.df, 
+                                   max.shift = max(data.shift$out.df$Shift))
 
-out.list <- list(data.offshore = NA,
-              data.inshore = data.inshore,
-              shift.data.offshore = NA,
-              shift.data.inshore = data.shift,
-              formatted.data.offshore = NA,
-              formatted.data.inshore = formatted.inshore)
+out.list <- list(data.offshore = NULL,
+                 data.inshore = data.inshore,
+                 shift.data.offshore = NULL,
+                 shift.data.inshore = data.shift$out.df,
+                 formatted.data.offshore = NULL,
+                 formatted.data.inshore = formatted.inshore)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
+
 
 
 ```
@@ -1175,17 +1500,22 @@ data.inshore <- get.data(Year = Year,
 # function in Piedras_Blancas_fcns.R
 data.shift <- find.effort(data.inshore, T0 = start.time) #%>% extract.shift.vars()
 
-formatted.inshore <- format.output(data.shift, max.shift = max(data.shift$Shift))
+formatted.inshore <- format.output(data.shift$out.df, 
+                                   max.shift = max(data.shift$out.df$Shift))
 
-out.list <- list(data.offshore = NA,
-              data.inshore = data.inshore,
-              shift.data.offshore = NA,
-              shift.data.inshore = data.shift,
-              formatted.data.offshore = NA,
-              formatted.data.inshore = formatted.inshore)
+out.list <- list(data.offshore = NULL,
+                 data.inshore = data.inshore,
+                 shift.data.offshore = NULL,
+                 shift.data.inshore = data.shift$out.df,
+                 formatted.data.offshore = NULL,
+                 formatted.data.inshore = formatted.inshore)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
 
 
 ```
@@ -1233,17 +1563,22 @@ data.inshore <- get.data(Year = Year,
 # function in Piedras_Blancas_fcns.R
 data.shift <- find.effort(data.inshore, T0 = start.time) #%>% extract.shift.vars()
 
-formatted.inshore <- format.output(data.shift, max.shift = max(data.shift$Shift))
+formatted.inshore <- format.output(data.shift$out.df, 
+                                   max.shift = max(data.shift$out.df$Shift))
 
-out.list <- list(data.offshore = NA,
-              data.inshore = data.inshore,
-              shift.data.offshore = NA,
-              shift.data.inshore = data.shift,
-              formatted.data.offshore = NA,
-              formatted.data.inshore = formatted.inshore)
+out.list <- list(data.offshore = NULL,
+                 data.inshore = data.inshore,
+                 shift.data.offshore = NULL,
+                 shift.data.inshore = data.shift$out.df,
+                 formatted.data.offshore = NULL,
+                 formatted.data.inshore = formatted.inshore)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
+
 
 ```
 
@@ -1284,17 +1619,23 @@ data.inshore <- get.data(Year = Year,
 # function in Piedras_Blancas_fcns.R
 data.shift <- find.effort(data.inshore, T0 = start.time) #%>% extract.shift.vars()
 
-formatted.inshore <- format.output(data.shift, max.shift = max(data.shift$Shift))
+formatted.inshore <- format.output(data.shift$out.df, 
+                                   max.shift = max(data.shift$out.df$Shift))
 
-out.list <- list(data.offshore = NA,
-              data.inshore = data.inshore,
-              shift.data.offshore = NA,
-              shift.data.inshore = data.shift,
-              formatted.data.offshore = NA,
-              formatted.data.inshore = formatted.inshore)
+out.list <- list(data.offshore = NULL,
+                 data.inshore = data.inshore,
+                 shift.data.offshore = NULL,
+                 shift.data.inshore = data.shift$out.df,
+                 formatted.data.offshore = NULL,
+                 formatted.data.inshore = formatted.inshore)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
+
 
 ```
 
@@ -1342,17 +1683,22 @@ data.inshore <- get.data(Year = Year,
 # function in Piedras_Blancas_fcns.R
 data.shift <- find.effort(data.inshore, T0 = start.time) #%>% extract.shift.vars()
 
-formatted.inshore <- format.output(data.shift, max.shift = max(data.shift$Shift))
+formatted.inshore <- format.output(data.shift$out.df, 
+                                   max.shift = max(data.shift$out.df$Shift))
 
-out.list <- list(data.offshore = NA,
-              data.inshore = data.inshore,
-              shift.data.offshore = NA,
-              shift.data.inshore = data.shift,
-              formatted.data.offshore = NA,
-              formatted.data.inshore = formatted.inshore)
+out.list <- list(data.offshore = NULL,
+                 data.inshore = data.inshore,
+                 shift.data.offshore = NULL,
+                 shift.data.inshore = data.shift$out.df,
+                 formatted.data.offshore = NULL,
+                 formatted.data.inshore = formatted.inshore)
 
-# Creates file names and saves files
-files <- file.names(out.dir, Year, out.list)
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
+
 
 ```
 

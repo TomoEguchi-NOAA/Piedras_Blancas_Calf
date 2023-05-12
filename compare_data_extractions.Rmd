@@ -112,7 +112,7 @@ col.defs.1 <- list(col.def.1, col.def.1.1997, col.def.1.2, col.def.1.3)
 col.defs.1.idx <- c(rep(1, 3), rep(2, 23), 3, 4)
 
 daily.summary.list <- list()
-k <- 28
+k <- 1
 
 for (k in 1:length(years)){
   
@@ -162,6 +162,8 @@ Get the raw data
 dir.name <- paste0("C_C ", Y)
 start.time <- "630"
 
+USE THE NEW WAY TO EXTRACT DATA, RATHER THAN COPYING AND PASTING CODE CHUNKS. USE NEW FUNCTION (YET TO BE CREATED) 2023-05-12
+
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -196,60 +198,83 @@ effort.dif.list <- find.effort.dif(Y, daily.summary.list, out.list)
 
 ```
 
-Many differences come from the first shift starting at 0630, rather than 0700. In the v1 extraction algorithm, the first shift was assumed to start at 0700, so 30 min were removed, whereas the v2 algorithm counts all data. Spot checks show v2 doing a good job counting all. v1 seems to ignore sea state > 4. 
+There were `r length(effort.dif.list$date.dif)` differences between the two extraction algorithms for year `r Y`. Many differences come from the first shift starting at 0630, rather than 0700. In the v1 extraction algorithm, the first shift was assumed to start at 0700, so 30 min were removed, whereas the v2 algorithm counts all data. Spot checks show v2 doing a good job counting all. v1 seems to ignore sea state > 4. 
 
-There are a few shift 5... I think they should be deleted. 
+There are a few shift 5... I think they should be deleted. They have been removed. 2023-05-12
 
 
 Sightings
 
 ```{r}
 
-START HERE TO CREATE A FUNCTION TO EXTRACT THE DIFFERENCS IN SIGHTING NUMBERS 2023-05-11
-
-effort.dif.list <- find.sighting.dif(Y, daily.summary.list, out.list)
-
-daily.summary.list[[which(years == Y)]]$daily.summary.1.2 %>%
-  filter(dif.sightings != 0) %>%
-  dplyr::select(Date.char) %>%
-  pull() -> date.dif.sightings
-
-
+sightings.dif.list <- find.sightings.dif(Y, daily.summary.list, out.list)
 
 ```
 
-
-```{r}
-data.1 <- daily.summary.list[[which(years == Y)]]$data.1
-data.2 <- daily.summary.list[[which(years == Y)]]$data.2
-daily.1.2 <- daily.summary.list[[which(years == Y)]]$daily.summary.1.2
-
-# Effort difference
-dif.effort <- daily.1.2 %>% filter(dif.effort != 0)
-dif.dates <- dif.effort$Date.char
-
-dif.1 <- dif.2 <- list()
-for (k in 1:length(dif.dates)){
-  dif.1[[k]] <- data.1 %>% filter(Date == as.Date(dif.dates[k])) 
-  dif.2[[k]] <- data.2 %>% filter(Date == as.Date(dif.dates[k]))
-
-}
-
-
-# sighting difference
-dif.sightings <- daily.1.2 %>% filter(dif.sightings != 0)
-
-```
+For the number of sightings, there were `r length(sightings.dif.list$date.dif` differences. Checking each one of them with raw data, v2 seems to be doing the right counts. 
 
 
 
 1995 
 
 ```{r}
-daily.summary.list[[which(years == 1995)]]$figure 
+Y <- 1995
+daily.summary.list[[which(years == Y)]]$figure 
 ```
 
-Many differences found... 
+Some differences found... 
+
+Get the raw data
+```{r}
+# Code chunk from Extract Excel data.Rmd
+dir.name <- paste0("C_C ", Y)
+start.time <- "700"
+xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
+xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
+xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
+
+sheet.name.inshore <- "Inshore Data"
+sheet.name.offshore <- "Offshore Data"
+col.types.inshore <- c("date", "numeric", "text", "numeric", "text", 
+                       "text", "numeric", "numeric", "text", "text", 
+                       "text", "text", "text", "text", "text", "text")
+
+col.names.inshore <- c("Date",	"Event Code",	"Time",	"Observer Code",	
+                       "Sea State",	"Vis In",	"C/C Pairs")
+
+col.types.offshore <- c("date", "numeric", "text", "numeric", 
+                        "text", "text", "numeric", "numeric", 
+                        "numeric", "text", "numeric", "text")
+
+col.names.offshore <- c("Date",	"Event",	"Time",	"OBS.", 
+                        "Sea", "Vis.", 	"Cow/Calf")
+
+out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
+                         col.types.inshore, col.types.offshore,
+                         col.names.inshore, col.names.offshore,
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time)
+```
+
+
+Effort:
+```{r}
+
+effort.dif.list <- find.effort.dif(Y, daily.summary.list, out.list)
+
+```
+
+
+Sightings
+
+```{r}
+
+sightings.dif.list <- find.sightings.dif(Y, daily.summary.list, out.list)
+
+```
+
+
 
 1996 
 
