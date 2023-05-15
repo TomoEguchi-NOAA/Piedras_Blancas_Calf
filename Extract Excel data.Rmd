@@ -55,26 +55,13 @@ xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 
-# sheet.name.inshore <- "INSHORE LOG"
-# sheet.name.offshore <- NULL
-# col.types.inshore <- c("date", "numeric", "text", "numeric", "text",
-#                        "text", "numeric", "text", "text")
-# 
-# col.names.inshore <- c("Date", "Event", "Time", "Obs. Code", "Sea State",
-#                        "Vis. IN", "Cow  / Calf")
-# 
-# col.types.offshore <- c("date", "numeric", "text", "numeric", "text",
-#                         "text", "numeric", "numeric", "text", "text")
-# 
-# col.names.offshore <- c("Date", "Event", "Time", "Obs.", "Sea State",
-#                         "Vis. Code", "Cow/Calf")
-
-out.list <- get.all.data(list.sheet.name.inshore$Y1994, 
-                         list.sheet.name.offshore$Y1994,
-                         list.col.types.inshore$Y1994, 
-                         list.col.types.offshore$Y1994,
-                         list.col.names.inshore$Y1994, 
-                         list.col.names.offshore$Y1994,
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
+out.list <- get.all.data(list.sheet.names.inshore[[idx.list]], 
+                         list.sheet.names.offshore[[idx.list]],
+                         list.col.types.inshore[[idx.list]], 
+                         list.col.types.offshore[[idx.list]],
+                         list.col.names.inshore[[idx.list]], 
+                         list.col.names.offshore[[idx.list]],
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
@@ -108,25 +95,13 @@ xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 
-sheet.name.inshore <- "Inshore Data"
-sheet.name.offshore <- "Offshore Data"
-col.types.inshore <- c("date", "numeric", "text", "numeric", "text", 
-                       "text", "numeric", "numeric", "text", "text", 
-                       "text", "text", "text", "text", "text", "text")
-
-col.names.inshore <- c("Date",	"Event Code",	"Time",	"Observer Code",	
-                       "Sea State",	"Vis In",	"C/C Pairs")
-
-col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "text", "text", "numeric", "numeric", 
-                        "numeric", "text", "numeric", "text")
-
-col.names.offshore <- c("Date",	"Event",	"Time",	"OBS.", 
-                        "Sea", "Vis.", 	"Cow/Calf")
-
-out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                         col.types.inshore, col.types.offshore,
-                         col.names.inshore, col.names.offshore,
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
+out.list <- get.all.data(list.sheet.names.inshore[[idx.list]], 
+                         list.sheet.names.offshore[[idx.list]],
+                         list.col.types.inshore[[idx.list]], 
+                         list.col.types.offshore[[idx.list]],
+                         list.col.names.inshore[[idx.list]], 
+                         list.col.names.offshore[[idx.list]],
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
@@ -160,42 +135,21 @@ xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 
-# c("Date", "Event", "Time", "Obs. Code", 
-# "Sea State", "Vis. IN", "Cow  / Calf")
-
-
-
-# sheet.name.inshore <- "data"
-# sheet.name.offshore <- "Sheet1"
-# col.names.inshore <- c("DATE",	"EVENT CODE",	"TIME", "OBS.",	
-#                        "SEA STATE",	"VIS (IN/OUT)",	"C/C")
-# 
-# col.types.inshore <- c("date", "numeric", "text", "numeric", 
-#                        "text", "text", "numeric", "numeric", 
-#                        "numeric", "text", "text", 
-#                        "text", "text", "text")
-# 
-# 
-# col.names.offshore <- c("DATE",	"EVENT CODE",	"TIME", 	"OBS",
-#                        	"SEA ST.", "VIS",	"C/C")
-# 
-# col.types.offshore <- c("date", "numeric", "text", "numeric", 
-#                         "text", "text", "numeric", "numeric", 
-#                         "numeric", "text",  "text")
-
-out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                         col.types.inshore, col.types.offshore,
-                         col.names.inshore, col.names.offshore,
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
+out.list <- get.all.data(list.sheet.names.inshore[[idx.list]], 
+                         list.sheet.names.offshore[[idx.list]],
+                         list.col.types.inshore[[idx.list]], 
+                         list.col.types.offshore[[idx.list]],
+                         list.col.names.inshore[[idx.list]], 
+                         list.col.names.offshore[[idx.list]],
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
-
 if (save.files){
   # Creates file names and saves files
   files <- file.names(out.dir, Year, out.list)
   
 }
-
 
 
 
@@ -218,28 +172,13 @@ xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 
 
-
-sheet.name.inshore <- "LOGS"
-sheet.name.offshore <- "LOGS"
-
-col.names.inshore <- c("DATE",	"EVENT",	"TIME", "OBSER", 
-                       "SEA STATE", "VIS I/O", "C/C")
-
-col.types.inshore <- c("date", "numeric", "text", "numeric", "numeric", 
-                       "numeric", "text", "text", "text", 
-                       "text", "numeric", "text", "text", 
-                       "text")
-
-col.names.offshore <- c("DATE",	"EVENT CODE",	"TIME", "OBS",
-                        "S STATE", "VIS", "COW/CA")
-
-col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "numeric", "text", "text", "numeric", 
-                        "text", "text",  "numeric", "text")
-
-out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                         col.types.inshore, col.types.offshore,
-                         col.names.inshore, col.names.offshore,
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
+out.list <- get.all.data(list.sheet.names.inshore[[idx.list]], 
+                         list.sheet.names.offshore[[idx.list]],
+                         list.col.types.inshore[[idx.list]], 
+                         list.col.types.offshore[[idx.list]],
+                         list.col.names.inshore[[idx.list]], 
+                         list.col.names.offshore[[idx.list]],
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
@@ -269,33 +208,16 @@ xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 
-
-
-sheet.name.inshore <- "LOG"
-sheet.name.offshore <- "LOGS"
-
-col.names.inshore <- c("Date",	"Event Code",	"Time",	"Obs",
-                       "Vis (I/O)", "Sea State",	"c/c"	)
-
-col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "text", "text", "numeric", "numeric", 
-                       "numeric", "text", "text", "text", 
-                       "text", "text")
-
-col.names.offshore <- c("Date",	"Event Code",	"Time",	"Obs",	
-                        "Vis",	"SeaState",	"c/c")
-
-col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "text", "text", "numeric", "numeric", 
-                        "text", "text",  "text", "text")
-  
-out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                         col.types.inshore, col.types.offshore,
-                         col.names.inshore, col.names.offshore,
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
+out.list <- get.all.data(list.sheet.names.inshore[[idx.list]], 
+                         list.sheet.names.offshore[[idx.list]],
+                         list.col.types.inshore[[idx.list]], 
+                         list.col.types.offshore[[idx.list]],
+                         list.col.names.inshore[[idx.list]], 
+                         list.col.names.offshore[[idx.list]],
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
-
 if (save.files){
   # Creates file names and saves files
   files <- file.names(out.dir, Year, out.list)
@@ -325,29 +247,13 @@ xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 
-sheet.name.inshore <- "DATA"
-sheet.name.offshore <- "DATA"
-
-col.names.inshore <- c("Date",	"Event Code",	"Time", 	"Obs. Code",
-                       "Vis", "Sea State", "C/C")
-
-col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "text", "text", "numeric", "numeric", 
-                       "numeric", "text", "text", "text",
-                       "text", "text", "text")
-
-col.names.offshore <- c("Date",	"Event Code",	"Time",	"Observer",	
-                        "Vis. Code",	"Sea State",	"C/C")
-
-col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "text", "text", "numeric", "numeric", 
-                        "text", "text",  "text", "text")
-
-
-
-out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                         col.types.inshore, col.types.offshore,
-                         col.names.inshore, col.names.offshore,
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
+out.list <- get.all.data(list.sheet.names.inshore[[idx.list]], 
+                         list.sheet.names.offshore[[idx.list]],
+                         list.col.types.inshore[[idx.list]], 
+                         list.col.types.offshore[[idx.list]],
+                         list.col.names.inshore[[idx.list]], 
+                         list.col.names.offshore[[idx.list]],
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
@@ -373,25 +279,16 @@ xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 
-sheet.name.inshore <- "DATA"
-sheet.name.offshore <- "LOGS"
-
-col.names.inshore <- c("DATE",	"EVENT",	"TIME",	"OBS.",	
-                       "VIS (IN/OUT)",	"SEA STATE",	"C/C")
-
-col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "text", "text", "numeric", "numeric", 
-                       "text", "text", "text", "text",
-                       "text", "text")
-
-col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS.",
-                        "VIS CODE",	"SEA STATE",	"C/C")
-
-col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "text", "text", "numeric", "numeric", 
-                        "text", "text",  "text")
-
-
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
+out.list <- get.all.data(list.sheet.names.inshore[[idx.list]], 
+                         list.sheet.names.offshore[[idx.list]],
+                         list.col.types.inshore[[idx.list]], 
+                         list.col.types.offshore[[idx.list]],
+                         list.col.names.inshore[[idx.list]], 
+                         list.col.names.offshore[[idx.list]],
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time)
 
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.types.inshore, col.types.offshore,
@@ -432,33 +329,16 @@ xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 
-sheet.name.inshore <- "LOGS"
-sheet.name.offshore <- "LOGS"
-
-col.names.inshore <- c("DATE",	"EVENT",	"TIME",	"OBS.",
-                       "VIS I/O",	"SEA ST",	"C/C"	)
-
-col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "text", "text", "numeric", "numeric", 
-                       "text", "text", "text", "text",
-                       "text", "text")
-
-col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",
-                        "VIS",	"SEA STATE",	"C/C")
-
-col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "text", "text", "numeric", "numeric", 
-                        "text", "text",  "text", "text")
-
-
-
-out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                         col.types.inshore, col.types.offshore,
-                         col.names.inshore, col.names.offshore,
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
+out.list <- get.all.data(list.sheet.names.inshore[[idx.list]], 
+                         list.sheet.names.offshore[[idx.list]],
+                         list.col.types.inshore[[idx.list]], 
+                         list.col.types.offshore[[idx.list]],
+                         list.col.names.inshore[[idx.list]], 
+                         list.col.names.offshore[[idx.list]],
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
-
 if (save.files){
   # Creates file names and saves files
   files <- file.names(out.dir, Year, out.list)
@@ -480,33 +360,16 @@ xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 
-sheet.name.inshore <- "LOGS"
-sheet.name.offshore <- "LOG"
-
-col.names.inshore <- c("DATE",	"EVENT",	"TIME", 	"OBS",
-                       "VIS (I/O)",	"SS",	"C/C")
-
-col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "text", "text", "numeric", "numeric", 
-                       "text", "text", "text", "text",
-                       "text", "text")
-
-col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",
-                        "VIS",	"SS",	"C/C")
-
-col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "text", "text", "numeric", "numeric", 
-                        "text", "text",  "text", "text")
-
-
-
-out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                         col.types.inshore, col.types.offshore,
-                         col.names.inshore, col.names.offshore,
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
+out.list <- get.all.data(list.sheet.names.inshore[[idx.list]], 
+                         list.sheet.names.offshore[[idx.list]],
+                         list.col.types.inshore[[idx.list]], 
+                         list.col.types.offshore[[idx.list]],
+                         list.col.names.inshore[[idx.list]], 
+                         list.col.names.offshore[[idx.list]],
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
-
 if (save.files){
   # Creates file names and saves files
   files <- file.names(out.dir, Year, out.list)
@@ -531,29 +394,13 @@ xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 
-sheet.name.inshore <- "Logs"
-sheet.name.offshore <- "logs"
-
-col.names.inshore <- c("DATE",	"EVENT",	"TIME", 	"OBS",
-                       "VIS (I/O)",	"SS",	"C/C")
-
-col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "text", "text", "numeric", "numeric", 
-                       "text", "text", "text", "text",
-                       "text", "text")
-
-col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",
-                        "VIS",	"SS",	"C/C")
-
-col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "text", "text", "numeric", "numeric", 
-                        "text", "text",  "text", "text")
-
-
-
-out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                         col.types.inshore, col.types.offshore,
-                         col.names.inshore, col.names.offshore,
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
+out.list <- get.all.data(list.sheet.names.inshore[[idx.list]], 
+                         list.sheet.names.offshore[[idx.list]],
+                         list.col.types.inshore[[idx.list]], 
+                         list.col.types.offshore[[idx.list]],
+                         list.col.names.inshore[[idx.list]], 
+                         list.col.names.offshore[[idx.list]],
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
@@ -580,29 +427,13 @@ xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[3])
 
-sheet.name.inshore <- "DATA"
-sheet.name.offshore <- "DATA"
-
-col.names.inshore <- c("DATE",	"EVENT",	"TIME", 	"OBS",
-                       "VIS (I/O)",	"SS",	"C/C")
-
-col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "text", "text", "numeric", "numeric", 
-                       "text", "text", "text", "text",
-                       "text", "text")
-
-col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",	
-                        "VIS",	"SS",	"C/C")
-
-col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "text", "text", "numeric", "numeric", 
-                        "text", "text",  "text", "text")
-
-
-
-out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                         col.types.inshore, col.types.offshore,
-                         col.names.inshore, col.names.offshore,
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
+out.list <- get.all.data(list.sheet.names.inshore[[idx.list]], 
+                         list.sheet.names.offshore[[idx.list]],
+                         list.col.types.inshore[[idx.list]], 
+                         list.col.types.offshore[[idx.list]],
+                         list.col.names.inshore[[idx.list]], 
+                         list.col.names.offshore[[idx.list]],
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
@@ -629,33 +460,17 @@ xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 
-
-sheet.name.inshore <- "LOGS"
-sheet.name.offshore <- "LOGS"
-
-col.names.inshore <- c("DATE",	"EVENT",	"TIME", 	"OBS",
-                       "VIS (I/O)",	"SS",	"C/C")
-
-col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "text", "text", "numeric", "numeric", 
-                       "text", "text", "text", "text", 
-                       "text", "text")
-
-col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",	
-                        "VIS",	"SS",	"C/C")
-
-col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "text", "text", "numeric", "numeric", 
-                        "text", "text",  "text", "text")
-
-
-
-out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                         col.types.inshore, col.types.offshore,
-                         col.names.inshore, col.names.offshore,
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
+out.list <- get.all.data(list.sheet.names.inshore[[idx.list]], 
+                         list.sheet.names.offshore[[idx.list]],
+                         list.col.types.inshore[[idx.list]], 
+                         list.col.types.offshore[[idx.list]],
+                         list.col.names.inshore[[idx.list]], 
+                         list.col.names.offshore[[idx.list]],
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
+
 
 if (save.files){
   # Creates file names and saves files
@@ -682,32 +497,17 @@ xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 
-sheet.name.inshore <- "LOGS"
-sheet.name.offshore <- "LOGS"
-
-col.names.inshore <- c("DATE",	"EVENT", 	"TIME",	"OBS#",
-                       "VIS IN",	"SEA ST",	"C/C")
-
-col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "text", "text", "numeric", "numeric", 
-                       "text", "text", "text", "text", 
-                       "text", "text", "text")
-
-col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",	
-                        "VIS",	"SEA ST",	"C/C")
-
-col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "text", "text", "numeric", "numeric", 
-                        "text", "text",  "text", "text")
-
-
-
-out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                         col.types.inshore, col.types.offshore,
-                         col.names.inshore, col.names.offshore,
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
+out.list <- get.all.data(list.sheet.names.inshore[[idx.list]], 
+                         list.sheet.names.offshore[[idx.list]],
+                         list.col.types.inshore[[idx.list]], 
+                         list.col.types.offshore[[idx.list]],
+                         list.col.names.inshore[[idx.list]], 
+                         list.col.names.offshore[[idx.list]],
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
+
 
 if (save.files){
   # Creates file names and saves files
@@ -731,31 +531,17 @@ xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 
-sheet.name.inshore <- "log"
-sheet.name.offshore <- "log"
-
-col.names.inshore <- c("DATE",	"EVENT", 	"TIME",	"OBS#",
-                       "VIS IN",	"SEA ST",	"C/C")
-
-col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "text", "text", "numeric", "numeric", 
-                       "text", "text", "text", "text", 
-                       "text", "text", "text", "text")
-
-col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",	
-                        "VIS",	"SEA ST",	"C/C")
-
-col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "text", "text", "numeric", "numeric", 
-                        "text", "text",  "text", "text")
-
-
-out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                         col.types.inshore, col.types.offshore,
-                         col.names.inshore, col.names.offshore,
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
+out.list <- get.all.data(list.sheet.names.inshore[[idx.list]], 
+                         list.sheet.names.offshore[[idx.list]],
+                         list.col.types.inshore[[idx.list]], 
+                         list.col.types.offshore[[idx.list]],
+                         list.col.names.inshore[[idx.list]], 
+                         list.col.names.offshore[[idx.list]],
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
+
 
 if (save.files){
   # Creates file names and saves files
@@ -779,25 +565,16 @@ xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 
-sheet.name.inshore <- "LOG"
-sheet.name.offshore <- "LOGS"
-
-col.names.inshore <- c("DATE",	"EVENT", 	"TIME",	"OBS#",
-                       "VIS IN",	"SEA ST",	"C/C")
-
-col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "text", "text", "numeric", "numeric", 
-                       "text", "text", "text", "text", 
-                       "text", "text", "text")
-
-col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",	
-                        "VIS",	"SEA ST",	"C/C")
-
-col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "text", "text", "numeric", "numeric", 
-                        "text", "text",  "text", "text")
-
-
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
+out.list <- get.all.data(list.sheet.names.inshore[[idx.list]], 
+                         list.sheet.names.offshore[[idx.list]],
+                         list.col.types.inshore[[idx.list]], 
+                         list.col.types.offshore[[idx.list]],
+                         list.col.names.inshore[[idx.list]], 
+                         list.col.names.offshore[[idx.list]],
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time)
 
 
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
@@ -827,29 +604,13 @@ xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 
-sheet.name.inshore <- "LOGS"
-sheet.name.offshore <- "LOGS"
-
-col.names.inshore <- c("DATE",	"EVENT", 	"TIME",	"OBS#",
-                       "VIS IN",	"SEA ST",	"C/C")
-
-col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "text", "text", "numeric", "numeric", 
-                       "text", "text", "text", "text", 
-                       "text", "text", "text")
-
-col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",	
-                        "VIS",	"SEA ST",	"C/C")
-
-col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "text", "text", "numeric", "numeric", 
-                        "text", "text",  "text", "text")
-
-
-
-out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                         col.types.inshore, col.types.offshore,
-                         col.names.inshore, col.names.offshore,
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
+out.list <- get.all.data(list.sheet.names.inshore[[idx.list]], 
+                         list.sheet.names.offshore[[idx.list]],
+                         list.col.types.inshore[[idx.list]], 
+                         list.col.types.offshore[[idx.list]],
+                         list.col.names.inshore[[idx.list]], 
+                         list.col.names.offshore[[idx.list]],
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
@@ -878,32 +639,17 @@ xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[3])
 
-sheet.name.inshore <- "LOGS"
-sheet.name.offshore <- "LOGS"
-
-col.names.inshore <- c("DATE",	"EVENT", 	"TIME",	"OBS#",
-                       "VIS IN",	"SEA ST",	"C/C")
-
-col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "text", "text", "numeric", "numeric", 
-                       "text", "text", "text", "text", 
-                       "text", "text", "text")
-
-col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",	
-                        "VIS",	"SEA ST",	"C/C")
-
-col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "text", "text", "numeric", "numeric", 
-                        "text", "text",  "text", "text")
-
-
-
-out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                         col.types.inshore, col.types.offshore,
-                         col.names.inshore, col.names.offshore,
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
+out.list <- get.all.data(list.sheet.names.inshore[[idx.list]], 
+                         list.sheet.names.offshore[[idx.list]],
+                         list.col.types.inshore[[idx.list]], 
+                         list.col.types.offshore[[idx.list]],
+                         list.col.names.inshore[[idx.list]], 
+                         list.col.names.offshore[[idx.list]],
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
+
 
 if (save.files){
   # Creates file names and saves files
@@ -926,29 +672,13 @@ xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[3])
 
-sheet.name.inshore <- "LOGS"
-sheet.name.offshore <- "LOGS"
-
-col.names.inshore <- c("DATE",	"EVENT", 	"TIME",	"OBS#",
-                       "VIS IN",	"SEA ST",	"C/C")
-
-col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "text", "text", "numeric", "numeric", 
-                       "text", "text", "text", "text", 
-                       "text", "text", "text")
-
-col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",	
-                        "VIS",	"SEA ST",	"C/C")
-
-col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "text", "text", "numeric", "numeric", 
-                        "text", "text",  "text", "text")
-
-
-
-out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                         col.types.inshore, col.types.offshore,
-                         col.names.inshore, col.names.offshore,
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
+out.list <- get.all.data(list.sheet.names.inshore[[idx.list]], 
+                         list.sheet.names.offshore[[idx.list]],
+                         list.col.types.inshore[[idx.list]], 
+                         list.col.types.offshore[[idx.list]],
+                         list.col.names.inshore[[idx.list]], 
+                         list.col.names.offshore[[idx.list]],
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
@@ -978,25 +708,13 @@ xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[3])
 
-sheet.name.inshore <- "LOGS"
-sheet.name.offshore <- "LOGS"
-
-col.names.inshore <- c("DATE",	"EVENT", 	"TIME",	"OBS#",
-                       "VIS IN",	"SEA ST",	"C/C")
-
-col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "text", "text", "numeric", "numeric", 
-                       "text", "text", "text", "text", 
-                       "text", "text", "text")
-
-col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",	
-                        "VIS",	"SEA ST",	"C/C")
-
-
-
-out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                         col.types.inshore, col.types.offshore,
-                         col.names.inshore, col.names.offshore,
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
+out.list <- get.all.data(list.sheet.names.inshore[[idx.list]], 
+                         list.sheet.names.offshore[[idx.list]],
+                         list.col.types.inshore[[idx.list]], 
+                         list.col.types.offshore[[idx.list]],
+                         list.col.names.inshore[[idx.list]], 
+                         list.col.names.offshore[[idx.list]],
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
@@ -1028,221 +746,16 @@ xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 
-sheet.name.inshore <- "LOGS"
-sheet.name.offshore <- "LOGS"
-
-col.names.inshore <- c("DATE",	"EVENT", 	"TIME",	"OBS#",
-                       "VIS IN",	"SEA ST",	"C/C")
-
-col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "text", "text", "numeric", "numeric", 
-                       "text", "text", "text", "text", 
-                       "text", "text", "text")
-
-col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",	
-                        "VIS",	"SEA ST",	"C/C")
-
-col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "text", "text", "numeric", "numeric", 
-                        "text", "text",  "text", "text")
-
-col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "text", "text", "numeric", "numeric", 
-                        "text", "text",  "text", "text")
-
-START HERE TO COMPLETE THE FOLLOWING LISTS TO CLEAN UP THE CODE. 2023-05-12
-
-list.sheet.names.inshore <- list(Y1994 = "INSHORE LOG", Y1995 = "Inshore Data", Y1996 = "data",
-                                 Y1997 = "LOGS", Y1998 = "LOGS", Y1999 = "DATA",
-                                 Y2000 = "DATA", Y2001 = "LOGS", Y2002 = "LOGS",
-                                 Y2003 = "logs", Y2004 = "DATA", Y2005 = "LOGS",
-                                 Y2006 = "LOGS", Y2007 = "log", Y2008 = "LOG",
-                                 Y2009 = "LOGS", Y2010 = "LOGS", Y2011 = "LOGS",
-                                 Y2012 = "LOGS")
-list.sheet.names.offshore <- list(Y1994 = NULL, Y1995 = "Offshore Data", Y1996 = "Sheet1",
-                                  Y1997 = "LOGS", Y1998 = "LOGS", Y1999 = "DATA",
-                                  Y2000 = "LOGS", Y2001 = "LOGS", Y2002 = "LOG",
-                                  Y2003 = "logs", Y2004 = "DATA", Y2005 = "LOGS",
-                                  Y2006 = "LOGS", Y2007 = "log", Y2008 = "LOGS",
-                                  Y2009 = "LOGS", Y2010 = "LOGS", Y2011 = "LOGS",
-                                  Y2012 = "LOGS")
-list.col.types.inshore <- list(Y1994 = c("date", "numeric", "text", "numeric", "text",
-                                         "text", "numeric", "text", "text"),
-                               Y1995 = c("date", "numeric", "text", "numeric", "text", 
-                                         "text", "numeric", "numeric", "text", "text", 
-                                         "text", "text", "text", "text", "text", "text"),
-                               Y1996 = c("date", "numeric", "text", "numeric", 
-                                         "text", "text", "numeric", "numeric", 
-                                         "numeric", "text", "text", 
-                                         "text", "text", "text"),
-                               Y1997 = c("date", "numeric", "text", "numeric", "numeric", 
-                                         "numeric", "text", "text", "text", 
-                                         "text", "numeric", "text", "text", 
-                                         "text"),
-                               Y1998 = c("date", "numeric", "text", "numeric", 
-                                         "text", "text", "numeric", "numeric", 
-                                         "numeric", "text", "text", "text", 
-                                         "text", "text"),
-                               Y1999 = c("date", "numeric", "text", "numeric", 
-                                         "text", "text", "numeric", "numeric", 
-                                         "numeric", "text", "text", "text",
-                                         "text", "text", "text"),
-                               Y2000 = c("date", "numeric", "text", "numeric", 
-                                         "text", "text", "numeric", "numeric", 
-                                         "text", "text", "text", "text",
-                                         "text", "text"),
-                               Y2001 = c("date", "numeric", "text", "numeric", 
-                                         "text", "text", "numeric", "numeric", 
-                                         "text", "text", "text", "text",
-                                         "text", "text"),
-                               Y2002 =  c("date", "numeric", "text", "numeric", 
-                                          "text", "text", "numeric", "numeric", 
-                                          "text", "text", "text", "text",
-                                          "text", "text"),
-                               Y2003 = c("date", "numeric", "text", "numeric", 
-                                         "text", "text", "numeric", "numeric", 
-                                         "text", "text", "text", "text",
-                                         "text", "text"),
-                               Y2004 = c("date", "numeric", "text", "numeric", 
-                                         "text", "text", "numeric", "numeric", 
-                                         "text", "text", "text", "text",
-                                         "text", "text"),
-                               Y2005 = c("date", "numeric", "text", "numeric", 
-                                         "text", "text", "numeric", "numeric", 
-                                         "text", "text", "text", "text", 
-                                         "text", "text"),
-                               Y2006 = c("date", "numeric", "text", "numeric", 
-                                         "text", "text", "numeric", "numeric", 
-                                         "text", "text", "text", "text", 
-                                         "text", "text", "text"),
-                               Y2007 = c("date", "numeric", "text", "numeric", 
-                                         "text", "text", "numeric", "numeric", 
-                                         "text", "text", "text", "text", 
-                                         "text", "text", "text", "text"),
-                               Y2008 = c("date", "numeric", "text", "numeric", "text", "text", "numeric", "numeric", 
-                                         "text", "text", "text", "text", "text", "text", "text"),
-                               Y2009 = c("date", "numeric", "text", "numeric", "text", "text", "numeric", "numeric", 
-                                         "text", "text", "text", "text", "text", "text", "text"),
-                               Y2010 = c("date", "numeric", "text", "numeric", 
-                                         "text", "text", "numeric", "numeric", 
-                                         "text", "text", "text", "text", 
-                                         "text", "text", "text"),
-                               Y2011 =  c("date", "numeric", "text", "numeric", 
-                                          "text", "text", "numeric", "numeric", 
-                                          "text", "text", "text", "text", 
-                                          "text", "text", "text"),
-                               Y2012 = c("date", "numeric", "text", "numeric", 
-                                         "text", "text", "numeric", "numeric", 
-                                         "text", "text", "text", "text", 
-                                         "text", "text", "text"))
-list.col.types.offshore <- list(Y1994 = c("date", "numeric", "text", "numeric", "text",
-                                          "text", "numeric", "numeric", "text", "text"),
-                                Y1995 = c("date", "numeric", "text", "numeric", 
-                                          "text", "text", "numeric", "numeric", 
-                                          "numeric", "text", "numeric", "text"),
-                                Y1996 =  c("date", "numeric", "text", "numeric", 
-                                           "text", "text", "numeric", "numeric", 
-                                           "numeric", "text",  "text"),
-                                Y1997 = c("date", "numeric", "text", "numeric", 
-                                          "numeric", "text", "text", "numeric", 
-                                          "text", "text",  "numeric", "text"),
-                                Y1998 = c("date", "numeric", "text", "numeric", 
-                                          "text", "text", "numeric", "numeric", 
-                                          "text", "text",  "text", "text"),
-                                Y1999 = c("date", "numeric", "text", "numeric", 
-                                          "text", "text", "numeric", "numeric", 
-                                          "text", "text",  "text", "text"),
-                                Y2000 = c("date", "numeric", "text", "numeric", 
-                                          "text", "text", "numeric", "numeric", 
-                                          "text", "text",  "text"),
-                                Y2001 =  c("date", "numeric", "text", "numeric", 
-                                           "text", "text", "numeric", "numeric", 
-                                           "text", "text",  "text", "text"),
-                                Y2002 = c("date", "numeric", "text", "numeric", 
-                                          "text", "text", "numeric", "numeric", 
-                                          "text", "text",  "text", "text"),
-                                Y2003 =  c("date", "numeric", "text", "numeric", 
-                                           "text", "text", "numeric", "numeric", 
-                                           "text", "text",  "text", "text"),
-                                Y2004 = c("date", "numeric", "text", "numeric", 
-                                          "text", "text", "numeric", "numeric", 
-                                          "text", "text",  "text", "text"),
-                                Y2005 = c("date", "numeric", "text", "numeric", 
-                                          "text", "text", "numeric", "numeric", 
-                                          "text", "text",  "text", "text"),
-                                Y2006 =  c("date", "numeric", "text", "numeric", 
-                                           "text", "text", "numeric", "numeric", 
-                                           "text", "text",  "text", "text"),
-                                Y2007 = c("date", "numeric", "text", "numeric", 
-                                          "text", "text", "numeric", "numeric", 
-                                          "text", "text",  "text", "text"),
-                                Y2008 = c("date", "numeric", "text", "numeric", 
-                                          "text", "text", "numeric", "numeric", 
-                                          "text", "text",  "text", "text"),
-                                Y2009 = c("date", "numeric", "text", "numeric", 
-                                          "text", "text", "numeric", "numeric", 
-                                          "text", "text",  "text", "text"),
-                                Y2010 = c("date", "numeric", "text", "numeric", 
-                                          "text", "text", "numeric", "numeric", 
-                                          "text", "text",  "text", "text"),
-                                Y2011 =  c("date", "numeric", "text", "numeric", 
-                                           "text", "text", "numeric", "numeric", 
-                                           "text", "text",  "text", "text"),
-                                Y2012 =  c("date", "numeric", "text", "numeric", 
-                                           "text", "text", "numeric", "numeric", 
-                                           "text", "text",  "text", "text"))
-list.col.names.inshore <- list(Y1994 = c("Date", "Event", "Time", "Obs. Code", "Sea State",
-                                         "Vis. IN", "Cow  / Calf"),
-                               Y1995 = c("Date",	"Event Code",	"Time",	"Observer Code",	
-                                         "Sea State",	"Vis In",	"C/C Pairs"),
-                               Y1996 = c("DATE",	"EVENT CODE",	"TIME", "OBS.",	
-                                         "SEA STATE",	"VIS (IN/OUT)",	"C/C"),
-                               Y1997 = c("DATE",	"EVENT",	"TIME", "OBSER", 
-                                         "SEA STATE", "VIS I/O", "C/C"),
-                               Y1998 = c("Date",	"Event Code",	"Time",	"Obs",
-                                         "Vis (I/O)", "Sea State",	"c/c"	),
-                               Y1999 = c("Date",	"Event Code",	"Time", 	"Obs. Code",
-                                         "Vis", "Sea State", "C/C"),
-                               Y2000 = c("DATE",	"EVENT",	"TIME",	"OBS.",	"VIS (IN/OUT)",	"SEA STATE",	"C/C"),
-                               Y2001 = c("DATE",	"EVENT",	"TIME",	"OBS.", "VIS I/O",	"SEA ST",	"C/C"	),
-                               Y2002 = c("DATE",	"EVENT",	"TIME", 	"OBS", "VIS (I/O)",	"SS",	"C/C"),
-                               Y2003 = c("DATE",	"EVENT",	"TIME", 	"OBS", "VIS (I/O)",	"SS",	"C/C"),
-                               Y2004 = c("DATE",	"EVENT",	"TIME", 	"OBS", "VIS (I/O)",	"SS",	"C/C"),
-                               Y2005 = c("DATE",	"EVENT",	"TIME", 	"OBS", "VIS (I/O)",	"SS",	"C/C"),
-                               Y2006 =  c("DATE",	"EVENT", 	"TIME",	"OBS#", "VIS IN",	"SEA ST",	"C/C"),
-                               Y2007 = c("DATE",	"EVENT", 	"TIME",	"OBS#", "VIS IN",	"SEA ST",	"C/C"),
-                               Y2008 = c("DATE",	"EVENT", 	"TIME",	"OBS#", "VIS IN",	"SEA ST",	"C/C"),
-                               Y2009 =  c("DATE",	"EVENT", 	"TIME",	"OBS#", "VIS IN",	"SEA ST",	"C/C"),
-                               Y2010 = c("DATE",	"EVENT", 	"TIME",	"OBS#", "VIS IN",	"SEA ST",	"C/C"),
-                               Y2011 = c("DATE",	"EVENT", 	"TIME",	"OBS#", "VIS IN",	"SEA ST",	"C/C"),
-                               Y2012 = c("DATE",	"EVENT", 	"TIME",	"OBS#", "VIS IN",	"SEA ST",	"C/C"))
-list.col.names.offshore <- list(Y1994 = c("Date", "Event", "Time", "Obs.", "Sea State",
-                                          "Vis. Code", "Cow/Calf"),
-                                Y1995 = c("Date",	"Event",	"Time",	"OBS.", 
-                                          "Sea", "Vis.", 	"Cow/Calf"),
-                                Y1996 = c("DATE",	"EVENT CODE",	"TIME", 	"OBS",
-                                          "SEA ST.", "VIS",	"C/C"),
-                                Y1997 = c("DATE",	"EVENT CODE",	"TIME", "OBS",
-                                          "S STATE", "VIS", "COW/CA"),
-                                Y1998 = c("Date",	"Event Code",	"Time",	"Obs",	
-                                          "Vis",	"SeaState",	"c/c"),
-                                Y1999 = c("Date",	"Event Code",	"Time",	"Observer",	
-                                          "Vis. Code",	"Sea State",	"C/C"),
-                                Y2000 = c("DATE",	"EVENT",	"TIME",	"OBS.",
-                                          "VIS CODE",	"SEA STATE",	"C/C"),
-                                Y2001 =  c("DATE",	"EVENT",	"TIME",	"OBS",
-                                           "VIS",	"SEA STATE",	"C/C"),
-                                Y2002 = c("DATE",	"EVENT",	"TIME",	"OBS", "VIS",	"SS",	"C/C"),
-                                Y2003 = c("DATE",	"EVENT",	"TIME",	"OBS", "VIS",	"SS",	"C/C"),
-                                Y2004 = c("DATE",	"EVENT",	"TIME",	"OBS", "VIS",	"SS",	"C/C"),
-                                Y2005 = c("DATE",	"EVENT",	"TIME",	"OBS", "VIS",	"SS",	"C/C"),
-                                Y2006 = c("DATE",	"EVENT",	"TIME",	"OBS", "VIS",	"SEA ST",	"C/C"),
-                                Y2007 = c("DATE",	"EVENT",	"TIME",	"OBS", "VIS",	"SEA ST",	"C/C"),
-                                Y2008 = c("DATE",	"EVENT",	"TIME",	"OBS", "VIS",	"SEA ST",	"C/C"),
-                                Y2009 = c("DATE",	"EVENT",	"TIME",	"OBS", "VIS",	"SEA ST",	"C/C"),
-                                Y2010 = c("DATE",	"EVENT",	"TIME",	"OBS", "VIS",	"SEA ST",	"C/C"),
-                                Y2011 = c("DATE",	"EVENT",	"TIME",	"OBS", "VIS",	"SEA ST",	"C/C"),
-                                Y2012 =  c("DATE", "EVENT",	"TIME",	"OBS", "VIS",	"SEA ST",	"C/C"))
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
+out.list <- get.all.data(list.sheet.names.inshore[[idx.list]], 
+                         list.sheet.names.offshore[[idx.list]],
+                         list.col.types.inshore[[idx.list]], 
+                         list.col.types.offshore[[idx.list]],
+                         list.col.names.inshore[[idx.list]], 
+                         list.col.names.offshore[[idx.list]],
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time)
 
 
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
@@ -1274,27 +787,13 @@ xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[grep("INSHORE", xls.files)])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[grep("OFFSHORE", xls.files)])
 
-sheet.name.inshore <- "LOGS"
-sheet.name.offshore <- "LOGS"
-
-col.names.inshore <- c("DATE",	"EVENT", 	"TIME",	"OBS#",
-                       "VIS IN",	"SEA ST",	"C/C", "IN/OFF")
-
-col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "text", "text", "numeric", "numeric", 
-                       "text", "text", "text", "text", 
-                       "text", "text", "text")
-
-col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",	
-                        "VIS",	"SEA ST",	"C/C")
-
-col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "text", "text", "numeric", "numeric", 
-                        "text", "text",  "text", "text")
-
-out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                         col.types.inshore, col.types.offshore,
-                         col.names.inshore, col.names.offshore,
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
+out.list <- get.all.data(list.sheet.names.inshore[[idx.list]], 
+                         list.sheet.names.offshore[[idx.list]],
+                         list.col.types.inshore[[idx.list]], 
+                         list.col.types.offshore[[idx.list]],
+                         list.col.names.inshore[[idx.list]], 
+                         list.col.names.offshore[[idx.list]],
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
@@ -1323,30 +822,17 @@ xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[grep("INSHORE", xls.files)])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[grep("OFFSHORE", xls.files)])
 
-sheet.name.inshore <- "LOGS"
-sheet.name.offshore <- "LOGS"
-
-col.names.inshore <- c("DATE",	"EVENT", 	"TIME",	"OBS#",
-                       "VIS IN",	"SEA ST",	"C/C", "IN/OFF")
-
-col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "text", "text", "numeric", "numeric", 
-                       "text", "text", "text", "text", 
-                       "text", "text", "text")
-
-col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",	
-                        "VIS",	"SEA ST",	"C/C")
-
-col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "text", "text", "numeric", "numeric", 
-                        "text", "text",  "text", "text")
-
-out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                         col.types.inshore, col.types.offshore,
-                         col.names.inshore, col.names.offshore,
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
+out.list <- get.all.data(list.sheet.names.inshore[[idx.list]], 
+                         list.sheet.names.offshore[[idx.list]],
+                         list.col.types.inshore[[idx.list]], 
+                         list.col.types.offshore[[idx.list]],
+                         list.col.names.inshore[[idx.list]], 
+                         list.col.names.offshore[[idx.list]],
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
+
 
 if (save.files){
   # Creates file names and saves files
@@ -1372,23 +858,17 @@ xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[grep("INSHORE", xls.files)])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[grep("OFFSHORE", xls.files)])
 
-sheet.name.inshore <- "LOGS"
-sheet.name.offshore <- NULL
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
+out.list <- get.all.data(list.sheet.names.inshore[[idx.list]], 
+                         list.sheet.names.offshore[[idx.list]],
+                         list.col.types.inshore[[idx.list]], 
+                         list.col.types.offshore[[idx.list]],
+                         list.col.names.inshore[[idx.list]], 
+                         list.col.names.offshore[[idx.list]],
+                         Year, 
+                         xls.file.name.inshore, xls.file.name.offshore,
+                         start.time)
 
-col.names.inshore <- c("DATE",	"EVENT", 	"TIME",	"OBS#",
-                       "VIS IN",	"SEA ST",	"C/C", "IN/OFF")
-
-col.types.inshore <- c("date", "numeric", "text", "numeric", 
-                       "text", "text", "numeric", "numeric", 
-                       "text", "text", "text", "text", 
-                       "text", "text", "text")
-
-col.names.offshore <- c("DATE",	"EVENT",	"TIME",	"OBS",	
-                        "VIS",	"SEA ST",	"C/C")
-
-col.types.offshore <- c("date", "numeric", "text", "numeric", 
-                        "text", "text", "numeric", "numeric", 
-                        "text", "text",  "text", "text")
 
 out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
                          col.types.inshore, col.types.offshore,
@@ -1420,23 +900,14 @@ start.time <- "0700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 
-sheet.name <- "LOGS"
-
-col.names <- c("DATE",	"EVENT", 	"TIME",	"OBS#",
-               "VIS IN",	"SEA ST",	"C/C", "IN/OFF")
-
-col.types <- c("date", "numeric", "text", "text", 
-               "text", "text", "numeric", "numeric", 
-               "text", "text", "text", "text", 
-               "text", "text", "text", "text",
-               "text", "text")
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
 
 # get the data using get.data function, which is in Piedras_Blancas_fcns.R
 data.inshore <- get.data(Year = Year,
                      xls.file.name = xls.file.name.inshore,
-                     sheet.name = sheet.name,
-                     col.types = col.types,
-                     col.names = all_of(col.names),
+                     sheet.name = list.sheet.names.inshore[[idx.list]],
+                     col.types = list.col.types.inshore[[idx.list]],
+                     col.names = list.col.names.inshore[[idx.list]],
                      start.time = start.time) %>%
   extract.all.vars()
 
@@ -1476,23 +947,14 @@ start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 
-sheet.name <- "LOGS"
-
-col.names <- c("DATE",	"EVENT", 	"TIME",	"OBS#",
-               "VIS IN",	"SEA ST",	"C/C", "IN/OFF")
-
-col.types <- c("numeric", "date", "numeric", "text", "text", 
-               "text", "text", "numeric", "numeric", 
-               "text", "text", "text", "text", 
-               "text", "text", "text", "text",
-               "text", "text", "text", "text")
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
 
 # get the data using get.data function, which is in Piedras_Blancas_fcns.R
 data.inshore <- get.data(Year = Year,
                      xls.file.name = xls.file.name.inshore,
-                     sheet.name = sheet.name,
-                     col.types = col.types,
-                     col.names = all_of(col.names),
+                     sheet.name = list.sheet.names.inshore[[idx.list]],
+                     col.types = list.col.types.inshore[[idx.list]],
+                     col.names = list.col.names.inshore[[idx.list]],
                      start.time = start.time) %>%
   extract.all.vars()
 
@@ -1539,23 +1001,14 @@ start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 
-sheet.name <- "INSHORE LOGS"
-
-col.names <- c("DATE",	"EVENT", 	"TIME",	"OBS #",
-               "VIS IN",	"SEA ST",	"C/C", "IN/OFF")
-
-col.types <- c("date", "numeric", "numeric", "text", "text", 
-               "text", "text", "numeric", "numeric", 
-               "text", "text", "text", "text", 
-               "text", "text", "text", "text",
-               "text", "text", "text")
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
 
 # get the data using get.data function, which is in Piedras_Blancas_fcns.R
 data.inshore <- get.data(Year = Year,
                      xls.file.name = xls.file.name.inshore,
-                     sheet.name = sheet.name,
-                     col.types = col.types,
-                     col.names = all_of(col.names),
+                     sheet.name = list.sheet.names.inshore[[idx.list]],
+                     col.types = list.col.types.inshore[[idx.list]],
+                     col.names = list.col.names.inshore[[idx.list]],
                      start.time = start.time) %>%
   extract.all.vars()
 
@@ -1595,23 +1048,14 @@ start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 
-sheet.name <- "INSHORE LOGS"
-
-col.names <- c("DATE",	"EVENT", 	"TIME",	"OBS #",
-                       "VIS IN",	"SEA ST",	"C/C", "IN/OFF")
-
-col.types <- c("date", "numeric", "numeric", "text", "text", 
-               "text", "text", "numeric", "numeric", 
-               "text", "text", "text", "text", 
-               "text", "text", "text", "text",
-               "text", "text", "text", "text", "text")
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
 
 # get the data using get.data function, which is in Piedras_Blancas_fcns.R
 data.inshore <- get.data(Year = Year,
                      xls.file.name = xls.file.name.inshore,
-                     sheet.name = sheet.name,
-                     col.types = col.types,
-                     col.names = all_of(col.names),
+                     sheet.name = list.sheet.names.inshore[[idx.list]],
+                     col.types = list.col.types.inshore[[idx.list]],
+                     col.names = list.col.names.inshore[[idx.list]],
                      start.time = start.time) %>%
   extract.all.vars()
 
@@ -1654,30 +1098,17 @@ start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 
-sheet.name <- "MomCalf Logs 2022 postQC"
-# c("Date", "Event", "Time", "Obs. Code", 
-#  "Sea State", "Vis. IN", "Cow  / Calf")
-
-# These are not the names of all columns. These are the names of columns in the
-# spreadsheet that are needed. These names change among years, so they need to
-# be specified for each year.
-col.names <- c("DATE", 	"EVENT", 	"TIME",	"OBS #",
-               "SEA ST", "VIS IN", "M/C", "LOCATION (IN/OFF)")
-
-# these are column types of all columns in the spreadsheet. 
-col.types <- c("date", "numeric", "numeric", "text", "text", 
-               "text", "text", "numeric", "numeric", "text", 
-               "text", "text", "text", "numeric", "text", 
-               "text", "text", "text")
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
 
 # get the data using get.data function, which is in Piedras_Blancas_fcns.R
 data.inshore <- get.data(Year = Year,
                      xls.file.name = xls.file.name.inshore,
-                     sheet.name = sheet.name,
-                     col.types = col.types,
-                     col.names = all_of(col.names),
+                     sheet.name = list.sheet.names.inshore[[idx.list]],
+                     col.types = list.col.types.inshore[[idx.list]],
+                     col.names = list.col.names.inshore[[idx.list]],
                      start.time = start.time) %>%
   extract.all.vars()
+
 
 # calculate effort and other statistics per 3-hr shift, using find.effort
 # function in Piedras_Blancas_fcns.R

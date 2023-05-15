@@ -162,32 +162,23 @@ Get the raw data
 dir.name <- paste0("C_C ", Y)
 start.time <- "630"
 
-USE THE NEW WAY TO EXTRACT DATA, RATHER THAN COPYING AND PASTING CODE CHUNKS. USE NEW FUNCTION (YET TO BE CREATED) 2023-05-12
-
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 
-sheet.name.inshore <- "INSHORE LOG"
-sheet.name.offshore <- NULL
-col.types.inshore <- c("date", "numeric", "text", "numeric", "numeric",
-                       "numeric", "numeric", "text", "text")
+# lists in the following lines are stored in Piedras_Blancas_fcns.R
 
-col.names.inshore <- c("Date", "Event", "Time", "Obs. Code", "Sea State",
-                       "Vis. IN", "Cow  / Calf")
-
-col.types.offshore <- c("date", "numeric", "text", "numeric", "numeric",
-                        "numeric", "numeric", "numeric", "text", "text")
-
-col.names.offshore <- c("Date", "Event", "Time", "Obs.", "Sea State",
-                        "Vis. Code", "Cow/Calf")
-
-out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                         col.types.inshore, col.types.offshore,
-                         col.names.inshore, col.names.offshore,
-                         Y, 
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Y))
+out.list <- get.all.data(list.sheet.names.inshore[[idx.list]], 
+                         list.sheet.names.offshore[[idx.list]],
+                         list.col.types.inshore[[idx.list]], 
+                         list.col.types.offshore[[idx.list]],
+                         list.col.names.inshore[[idx.list]], 
+                         list.col.names.offshore[[idx.list]],
+                         Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
+
 ```
 
 
