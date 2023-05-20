@@ -1,37 +1,66 @@
-# this version (v7) uses Binomial likelihood and the second order autoregressive
-# model for the mean of Poisson. The  mean is a function of day, not week.
-# The mean is modeled with Richards function. 
+# this version (v7) uses Binomial likelihood. True counts are Poisson, whose
+# mean is a function of day, and modeled with Richards function. Two parameters
+# for Richards function are shared among years (K and Max), whereas the other
+# three (S1, S2, and P) are common among years.
+
+# Richards function has the following form:
+# 
+# M1 <- (1 + (2 * exp(K) - 1) * exp((1/S1) * (P - d))) ^ (-1/exp(K))
+# M2 <- (1 + (2 * exp(K) - 1) * exp((1/S2) * (P - d))) ^ (-1/exp(K))
+# N <- min + (max - min) * (M1 * M2)
+#
+# d is the number of days from the beginning of nesting season
+# S1 < 0 and S2 > 0 define the "fatness" of the function
+# K > 0 defines the "flatness" at the peak of the function
+# P defines where the peak is relatvie to the range of d min(d) < P < max(d)
+# min is "the basal level of outside the season." I set min = 0.
+# max > min
+#
+# I set min = 0. 
 
 model {
 	p.obs ~ dnorm(0.889,0.06375^-2) #estimated observation probability
 	
 	# Richards function to model daily mean
-	for (t in 1:n.days){
-		M1[t] <- (1 + (2 * exp(K) - 1) * exp((1/(-S1)) * (P - t))) ^ (-1/exp(K))
-		M2[t] <- (1 + (2 * exp(K) - 1) * exp((1/S2) * (P - t))) ^ (-1/exp(K))
-		lambda[t] <- (Max) * (M1[t] * M2[t])
-	}
+	for (y in 1:n.years){
 	
-	for(i in 1:n.obs){
-	    count.true[i] ~ dpois(lambda[day[i]]) #T(weekly.max[week[i]],)      
+		for (t in 1:n.days[y]){
+			M1[t,y] <- (1 + (2 * exp(K[y]) - 1) * exp((1/(-S1)) * (P - t))) ^ (-1/exp(K[y]))
+			M2[t,y] <- (1 + (2 * exp(K[y]) - 1) * exp((1/S2) * (P - t))) ^ (-1/exp(K[y]))
+			lambda[t,y] <- (Max[y]) * (M1[t,y] * M2[t,y])
+		} #t
+	}#y
+	
+	for (y in 1:n.years){
+		for(i in 1:n.obs[y]){
+			# counts are made per 3-hr shift, whereas the mean (lambda) is
+			# per day. So, the mean has to be divided by 8, assuming there is 
+			# no consistent pattern within a 24-hr period.
+			count.true[i,y] ~ dpois(lambda[day[i,y], y]/8)       
 		
-        p.obs.corr[i] <- p.obs * effort[i]/3 # watch period is 3 hours, so any amount of effort below 3 hours scales the observation probability accordingly
+			# watch period is 3 hours, so any amount of effort 
+			# below 3 hours scales the observation probability accordingly
+			p.obs.corr[i,y] <- p.obs * effort[i,y]/3 
         
-		count.obs[i] ~ dbin(p.obs.corr[i], count.true[i])
-        loglik[i] <- logdensity.bin(count.obs[i], p.obs.corr[i], count.true[i])
-    }#i
-
-	Total.Calves <- sum(count.true[1:n.obs])
+			count.obs[i,y] ~ dbin(p.obs.corr[i,y], count.true[i,y])
+			loglik[i,y] <- logdensity.bin(count.obs[i,y], p.obs.corr[i,y], count.true[i,y])
+		}#i
+	}#y
 	
-	beta1 ~ dnorm(0, 0.01)
-	beta2 ~ dnorm(0, 0.01)
-	eps ~ dnorm(0, 0.01)
-
-	Max ~ dgamma(4, 0.002)
+	for (y in 1:n.years){	
+		Total.Calves[y] <- sum(count.true[1:n.obs[y], y])		
+	}#y
+	
+	# Priors
+	P ~ dunif(30, 60)
 	S1 ~ dgamma(2.1,1) T(,5) #dunif(-5, -0.3) 
 	S2 ~ dgamma(2.1,1) T(,5)  #dunif(0.3, 5) 
-	K ~ dunif(0.1, 5)   #dnorm(0, 0.01)T(0.3, 3)
-	P ~ dunif(30, 60)
+	
+	for (y in 1:n.years){
+		K[y] ~ dunif(0.1, 5)   #dnorm(0, 0.01)T(0.3, 3)
+		Max[y] ~ dgamma(4, 0.002)
+	}
+	
 
 }#model
     
