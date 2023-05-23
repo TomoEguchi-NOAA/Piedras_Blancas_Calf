@@ -290,12 +290,7 @@ out.list <- get.all.data(list.sheet.names.inshore[[idx.list]],
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)
 
-out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                         col.types.inshore, col.types.offshore,
-                         col.names.inshore, col.names.offshore,
-                         Year, 
-                         xls.file.name.inshore, xls.file.name.offshore,
-                         start.time)
+
 
 if (save.files){
   # Creates file names and saves files
@@ -577,13 +572,6 @@ out.list <- get.all.data(list.sheet.names.inshore[[idx.list]],
                          start.time)
 
 
-out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                         col.types.inshore, col.types.offshore,
-                         col.names.inshore, col.names.offshore,
-                         Year, 
-                         xls.file.name.inshore, xls.file.name.offshore,
-                         start.time)
-
 if (save.files){
   # Creates file names and saves files
   files <- file.names(out.dir, Year, out.list)
@@ -758,13 +746,6 @@ out.list <- get.all.data(list.sheet.names.inshore[[idx.list]],
                          start.time)
 
 
-out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                         col.types.inshore, col.types.offshore,
-                         col.names.inshore, col.names.offshore,
-                         Year, 
-                         xls.file.name.inshore, xls.file.name.offshore,
-                         start.time)
-
 if (save.files){
   # Creates file names and saves files
   files <- file.names(out.dir, Year, out.list)
@@ -865,14 +846,6 @@ out.list <- get.all.data(list.sheet.names.inshore[[idx.list]],
                          list.col.types.offshore[[idx.list]],
                          list.col.names.inshore[[idx.list]], 
                          list.col.names.offshore[[idx.list]],
-                         Year, 
-                         xls.file.name.inshore, xls.file.name.offshore,
-                         start.time)
-
-
-out.list <- get.all.data(sheet.name.inshore, sheet.name.offshore,
-                         col.types.inshore, col.types.offshore,
-                         col.names.inshore, col.names.offshore,
                          Year, 
                          xls.file.name.inshore, xls.file.name.offshore,
                          start.time)

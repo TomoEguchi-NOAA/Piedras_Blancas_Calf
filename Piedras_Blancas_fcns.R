@@ -171,7 +171,7 @@ find.effort <- function(x, T0){
   
   # 2023-05-10 THIS IS STILL NOT WORKING PROPERLY. EFFORT IS NOT SUMMED CORRECTLY, PARTIALLY
   # DUE TO NON-MATCHING 1/5 EVENT CODE (ON AND OFF EFFORT MARKERS). SEA STATE AND VISIBILITY
-  # FILTERS NEED TO BE MORE EFFICIENT. 
+  # FILTERS NEED TO BE MORE EFFICIENT. THIS HAS BEEN FIXED.
   
   # this turns dates in to character
   all.dates <- unique(x$Date)
@@ -244,9 +244,21 @@ find.effort <- function(x, T0){
       if (shift.last > 4) shift.last <- 4
       
       for (k4 in shift.first:shift.last){
-        shift.idx <- grep(as.character(k4), one.day$Shift)
+        if (k4 == 1){
+          T0000.begin <- min(x$Minutes_since_0000)
+        } else {
+          T0000.begin <- shift.begins[k4]  
+        }
         
-        one.shift <- one.day[shift.idx,]
+        T0000.end <- shift.ends[k4]
+        
+        one.day %>% filter(Minutes_since_0000 > (T0000.begin),
+                           Minutes_since_0000 <= T0000.end) -> one.shift
+        
+        # This will pick up the shift plus (shift)/(shift+1) 
+        # shift.idx <- grep(as.character(k4), one.day$Shift)
+        # 
+        # one.shift <- one.day[shift.idx,]
         
         if (nrow(one.shift) > 0){
           # Sometimes the beginning of one shift and the end of the previous 
@@ -326,6 +338,9 @@ find.effort <- function(x, T0){
           
           one.shift.eft[row.1, "Event"] <- 1
           one.shift.eft[row.5, "Event"] <- 5
+          
+          one.shift.eft[row.1, "Mother_Calf"] <- NA
+          one.shift.eft[row.5, "Mother_Calf"] <- NA
           
           one.shift.eft <- one.shift.eft[!is.na(one.shift.eft$Effort),]
           # calculate effort for each "on" period per shift
@@ -714,7 +729,7 @@ find.sightings.dif <- function(Y, daily.summary.list, out.list){
     daily.summary.list[[which(years == Y)]]$data.2 %>%
       filter(Date == as.Date(date.dif.sightings[k])) -> data.2.dif[[k]]
     
-    # Absolute difference in effort is greater than 0.05 hr (3 min)
+    # Absolute difference in sightings is greater than 0
     shift.dif[[k]] <- data.2.dif[[k]]$Shift[which(abs(data.1.dif[[k]]$Sightings - data.2.dif[[k]]$Sightings) != 0)]
     
     if (length(shift.dif[[k]]) > 0){
@@ -724,7 +739,9 @@ find.sightings.dif <- function(Y, daily.summary.list, out.list){
         tmp.data <- out.list$shift.all.inshore %>% 
           filter(Date == as.Date(date.dif.sightings[k]))
         
-        raw.data[[k2]] <- tmp.data[grep(shift.dif[[k]][k2], tmp.data$Shift),]
+        #NEED TO FILTER SO THAT THE CHUNK STARTS WITH EVENT = 1 AND ENDS WITH EVENT = 5
+        tmp <- tmp.data[grep(shift.dif[[k]][k2], tmp.data$Shift),]
+        raw.data[[k2]] <- tmp[which(tmp$Event == 1)[1]:max(which(tmp$Event == 5)),]
         
         # raw.data[[k2]] <- out.list$shift.all.inshore %>% 
         #   filter(Date == as.Date(date.dif.sightings[k])) %>%
@@ -748,9 +765,9 @@ find.sightings.dif <- function(Y, daily.summary.list, out.list){
 # Excel file definitions
 # Sheet names for inshore logs
 list.sheet.names.inshore <- list(Y1994 = "INSHORE LOG", Y1995 = "Inshore Data", Y1996 = "data",
-                                 Y1997 = "LOGS", Y1998 = "LOGS", Y1999 = "DATA",
+                                 Y1997 = "LOGS", Y1998 = "LOG", Y1999 = "DATA",
                                  Y2000 = "DATA", Y2001 = "LOGS", Y2002 = "LOGS",
-                                 Y2003 = "logs", Y2004 = "DATA", Y2005 = "LOGS",
+                                 Y2003 = "Logs", Y2004 = "DATA", Y2005 = "LOGS",
                                  Y2006 = "LOGS", Y2007 = "log", Y2008 = "LOG",
                                  Y2009 = "LOGS", Y2010 = "LOGS", Y2011 = "LOGS",
                                  Y2012 = "LOGS", Y2013 = "LOGS", Y2014 = "LOGS",
