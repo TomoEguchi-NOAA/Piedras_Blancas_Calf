@@ -189,7 +189,26 @@ if (save.files){
   
 }
 
+data.inshore <- get.data(Year = Year, 
+                           xls.file.name = xls.file.name.inshore, 
+                           sheet.name = list.sheet.names.inshore[[idx.list]],
+                           col.types = list.col.types.inshore[[idx.list]], 
+                           col.names = list.col.names.inshore[[idx.list]], 
+                           start.time = start.time) %>%
+    mutate(Area = "in") %>%
+    extract.all.vars()
+  
+shift.inshore <- find.effort(data.inshore, T0 = start.time) 
 
+data.offshore <- get.data(Year = Year, 
+                            xls.file.name = xls.file.name.offshore, 
+                            sheet.name = list.sheet.names.offshore[[idx.list]],
+                            col.types = list.col.types.offshore[[idx.list]], 
+                            col.names = list.col.names.offshore[[idx.list]], 
+                            start.time = start.time)%>%
+    mutate(Area = "off") %>%
+    extract.all.vars()
+shift.offshore <- find.effort(data.offshore, T0 = start.time)   
 ```
 
 
@@ -224,8 +243,15 @@ if (save.files){
   
 }
 
-
-
+# data.offshore <- get.data(Year = Year, 
+#                             xls.file.name = xls.file.name.offshore, 
+#                             sheet.name = list.sheet.names.offshore[[idx.list]],
+#                             col.types = list.col.types.offshore[[idx.list]], 
+#                             col.names = list.col.names.offshore[[idx.list]], 
+#                             start.time = start.time)%>%
+#     mutate(Area = "off") %>%
+#     extract.all.vars()
+ 
 ```
 
 

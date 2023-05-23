@@ -179,7 +179,7 @@ find.effort <- function(x, T0){
   # Start time of shift 1:
   T0.minutes <- char_time2min(T0)
   
-  # End of shift time
+  # End of shift time in minutes since 0000
   shift.ends <- c(600, 780, 960, 1140, 1320)
   
   shift.begins <- c(T0.minutes, shift.ends)
@@ -187,15 +187,15 @@ find.effort <- function(x, T0){
   out.list <- list()
   shift.list <- list()
   d <- k1 <- c <- k2 <- 1
-  d <- 29
-  k4 <- 3
+  d <- 31
+  k4 <- 1
   for (d in 1:length(all.dates)){
     # pick just one day's worth of data
     one.day <- filter(x, Date == as.Date(all.dates[d])) %>% arrange(Minutes_since_0000)
     
     # Entries when there were no shift at all (e.g., 1998-04-28) need to be removed
     # also, an entry before effort starts (e.g., 1998-03-23 offshore)
-    if (nrow(one.day) > 1 & one.day$Event[1] < 5){
+    if (nrow(one.day) > 1 & one.day$Event[1] != 5){
       # Find start and end time for the day:
       one.day %>%
         arrange(by = Minutes_since_0000) -> one.day
@@ -245,15 +245,34 @@ find.effort <- function(x, T0){
       
       for (k4 in shift.first:shift.last){
         if (k4 == 1){
-          T0000.begin <- min(x$Minutes_since_0000)
+          # for the first shift, sometimes they put a comment in the first row
+          # with Event = 6, rather than Event = 1. Those need to be removed.
+          # take all Event == 1
+          tmp <- one.day %>% 
+            filter(Event == 1)
+          
+          # Some years contain "shifts" with no observations but just comments
+          # Event = 6. E.g., 1997-03-24. These need to be dealt with. 
+          if (nrow(tmp) == 0){   # no start events
+            START HERE NEXT 2023-05-23
+          }
+          T0000.begin <- min(tmp$Minutes_since_0000, na.rm = T) 
+          
+          # if (nrow(tmp) == 0) stop("error")
         } else {
           T0000.begin <- shift.begins[k4]  
         }
         
         T0000.end <- shift.ends[k4]
         
-        one.day %>% filter(Minutes_since_0000 > (T0000.begin),
-                           Minutes_since_0000 <= T0000.end) -> one.shift
+        if (k4 == 1){
+          one.day %>% filter(Minutes_since_0000 >= (T0000.begin),
+                             Minutes_since_0000 <= T0000.end) -> one.shift  
+        } else {
+          one.day %>% filter(Minutes_since_0000 > (T0000.begin),
+                             Minutes_since_0000 <= T0000.end) -> one.shift
+          
+        }
         
         # This will pick up the shift plus (shift)/(shift+1) 
         # shift.idx <- grep(as.character(k4), one.day$Shift)
@@ -336,6 +355,7 @@ find.effort <- function(x, T0){
             row.5 <- row.5.1[!is.na(row.5.1)]
           }
           
+          # These are probably unnecessary?
           one.shift.eft[row.1, "Event"] <- 1
           one.shift.eft[row.5, "Event"] <- 5
           
@@ -680,7 +700,7 @@ find.effort.dif <- function(Y, daily.summary.list, out.list){
   
   raw.data.all <- shift.dif <- data.2.dif <- data.1.dif <- list(length(date.dif.effort))
   
-  k <- 1
+  k <- 12
   for (k in 1:length(date.dif.effort)){
     daily.summary.list[[which(years == Y)]]$data.1 %>%
       filter(Date == as.Date(date.dif.effort[k])) -> data.1.dif[[k]]
@@ -697,8 +717,20 @@ find.effort.dif <- function(Y, daily.summary.list, out.list){
       for (k2 in 1:length(shift.dif[[k]])){
         tmp.data <- out.list$shift.all.inshore %>% 
           filter(Date == as.Date(date.dif.effort[k]))
+        #tmp.data <- out.list$data.inshore %>% 
+        #  filter(Date == as.Date(date.dif.effort[k]))
         
-        raw.data[[k2]] <- tmp.data[grep(shift.dif[[k]][k2], tmp.data$Shift),]
+        #NEED TO FILTER SO THAT THE CHUNK STARTS WITH EVENT = 1 AND ENDS WITH EVENT = 5
+        tmp <- tmp.data[grep(shift.dif[[k]][k2], tmp.data$Shift),]
+        
+        if (nrow(tmp) == 0){
+          raw.data[[k2]] <- NULL
+        } else {
+          raw.data[[k2]] <- tmp[which(tmp$Event == 1)[1]:max(which(tmp$Event == 5)),]          
+        }
+
+        
+        #raw.data[[k2]] <- tmp.data[grep(shift.dif[[k]][k2], tmp.data$Shift),]
       }
       raw.data.all[[k]] <- raw.data
       
@@ -741,7 +773,12 @@ find.sightings.dif <- function(Y, daily.summary.list, out.list){
         
         #NEED TO FILTER SO THAT THE CHUNK STARTS WITH EVENT = 1 AND ENDS WITH EVENT = 5
         tmp <- tmp.data[grep(shift.dif[[k]][k2], tmp.data$Shift),]
-        raw.data[[k2]] <- tmp[which(tmp$Event == 1)[1]:max(which(tmp$Event == 5)),]
+        
+        if (nrow(tmp) == 0){
+          raw.data[[k2]] <- NULL
+        } else {
+          raw.data[[k2]] <- tmp[which(tmp$Event == 1)[1]:max(which(tmp$Event == 5)),]          
+        }
         
         # raw.data[[k2]] <- out.list$shift.all.inshore %>% 
         #   filter(Date == as.Date(date.dif.sightings[k])) %>%
