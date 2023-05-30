@@ -187,15 +187,18 @@ find.effort <- function(x, T0){
   out.list <- list()
   shift.list <- list()
   d <- k1 <- c <- k2 <- 1
-  d <- 31
+  d <- 13
   k4 <- 1
   for (d in 1:length(all.dates)){
     # pick just one day's worth of data
     one.day <- filter(x, Date == as.Date(all.dates[d])) %>% arrange(Minutes_since_0000)
     
+    # Must have at least one Event = 1
+    one.day %>% filter(Event == 1) -> one.day.event.1
+    
     # Entries when there were no shift at all (e.g., 1998-04-28) need to be removed
     # also, an entry before effort starts (e.g., 1998-03-23 offshore)
-    if (nrow(one.day) > 1 & one.day$Event[1] != 5){
+    if (nrow(one.day) > 1 & one.day$Event[1] != 5 & nrow(one.day.event.1) > 0){
       # Find start and end time for the day:
       one.day %>%
         arrange(by = Minutes_since_0000) -> one.day
@@ -253,9 +256,9 @@ find.effort <- function(x, T0){
           
           # Some years contain "shifts" with no observations but just comments
           # Event = 6. E.g., 1997-03-24. These need to be dealt with. 
-          if (nrow(tmp) == 0){   # no start events
-            START HERE NEXT 2023-05-23
-          }
+          #if (nrow(tmp) == 0){   # no start events
+            #START HERE NEXT 2023-05-23
+          #}
           T0000.begin <- min(tmp$Minutes_since_0000, na.rm = T) 
           
           # if (nrow(tmp) == 0) stop("error")
