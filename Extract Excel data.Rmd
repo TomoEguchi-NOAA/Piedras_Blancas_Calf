@@ -224,14 +224,6 @@ if (save.files){
   
 }
 
-# data.offshore <- get.data(Year = Year, 
-#                             xls.file.name = xls.file.name.offshore, 
-#                             sheet.name = list.sheet.names.offshore[[idx.list]],
-#                             col.types = list.col.types.offshore[[idx.list]], 
-#                             col.names = list.col.names.offshore[[idx.list]], 
-#                             start.time = start.time)%>%
-#     mutate(Area = "off") %>%
-#     extract.all.vars()
  
 ```
 
@@ -882,28 +874,13 @@ xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 
 idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
 
-# get the data using get.data function, which is in Piedras_Blancas_fcns.R
-data.inshore <- get.data(Year = Year,
-                     xls.file.name = xls.file.name.inshore,
-                     sheet.name = list.sheet.names.inshore[[idx.list]],
-                     col.types = list.col.types.inshore[[idx.list]],
-                     col.names = list.col.names.inshore[[idx.list]],
-                     start.time = start.time) %>%
-  extract.all.vars()
-
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.inshore, T0 = start.time) #%>% extract.shift.vars()
-
-formatted.inshore <- format.output(data.shift$out.df, 
-                                   max.shift = max(data.shift$out.df$Shift))
-
-out.list <- list(data.offshore = NULL,
-                 data.inshore = data.inshore,
-                 shift.data.offshore = NULL,
-                 shift.data.inshore = data.shift$out.df,
-                 formatted.data.offshore = NULL,
-                 formatted.data.inshore = formatted.inshore)
+# get the data using get.data.inshore.only function, which is in Piedras_Blancas_fcns.R
+out.list <- get.data.inshore.only(Year = Year,
+                                     xls.file.name = xls.file.name.inshore,
+                                     sheet.name = list.sheet.names.inshore[[idx.list]],
+                                     col.types = list.col.types.inshore[[idx.list]],
+                                     col.names = list.col.names.inshore[[idx.list]],
+                                     start.time = start.time)
 
 if (save.files){
   # Creates file names and saves files
@@ -929,28 +906,36 @@ xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 
 idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
 
-# get the data using get.data function, which is in Piedras_Blancas_fcns.R
-data.inshore <- get.data(Year = Year,
-                     xls.file.name = xls.file.name.inshore,
-                     sheet.name = list.sheet.names.inshore[[idx.list]],
-                     col.types = list.col.types.inshore[[idx.list]],
-                     col.names = list.col.names.inshore[[idx.list]],
-                     start.time = start.time) %>%
-  extract.all.vars()
+# get the data using get.data.inshore.only function, which is in Piedras_Blancas_fcns.R
+out.list <- get.data.inshore.only(Year = Year,
+                                     xls.file.name = xls.file.name.inshore,
+                                     sheet.name = list.sheet.names.inshore[[idx.list]],
+                                     col.types = list.col.types.inshore[[idx.list]],
+                                     col.names = list.col.names.inshore[[idx.list]],
+                                     start.time = start.time)
 
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.inshore, T0 = start.time) #%>% extract.shift.vars()
-
-formatted.inshore <- format.output(data.shift$out.df, 
-                                   max.shift = max(data.shift$out.df$Shift))
-
-out.list <- list(data.offshore = NULL,
-                 data.inshore = data.inshore,
-                 shift.data.offshore = NULL,
-                 shift.data.inshore = data.shift$out.df,
-                 formatted.data.offshore = NULL,
-                 formatted.data.inshore = formatted.inshore)
+# # get the data using get.data function, which is in Piedras_Blancas_fcns.R
+# data.inshore <- get.data(Year = Year,
+#                      xls.file.name = xls.file.name.inshore,
+#                      sheet.name = list.sheet.names.inshore[[idx.list]],
+#                      col.types = list.col.types.inshore[[idx.list]],
+#                      col.names = list.col.names.inshore[[idx.list]],
+#                      start.time = start.time) %>%
+#   extract.all.vars()
+# 
+# # calculate effort and other statistics per 3-hr shift, using find.effort
+# # function in Piedras_Blancas_fcns.R
+# data.shift <- find.effort(data.inshore, T0 = start.time) #%>% extract.shift.vars()
+# 
+# formatted.inshore <- format.output(data.shift$out.df, 
+#                                    max.shift = max(data.shift$out.df$Shift))
+# 
+# out.list <- list(data.offshore = NULL,
+#                  data.inshore = data.inshore,
+#                  shift.data.offshore = NULL,
+#                  shift.data.inshore = data.shift$out.df,
+#                  formatted.data.offshore = NULL,
+#                  formatted.data.inshore = formatted.inshore)
 
 
 if (save.files){
@@ -983,28 +968,36 @@ xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 
 idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
 
-# get the data using get.data function, which is in Piedras_Blancas_fcns.R
-data.inshore <- get.data(Year = Year,
-                     xls.file.name = xls.file.name.inshore,
-                     sheet.name = list.sheet.names.inshore[[idx.list]],
-                     col.types = list.col.types.inshore[[idx.list]],
-                     col.names = list.col.names.inshore[[idx.list]],
-                     start.time = start.time) %>%
-  extract.all.vars()
+# get the data using get.data.inshore.only function, which is in Piedras_Blancas_fcns.R
+out.list <- get.data.inshore.only(Year = Year,
+                                     xls.file.name = xls.file.name.inshore,
+                                     sheet.name = list.sheet.names.inshore[[idx.list]],
+                                     col.types = list.col.types.inshore[[idx.list]],
+                                     col.names = list.col.names.inshore[[idx.list]],
+                                     start.time = start.time)
 
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.inshore, T0 = start.time) #%>% extract.shift.vars()
-
-formatted.inshore <- format.output(data.shift$out.df, 
-                                   max.shift = max(data.shift$out.df$Shift))
-
-out.list <- list(data.offshore = NULL,
-                 data.inshore = data.inshore,
-                 shift.data.offshore = NULL,
-                 shift.data.inshore = data.shift$out.df,
-                 formatted.data.offshore = NULL,
-                 formatted.data.inshore = formatted.inshore)
+# # get the data using get.data function, which is in Piedras_Blancas_fcns.R
+# data.inshore <- get.data(Year = Year,
+#                      xls.file.name = xls.file.name.inshore,
+#                      sheet.name = list.sheet.names.inshore[[idx.list]],
+#                      col.types = list.col.types.inshore[[idx.list]],
+#                      col.names = list.col.names.inshore[[idx.list]],
+#                      start.time = start.time) %>%
+#   extract.all.vars()
+# 
+# # calculate effort and other statistics per 3-hr shift, using find.effort
+# # function in Piedras_Blancas_fcns.R
+# data.shift <- find.effort(data.inshore, T0 = start.time) #%>% extract.shift.vars()
+# 
+# formatted.inshore <- format.output(data.shift$out.df, 
+#                                    max.shift = max(data.shift$out.df$Shift))
+# 
+# out.list <- list(data.offshore = NULL,
+#                  data.inshore = data.inshore,
+#                  shift.data.offshore = NULL,
+#                  shift.data.inshore = data.shift$out.df,
+#                  formatted.data.offshore = NULL,
+#                  formatted.data.inshore = formatted.inshore)
 
 if (save.files){
   # Creates file names and saves files
@@ -1030,29 +1023,37 @@ xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 
 idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
 
-# get the data using get.data function, which is in Piedras_Blancas_fcns.R
-data.inshore <- get.data(Year = Year,
-                     xls.file.name = xls.file.name.inshore,
-                     sheet.name = list.sheet.names.inshore[[idx.list]],
-                     col.types = list.col.types.inshore[[idx.list]],
-                     col.names = list.col.names.inshore[[idx.list]],
-                     start.time = start.time) %>%
-  extract.all.vars()
+# get the data using get.data.inshore.only function, which is in Piedras_Blancas_fcns.R
+out.list <- get.data.inshore.only(Year = Year,
+                                     xls.file.name = xls.file.name.inshore,
+                                     sheet.name = list.sheet.names.inshore[[idx.list]],
+                                     col.types = list.col.types.inshore[[idx.list]],
+                                     col.names = list.col.names.inshore[[idx.list]],
+                                     start.time = start.time)
 
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.inshore, T0 = start.time) #%>% extract.shift.vars()
-
-formatted.inshore <- format.output(data.shift$out.df, 
-                                   max.shift = max(data.shift$out.df$Shift))
-
-out.list <- list(data.offshore = NULL,
-                 data.inshore = data.inshore,
-                 shift.data.offshore = NULL,
-                 shift.data.inshore = data.shift$out.df,
-                 formatted.data.offshore = NULL,
-                 formatted.data.inshore = formatted.inshore)
-
+# # get the data using get.data function, which is in Piedras_Blancas_fcns.R
+# data.inshore <- get.data(Year = Year,
+#                      xls.file.name = xls.file.name.inshore,
+#                      sheet.name = list.sheet.names.inshore[[idx.list]],
+#                      col.types = list.col.types.inshore[[idx.list]],
+#                      col.names = list.col.names.inshore[[idx.list]],
+#                      start.time = start.time) %>%
+#   extract.all.vars()
+# 
+# # calculate effort and other statistics per 3-hr shift, using find.effort
+# # function in Piedras_Blancas_fcns.R
+# data.shift <- find.effort(data.inshore, T0 = start.time) #%>% extract.shift.vars()
+# 
+# formatted.inshore <- format.output(data.shift$out.df, 
+#                                    max.shift = max(data.shift$out.df$Shift))
+# 
+# out.list <- list(data.offshore = NULL,
+#                  data.inshore = data.inshore,
+#                  shift.data.offshore = NULL,
+#                  shift.data.inshore = data.shift$out.df,
+#                  formatted.data.offshore = NULL,
+#                  formatted.data.inshore = formatted.inshore)
+# 
 
 if (save.files){
   # Creates file names and saves files
@@ -1080,29 +1081,37 @@ xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 
 idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
 
-# get the data using get.data function, which is in Piedras_Blancas_fcns.R
-data.inshore <- get.data(Year = Year,
-                     xls.file.name = xls.file.name.inshore,
-                     sheet.name = list.sheet.names.inshore[[idx.list]],
-                     col.types = list.col.types.inshore[[idx.list]],
-                     col.names = list.col.names.inshore[[idx.list]],
-                     start.time = start.time) %>%
-  extract.all.vars()
+# get the data using get.data.inshore.only function, which is in Piedras_Blancas_fcns.R
+out.list <- get.data.inshore.only(Year = Year,
+                                     xls.file.name = xls.file.name.inshore,
+                                     sheet.name = list.sheet.names.inshore[[idx.list]],
+                                     col.types = list.col.types.inshore[[idx.list]],
+                                     col.names = list.col.names.inshore[[idx.list]],
+                                     start.time = start.time)
 
-
-# calculate effort and other statistics per 3-hr shift, using find.effort
-# function in Piedras_Blancas_fcns.R
-data.shift <- find.effort(data.inshore, T0 = start.time) #%>% extract.shift.vars()
-
-formatted.inshore <- format.output(data.shift$out.df, 
-                                   max.shift = max(data.shift$out.df$Shift))
-
-out.list <- list(data.offshore = NULL,
-                 data.inshore = data.inshore,
-                 shift.data.offshore = NULL,
-                 shift.data.inshore = data.shift$out.df,
-                 formatted.data.offshore = NULL,
-                 formatted.data.inshore = formatted.inshore)
+# # get the data using get.data function, which is in Piedras_Blancas_fcns.R
+# data.inshore <- get.data(Year = Year,
+#                      xls.file.name = xls.file.name.inshore,
+#                      sheet.name = list.sheet.names.inshore[[idx.list]],
+#                      col.types = list.col.types.inshore[[idx.list]],
+#                      col.names = list.col.names.inshore[[idx.list]],
+#                      start.time = start.time) %>%
+#   extract.all.vars()
+# 
+# 
+# # calculate effort and other statistics per 3-hr shift, using find.effort
+# # function in Piedras_Blancas_fcns.R
+# data.shift <- find.effort(data.inshore, T0 = start.time) #%>% extract.shift.vars()
+# 
+# formatted.inshore <- format.output(data.shift$out.df, 
+#                                    max.shift = max(data.shift$out.df$Shift))
+# 
+# out.list <- list(data.offshore = NULL,
+#                  data.inshore = data.inshore,
+#                  shift.data.offshore = NULL,
+#                  shift.data.inshore = data.shift$out.df,
+#                  formatted.data.offshore = NULL,
+#                  formatted.data.inshore = formatted.inshore)
 
 if (save.files){
   # Creates file names and saves files
@@ -1113,3 +1122,34 @@ if (save.files){
 
 ```
 
+
+## 2023 
+
+
+```{r}
+THIS NEEDS TO BE COMPLETED. SHEET NAME NEEDS TO BE DEFINED IN Piedras_Blancas_fcns.R 2023-05-31
+Year <- 2023
+dir.name <- paste0("C_C ", Year)
+start.time <- "700"
+xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
+xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
+
+idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
+
+# get the data using get.data.inshore.only function, which is in Piedras_Blancas_fcns.R
+out.list <- get.data.inshore.only(Year = Year,
+                                     xls.file.name = xls.file.name.inshore,
+                                     sheet.name = list.sheet.names.inshore[[idx.list]],
+                                     col.types = list.col.types.inshore[[idx.list]],
+                                     col.names = list.col.names.inshore[[idx.list]],
+                                     start.time = start.time)
+
+
+if (save.files){
+  # Creates file names and saves files
+  files <- file.names(out.dir, Year, out.list)
+  
+}
+
+
+```

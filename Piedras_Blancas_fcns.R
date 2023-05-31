@@ -142,6 +142,35 @@ get.data <- function(Year, xls.file.name, sheet.name,
   return(data.out)  
 }
 
+get.data.inshore.only <- function(sheet.name, 
+                                  col.types, 
+                                  col.names, 
+                                  Year, 
+                                  xls.file.name, 
+                                  start.time){
+  
+  data.inshore <- get.data(Year = Year,
+                           xls.file.name = xls.file.name,
+                           sheet.name = sheet.name,
+                           col.types = col.types,
+                           col.names = col.names,
+                           start.time = start.time) %>%
+    extract.all.vars()
+  
+  # calculate effort and other statistics per 3-hr shift, using find.effort
+  # function in Piedras_Blancas_fcns.R
+  data.shift <- find.effort(data.inshore, T0 = start.time) #%>% extract.shift.vars()
+  
+  formatted.inshore <- format.output(data.shift$out.df, 
+                                     max.shift = max(data.shift$out.df$Shift))
+  
+  out.list <- list(data.inshore = data.inshore,
+                   shift.data.inshore = data.shift$out.df,
+                   formatted.data.inshore = formatted.inshore)
+  return(out.list)
+  
+}
+
 # x is a data.frame with at least three fields: Date (character), 
 # Minutes_since_0000
 # and Shift - find.shift is used to come up with this

@@ -185,6 +185,7 @@ Effort:
 
 effort.dif.list <- find.effort.dif(Y, daily.summary.list, out.list)
 
+length(effort.dif.list$date.dif)
 ```
 
 There were `r length(effort.dif.list$date.dif)` differences between the two extraction algorithms for year `r Y`. Many differences come from the first shift starting at 0630, rather than 0700. In the v1 extraction algorithm, the first shift was assumed to start at 0700, so 30 min were removed, whereas the v2 algorithm counts all data. Spot checks show v2 doing a good job counting all. v1 seems to ignore sea state > 4. 
@@ -218,6 +219,10 @@ Observation started at 0630 (Event = 1). So, I think it makes sense to include e
 
 
 2. `r effort.dif.list$date.dif[2]`
+
+```{r}
+length(effort.dif.list$raw.data[[2]])
+```
 
 There were `r length(effort.dif.list$raw.data[[2]])` differences between V1 and V2 extractions within `r effort.dif.list$date.dif[2]`.
 
