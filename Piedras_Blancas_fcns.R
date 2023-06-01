@@ -1,6 +1,7 @@
 
 library(rstan)
 library(loo)
+library(readxl)
 
 get.all.data <- function(sheet.name.inshore, sheet.name.offshore,
                          col.types.inshore, col.types.offshore,
@@ -184,6 +185,9 @@ get.data.inshore.only <- function(sheet.name,
 # start and end of each day (default = 7 and 19, correspond to 0700
 # and 1900), and the maximum number of shift per day (default to 4).
 #find.effort <- function(x, start.hr = 7, end.hr = 19, max.shift = 4){
+# 2023-06-01 A HA MOMENT. RATHER THAN MAKING ARBITRARY STARTING TIME OF 0630 OR 0700, 
+# CREATE 3-HR SHIFTS STARTING FROM 0100. This has not been implemented. The comparison
+# between Ver1 and Ver2 needs to be completed first. 
 
 # T0 is start time in character, e.g., "0630", "0700)
 find.effort <- function(x, T0){
@@ -208,7 +212,7 @@ find.effort <- function(x, T0){
   # Start time of shift 1:
   T0.minutes <- char_time2min(T0)
   
-  # End of shift time in minutes since 0000
+  # End of shift time in minutes since 0000. 600 is 1000hrs
   shift.ends <- c(600, 780, 960, 1140, 1320)
   
   shift.begins <- c(T0.minutes, shift.ends)

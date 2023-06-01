@@ -446,6 +446,10 @@ The difference comes from whether or not to include 0630 - 0700 as search effort
 
 10. `r effort.dif.list$date.dif[10]`
 
+```{r}
+length(effort.dif.list$raw.data[[10]])
+```
+
 There were `r length(effort.dif.list$raw.data[[10]])` differences for `r effort.dif.list$date.dif[10]`.
 
 Data:
@@ -491,7 +495,6 @@ For Shift 1, V1 did not include 0628 - 0700.
 For Shift 2, V1 somehow gave a full effort (3 hrs) but the data show 0 hrs of effort.
 
 For Shift 3, the effort started at 1450, rather than 1300. So, the true effort was 1450 - 1600 (70 min or 1.167 hrs)
-
 
 
 
@@ -564,8 +567,6 @@ effort.dif.list$dif.2[[13]]
 
 
 Not sure how V1 computed 2.33 hrs for Shift 2.
-
-
 
 
 14. `r effort.dif.list$date.dif[14]`
@@ -664,7 +665,7 @@ effort.dif.list$dif.2[[17]]
 
 ```
 
-V2 cut Shift 2 by 15 minutes. Not sure why. 
+V2 cut Shift 2 by 15 minutes. Not sure why. Maybe because the Event 1 at 1000 was not included in the data file?
 
 
 Sightings:
@@ -724,7 +725,7 @@ sightings.dif.list$dif.2[[2]]
 
 ```
 
-Only 9 mother-calf pairs were observed on 5/3.
+Only 9 mother-calf pairs were observed on 5/3 Shift 4.
 
 
 
