@@ -1129,7 +1129,6 @@ if (save.files){
 
 
 ```{r}
-THIS NEEDS TO BE COMPLETED. SHEET NAME NEEDS TO BE DEFINED IN Piedras_Blancas_fcns.R 2023-05-31
 Year <- 2023
 dir.name <- paste0("C_C ", Year)
 start.time <- "700"

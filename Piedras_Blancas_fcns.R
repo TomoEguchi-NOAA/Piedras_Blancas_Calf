@@ -75,7 +75,8 @@ get.data <- function(Year, xls.file.name, sheet.name,
                 Time = .data[[col.names[[3]]]],
                 Minutes_since_T0 = sapply(Time, FUN = char_time2min, start.time),
                 Minutes_since_0000 = sapply(Time, FUN = char_time2min),
-                Shift = sapply(Minutes_since_0000, FUN = find.shift),
+                #Shift = sapply(Minutes_since_0000, FUN = find.shift),
+                Shift = sapply(Minutes_since_0000, FUN = find.shift.2),
                 Obs = .data[[col.names[[4]]]],
                 SeaState = .data[[col.names[[5]]]],
                 Vis = .data[[col.names[[6]]]],
@@ -94,7 +95,8 @@ get.data <- function(Year, xls.file.name, sheet.name,
                 Time = .data[[col.names[[3]]]],
                 Minutes_since_T0 = sapply(Time, FUN = char_time2min, start.time),
                 Minutes_since_0000 = sapply(Time, FUN = char_time2min),
-                Shift = sapply(Minutes_since_0000, FUN = find.shift),
+                #Shift = sapply(Minutes_since_0000, FUN = find.shift),
+                Shift = sapply(Minutes_since_0000, FUN = find.shift.2),
                 Obs = .data[[col.names[[4]]]],
                 SeaState = .data[[col.names[[5]]]],
                 Vis = .data[[col.names[[6]]]],
@@ -174,7 +176,7 @@ get.data.inshore.only <- function(sheet.name,
 
 # x is a data.frame with at least three fields: Date (character), 
 # Minutes_since_0000
-# and Shift - find.shift is used to come up with this
+# and Shift - find.shift is used to come up with this (or find.shift.2)
 # 1 = START EFFORT
 #2 = CHANGE OBSERVERS
 #3 = CHANGE SIGHTING CONDITIONS
@@ -199,6 +201,10 @@ find.effort <- function(x, T0){
   
   # THE FUNCTION ABOVE find.shift DEFINES SHIFTS. ANYTIME BEFORE 1000 IS SHIFT 1, ETC.
   # get.data USES find.shift AND RETURNS ASSIGNED SHIFTS IN THE OUTPUT.
+  # ALTERNATIVELY, find.shift.2 DEFINES SHIFTS DIFFERENTLY. IT USES A DIFFERENT START TIME
+  # WHERE 0100 IS THE BEGINNING OF EACH DAY. THIS WAY, OCCASIONAL START OF THE FIRST SHIFT
+  # BEFORE 0700 CAN BE ASSIGNED TO THE CORRECT SHIFT BIN. IN THIS WAY, START TIME (T0)
+  # SHOULD NOT MATTER ANY MORE. 2023-06-02 - SEE find.effort.2 FOR THIS. 
   
   # REGARDLESS OF STARTING TIME, THEY SHOULD BE SEPARATED INTO 3-HR BLOCKS
   
@@ -478,6 +484,281 @@ find.effort <- function(x, T0){
               shift.df = shift.df))
 }
 
+find.effort.2 <- function(x){
+  
+  # this turns dates in to character
+  all.dates <- unique(x$Date)
+  
+  # Start time of shift 2:
+  T0.minutes <- char_time2min("0400")
+  
+  # End of shift time in minutes since 0000. 600 is 1000hrs
+  shift.ends <- c(420, 600, 780, 960, 1140)
+  
+  shift.begins <- c(T0.minutes, shift.ends)
+  
+  out.list <- list()
+  shift.list <- list()
+  d <- k1 <- c <- k2 <- 1
+  d <- 13
+  k4 <- 1
+  for (d in 1:length(all.dates)){
+    # pick just one day's worth of data
+    one.day <- filter(x, Date == as.Date(all.dates[d])) %>% arrange(Minutes_since_0000)
+    
+    # Must have at least one Event = 1
+    one.day %>% filter(Event == 1) -> one.day.event.1
+    
+    # Entries when there were no shift at all (e.g., 1998-04-28) need to be removed
+    # also, an entry before effort starts (e.g., 1998-03-23 offshore)
+    if (nrow(one.day) > 1 & one.day$Event[1] != 5 & nrow(one.day.event.1) > 0){
+      # Find start and end time for the day:
+      one.day %>%
+        arrange(by = Minutes_since_0000) -> one.day
+      
+      # Visibility is coded in characters. This needs to be converted into double in order
+      # to find maximum value within each shift. 2023-05-10
+      all.sea.state <- one.day$SeaState
+      idx.slash <- grep("/", all.sea.state)
+      if (length(idx.slash) == 0){
+        one.day$SeaState.num <- as.numeric(all.sea.state)
+      } else {
+        # Should I take the first one, or maximum? I go with first one for now. 2023-05-11
+        one.day$SeaState.num <- lapply(str_split(all.sea.state, "/"), 
+                                       FUN = function(x) x[1]) %>% 
+          unlist() %>% 
+          as.numeric()
+      }
+      
+      all.vis <- one.day$Vis
+      idx.slash <- grep("/", all.vis)
+      if (length(idx.slash) == 0){
+        one.day$Vis.num <- as.numeric(all.vis)
+      } else {
+        one.day$Vis.num <- lapply(str_split(all.vis, "/"), 
+                                  FUN = function(x) x[1]) %>% 
+          unlist() %>% 
+          as.numeric()
+      }
+      
+      # Check to see if the line is the end of one and the beginning of the next
+      shift <- one.day$Shift[1]
+      if (length(grep("/", shift)) == 0){
+        shift.first <- as.numeric(shift)
+      } else {
+        shift.first <- strsplit(shift, "/")[[1]][2] %>% as.numeric()
+      }
+      
+      shift <- one.day$Shift[nrow(one.day)]
+      if (length(grep("/", shift)) == 0){
+        shift.last <- as.numeric(shift)
+      } else {
+        shift.last <- strsplit(shift, "/")[[1]][1] %>% as.numeric()
+      }
+      
+      # go through one shift at a time but remove the 5th shift
+      if (shift.last > 4) shift.last <- 4
+      
+      for (k4 in shift.first:shift.last){
+        if (k4 == 1){
+          # for the first shift, sometimes they put a comment in the first row
+          # with Event = 6, rather than Event = 1. Those need to be removed.
+          # take all Event == 1
+          tmp <- one.day %>% 
+            filter(Event == 1)
+          
+          # Some years contain "shifts" with no observations but just comments
+          # Event = 6. E.g., 1997-03-24. These need to be dealt with. 
+          #if (nrow(tmp) == 0){   # no start events
+          #START HERE NEXT 2023-05-23
+          #}
+          T0000.begin <- min(tmp$Minutes_since_0000, na.rm = T) 
+          
+          # if (nrow(tmp) == 0) stop("error")
+        } else {
+          T0000.begin <- shift.begins[k4]  
+        }
+        
+        T0000.end <- shift.ends[k4]
+        
+        if (k4 == 1){
+          one.day %>% filter(Minutes_since_0000 >= (T0000.begin),
+                             Minutes_since_0000 <= T0000.end) -> one.shift  
+        } else {
+          one.day %>% filter(Minutes_since_0000 > (T0000.begin),
+                             Minutes_since_0000 <= T0000.end) -> one.shift
+          
+        }
+        
+        # This will pick up the shift plus (shift)/(shift+1) 
+        # shift.idx <- grep(as.character(k4), one.day$Shift)
+        # 
+        # one.shift <- one.day[shift.idx,]
+        
+        if (nrow(one.shift) > 0){
+          # Sometimes the beginning of one shift and the end of the previous 
+          # shift is shared in one line with Shift = x/y. When that and a sighting
+          # happens simultaneously, the sighting gets double counted between the
+          # two shifts. So, the sighting has to be placed in one or the other.
+          line.bottom <- one.shift[nrow(one.shift),]
+          if (line.bottom$Event == 4 & str_detect(line.bottom$Shift, "/")){
+            one.shift <- one.shift[1:(nrow(one.shift)-1),]
+            
+          }
+          
+          # add one row at the top and end of one.shift, so that it has
+          # Event 1 at the top, and 5 at the bottom if they are not there:
+          if (one.shift[1,"Event"] != 1){
+            one.shift.eft <- rbind(one.shift[1,], one.shift)
+            one.shift.eft[1, "Event"] <- 1
+            one.shift.eft[1, "Time"] <- minutes2time_char(shift.begins[k4])
+            one.shift.eft[1, "Minutes_since_T0"] <- shift.begins[k4] - char_time2min(T0)
+            one.shift.eft[1, "Minutes_since_0000"] <- shift.begins[k4]
+            one.shift.eft[1, "Mother_Calf"] <- NA
+            
+          } else {
+            one.shift.eft <- one.shift
+          }
+          
+          if (one.shift[nrow(one.shift), "Event"] != 5){
+            one.shift.eft <- rbind(one.shift.eft, one.shift[nrow(one.shift),])
+            one.shift.eft[nrow(one.shift.eft), "Event"] <- 5
+            one.shift.eft[nrow(one.shift.eft), "Time"] <- minutes2time_char(shift.ends[k4])
+            one.shift.eft[nrow(one.shift.eft), "Minutes_since_T0"] <- shift.ends[k4] - char_time2min(T0)
+            one.shift.eft[nrow(one.shift.eft), "Minutes_since_0000"] <- shift.ends[k4]
+            one.shift.eft[nrow(one.shift.eft), "Mother_Calf"] <- NA 
+          }
+          
+          # Figure out off effort time due to visibility and sea state (> 4)
+          one.shift.eft %>% 
+            mutate(Effort = ifelse((Vis.num > 4 | SeaState.num > 4),
+                                   "off", "on")) -> one.shift.eft
+          
+          # # find out how many on/off effort existed
+          row.1 <- which(one.shift.eft$Event == 1)
+          row.5 <- which(one.shift.eft$Event == 5)
+          
+          # sometimes too many event == 1 and event == 5
+          # 
+          if (length(row.1) > 1 & length(row.5) > 1){
+            for (k3 in 2:length(row.1)){
+              if (row.1[k3] < row.5[k3-1]){
+                stop()
+                row.1[k3] <- NA
+              }
+              
+            }
+            row.1 <- row.1[!is.na(row.1)]
+            
+          }
+          
+          # if they don't match, adjust accordingly.
+          if (length(row.1) != length(row.5)){
+            nrow <- min(length(row.1), length(row.5))
+            row.1.1 <- vector(mode = "numeric", length = nrow)
+            row.5.1 <- vector(mode = "numeric", length = nrow)
+            for (k2 in 1:nrow){
+              if (k2 == 1){
+                row.1.1[k2] <- row.1[k2]
+                row.5.1[k2] <- row.5[k2]
+              } else {
+                row.1.1[k2] <- first(row.1[row.1 > row.5.1[k2-1]])
+                row.5.1[k2] <- first(row.5[row.5 > row.1.1[k2]])
+              }
+              
+            }
+            row.1 <- row.1.1[!is.na(row.1.1)]
+            row.5 <- row.5.1[!is.na(row.5.1)]
+          }
+          
+          # These are probably unnecessary?
+          one.shift.eft[row.1, "Event"] <- 1
+          one.shift.eft[row.5, "Event"] <- 5
+          
+          one.shift.eft[row.1, "Mother_Calf"] <- NA
+          one.shift.eft[row.5, "Mother_Calf"] <- NA
+          
+          one.shift.eft <- one.shift.eft[!is.na(one.shift.eft$Effort),]
+          # calculate effort for each "on" period per shift
+          #tmp.eft <- 0
+          idx.off <- which(one.shift.eft$Effort == "off")
+          idx.on <- which(one.shift.eft$Effort == "on")
+          
+          if (length(idx.on) > 0){
+            for (k2 in min(idx.on):nrow(one.shift.eft)){
+              if (k2 == min(idx.on)){
+                tmp.eft <- 0
+                time.0 <- one.shift.eft[k2, "Minutes_since_0000"]
+                effort <- "on"
+              } else {
+                if (one.shift.eft[k2, "Effort"] == "off" & effort == "on"){
+                  d.time <- one.shift.eft[k2, "Minutes_since_0000"] - time.0
+                  tmp.eft <- tmp.eft + d.time
+                  effort <- "off"
+                } else if (one.shift.eft[k2, "Effort"] == "on" & effort == "off"){
+                  time.0 <- one.shift.eft[k2, "Minutes_since_0000"]
+                  effort <- "on"
+                } else if (one.shift.eft[k2, "Effort"] == "on" & effort == "on"){
+                  d.time <- one.shift.eft[k2, "Minutes_since_0000"] - time.0
+                  tmp.eft <- tmp.eft + d.time
+                  effort <- "on"
+                  time.0 <- one.shift.eft[k2, "Minutes_since_0000"]
+                }
+              }
+              
+            }
+            
+          } else {
+            tmp.eft <- 0
+          }
+          
+          # Sometimes, there is no Vis (or also sea state) update in an entire
+          # shift. Use one from previous shift in those cases
+          # These should not happen any longer but keep it anyways. 2023-05-10
+          if (sum(!is.na(one.shift$SeaState.num)) > 0){
+            max.sea.state <- max(one.shift$SeaState.num, na.rm = T)          
+          } else {
+            max.sea.state <- max.sea.state
+          }
+          
+          if (sum(!is.na(one.shift$Vis.num)) > 0){
+            max.Vis <- max(one.shift$Vis.num, na.rm = T) 
+          } else {
+            max.Vis <- max.Vis
+          }
+          
+          out.list[[c]] <- data.frame(Date = all.dates[d],
+                                      Minutes_since_0000 = one.shift.eft[1, "Minutes_since_0000"],
+                                      Shift = k4,
+                                      Effort = unname(tmp.eft),
+                                      Mother_Calf = one.shift.eft %>%
+                                        filter(Effort == "on") %>%
+                                        summarize(MandC = sum(Mother_Calf, na.rm = TRUE)) %>%
+                                        pull(),
+                                      Sea_State = ifelse(!is.infinite(max.sea.state),
+                                                         max.sea.state, NA),
+                                      Vis = ifelse(!is.infinite(max.Vis),
+                                                   max.Vis, NA))
+          
+          shift.list[[c]] <- one.shift.eft
+          c <- c + 1
+          
+        }
+      }  
+    }
+    
+  }
+  
+  out.df <- do.call(rbind, out.list)
+  shift.df <- do.call(rbind, shift.list)
+  # out.df %>% 
+  #   mutate(Date = as.Date(Date.char, 
+  #                              format = "%Y-%m-%d")) -> out.df.1
+  return(list(out.df = out.df,
+              shift.df = shift.df))
+}
+
+
 # extract MCMC diagnostic statistics, including Rhat, loglikelihood, DIC, and LOOIC
 MCMC.diag <- function(jm, MCMC.params){
   n.per.chain <- (MCMC.params$n.samples - MCMC.params$n.burnin)/MCMC.params$n.thin
@@ -589,6 +870,39 @@ find.shift <- function(x0){
   return(shift)
 }
 
+# A different way to look at shifts. Rather than starting at 0600 or 0700,
+# start at 0100, so that occasional extra 30 minutes can be assigned to the 
+# correct shift
+find.shift.2 <- function(x0){
+  x <- as.numeric(x0)
+  if (!is.na(x)){
+    if (x > 240 & x < 420){
+      shift <- "2"
+    } else if (x == 420) {
+      shift <- "2/3"
+    } else if (x > 420 & x < 600) {
+      shift <- "3"
+    } else if (x == 600){
+      shift <- "3/4"
+    } else if (x > 600 & x < 780){
+      shift <- "4"
+    } else if (x == 780){
+      shift <- "4/5"
+    } else if (x > 780 & x < 960){
+      shift <- "5"
+    } else if (x == 960){
+      shift <- "5/6"        
+    } else if (x > 960 & x <= 1140){ 
+      shift <- "6"
+    } else {
+      shift <- NA
+    }
+  } else {
+    shift <- NA
+  }
+  return(shift)
+}
+
 
 format.output <- function(data.shift, max.shift){
   # create a data frame with the full set of date/shift for dates with observations
@@ -647,6 +961,70 @@ format.output <- function(data.shift, max.shift){
   
   return(formatted.all.data)
 }
+
+# THIS FUNCTION IS NOT COMPLETED. 
+format.output.2 <- function(data.shift,max.shift){
+  # create a data frame with the full set of date/shift for dates with observations
+  # WITH NEW DEFINITIONS OF SHIFTS, THE FOLLOWING DATA FRAME NEEDS TO BE DEFINED
+  # DIFFERENTLY. THE FIRST SHIFT STARTS AT 0100. SO MAX.SHIFT CANNOT BE USED TO 
+  # REPLICATE DATE. 
+  day.shifts <- data.frame(Date = rep(unique(data.shift$Date),
+                                      each = max.shift),
+                           Shift = rep(c(1,2,3,4), 
+                                       times = length(unique(data.shift$Date))))
+  
+  # Combine the full set of date/shift with the observed - some shifts are NAs because
+  # they were not in the dataset
+  day.shifts %>% 
+    left_join(data.shift, by = c("Date", "Shift")) -> all.day.shifts
+  
+  
+  # create a vector with sequential weeks
+  all.weeks <- seq.Date(as.Date(min(data.shift$Date)),
+                        as.Date(max(data.shift$Date)),
+                        by = "week")
+  
+  # select necessary data from per-shift data frame, mutate the column names
+  # then create a new data frame
+  data.shift %>% 
+    select(Shift, Date, Effort, Mother_Calf) %>%
+    mutate(Date = Date,
+           Effort = Effort/60,
+           Sightings = Mother_Calf) %>%
+    select(Date, Shift, Effort, Sightings) %>%
+    #mutate(Date = as.Date(Date)) %>%
+    data.frame() -> raw.data
+  
+  # Create all dates, including weekends
+  all.dates <- seq.Date(as.Date(min(data.shift$Date)),
+                        as.Date(max(data.shift$Date)),
+                        by = "day")
+  
+  # create all shifts, including nights
+  all.shifts <- data.frame(Date = rep(all.dates,
+                                      each = 8),
+                           Shift = rep(c(1:8), 
+                                       times = length(all.dates),
+                                       by = "day"))
+  
+  all.shifts %>% 
+    left_join(raw.data, by = c("Date", "Shift")) %>%
+    mutate(Week = ceiling(difftime(Date, min(all.dates), 
+                                   units = "weeks")) %>%
+             as.numeric(),
+           Date = Date) %>%
+    select(Week, Date, Shift, Effort, Sightings) -> formatted.all.data
+  
+  # need to change week = 0 to week = 1...
+  formatted.all.data[formatted.all.data$Week == 0, "Week"] <- 1
+  
+  # Change NAs to 0s
+  formatted.all.data[is.na(formatted.all.data)] <- 0
+  
+  return(formatted.all.data)
+}
+
+
 
 extract.all.vars <- function(x) {
   x %>%
@@ -846,7 +1224,8 @@ list.sheet.names.inshore <- list(Y1994 = "INSHORE LOG", Y1995 = "Inshore Data", 
                                  Y2012 = "LOGS", Y2013 = "LOGS", Y2014 = "LOGS",
                                  Y2015 = "LOGS", Y2016 = "LOGS", Y2017 = "LOGS",
                                  Y2018 = "LOGS", Y2019 = "INSHORE LOGS", Y2021 = "INSHORE LOGS",
-                                 Y2022 = "MomCalf Logs 2022 postQC")
+                                 Y2022 = "MomCalf Logs 2022 postQC",
+                                 Y2023 = "PiedrasBlancasCalfProductionDat")
 
 # Sheet names for offshore logs. Starting 2017, offshore logs were eliminated.
 list.sheet.names.offshore <- list(Y1994 = NULL, Y1995 = "Offshore Data", Y1996 = "Sheet1",
@@ -968,7 +1347,11 @@ list.col.types.inshore <- list(Y1994 = c("date", "numeric", "text", "numeric", "
                                Y2022 = c("date", "numeric", "numeric", "text", "text", 
                                          "text", "text", "numeric", "numeric", "text", 
                                          "text", "text", "text", "numeric", "text", 
-                                         "text", "text", "text"))
+                                         "text", "text", "text"),
+                               Y2023 = c("date", "numeric", "numeric", "text", "text",
+                                         "text", "text","text", "numeric", "text", "text", 
+                                         "text", "text", "text", "text", "text", 
+                                         "text", "text"))
 
 # Column types for offshore logs. Some years contain more columns (typically one) with
 # no identifier, which return "New Name" when the file is read. No offshore files starting
@@ -1077,7 +1460,8 @@ list.col.names.inshore <- list(Y1994 = c("Date", "Event", "Time", "Obs. Code", "
                                Y2018 = c("DATE",	"EVENT", 	"TIME",	"OBS#", "VIS IN",	"SEA ST",	"C/C", "IN/OFF"),
                                Y2019 = c("DATE",	"EVENT", 	"TIME",	"OBS #", "VIS IN",	"SEA ST",	"C/C", "IN/OFF"),
                                Y2021 = c("DATE",	"EVENT", 	"TIME",	"OBS #", "VIS IN",	"SEA ST",	"C/C", "IN/OFF"),
-                               Y2022 = c("DATE", 	"EVENT", 	"TIME",	"OBS #", "VIS IN", "SEA ST", "M/C", "LOCATION (IN/OFF)"))
+                               Y2022 = c("DATE", 	"EVENT", 	"TIME",	"OBS #", "VIS IN", "SEA ST", "M/C", "LOCATION (IN/OFF)"),
+                               Y2023 = c("DATE", "EVENT", "TIME", "OBS #", "SEA ST", "VIS IN", "M/C", "LOCATION (IN/OFF)"))
 
 # Same for offfshore spreadsheets
 list.col.names.offshore <- list(Y1994 = c("Date", "Event", "Time", "Obs.", "Sea State",
