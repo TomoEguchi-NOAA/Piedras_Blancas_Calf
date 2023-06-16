@@ -32,13 +32,13 @@ MCMC.params <- list(n.samples = 80000,
 n.samples <- MCMC.params$n.chains * ((MCMC.params$n.samples - MCMC.params$n.burnin)/MCMC.params$n.thin)
 
 jags.params <- c("count.true",
-                "lambda",
-                "beta1", "beta2", "eps",
-                "p.obs.corr",
-                "p.obs",
-                "Total.Calves",
-                "S1", "S2", "P", "K", "Max",
-                "loglik")
+                 "lambda",
+                 "beta1", "beta2", "eps",
+                 "p.obs.corr",
+                 "p.obs",
+                 "Total.Calves",
+                 "S1", "S2", "P", "K", "Max",
+                 "loglik")
 
 #if (model != "V7"){
   # get data
