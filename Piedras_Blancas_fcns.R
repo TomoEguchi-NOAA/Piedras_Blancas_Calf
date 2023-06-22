@@ -1134,7 +1134,7 @@ file.names <- function(out.dir, ver, Year, out.list){
   return(files)
 }
 
-
+THIS FUNCTION NEEDS TO BE FIXED
 find.effort.dif <- function(Y, daily.summary.list, out.list){
   daily.summary.list[[which(years == Y)]]$daily.summary.1.2 %>%
     filter(abs(dif.effort) > 0.05 ) %>%
@@ -1143,7 +1143,7 @@ find.effort.dif <- function(Y, daily.summary.list, out.list){
   
   raw.data.all <- shift.dif <- data.2.dif <- data.1.dif <- list(length(date.dif.effort))
   
-  k <- 12
+  k <- 13
   for (k in 1:length(date.dif.effort)){
     daily.summary.list[[which(years == Y)]]$data.1 %>%
       filter(Date == as.Date(date.dif.effort[k])) -> data.1.dif[[k]]
@@ -1151,6 +1151,8 @@ find.effort.dif <- function(Y, daily.summary.list, out.list){
     daily.summary.list[[which(years == Y)]]$data.2 %>%
       filter(Date == as.Date(date.dif.effort[k])) -> data.2.dif[[k]]
     
+    # SHIFT IS DEFINED DIFFERNETLY FOR V3 DATA EXTRACTION. SO THE FOLLOWING LINE
+    # NEEDS TO BE MODIFIED. 2023-06-22
     # Absolute difference in effort is greater than 0.05 hr (3 min)
     shift.dif[[k]] <- data.2.dif[[k]]$Shift[which(abs(data.1.dif[[k]]$Effort - data.2.dif[[k]]$Effort) > 0.05)]
     

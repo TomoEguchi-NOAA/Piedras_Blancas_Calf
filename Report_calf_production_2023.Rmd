@@ -39,8 +39,9 @@ set_flextable_defaults(font.size = 8,
 
 # I cleaned up old data files this year. So, results may be a bit different from
 # Josh's analyses. But, I think mine is cleaner. So, I'll use mine to compute 
-# CIs for the past years. v2 refers to the v2 extraction algorithm (mine)
-data.path <- "data/Formatted Annual Data v2/"
+# CIs for the past years. v2 refers to the v2 extraction algorithm (mine). v3
+# refers to the most up to date extraction method as of June 2023
+data.path <- "data/Formatted Annual Data v3/"
 
 # UMEs
 UMEs <- data.frame(Season = c("1999/2000", "2000/2001",
@@ -55,7 +56,7 @@ rds.path <- "RData/"
 # numbers are repeated 4 times. \\. indicates the numbers are followed by
 # a period - regular expression. v1 refers to the model - Josh's code
 FILES <- list.files(path = rds.path, 
-                    pattern = "calf_estimates_v2_Mv1_[0-9]{4}\\.")
+                    pattern = "calf_estimates_v3_Mv1_[0-9]{4}\\.")
 
 posterior.total.calves <- jm.out <- list()
 k <- 1
@@ -173,7 +174,7 @@ full northbound migration from start to finish.
 
 ```{r data., echo=FALSE, include=FALSE, cache=TRUE, message=FALSE}
 
-data. <- read.csv(paste0(data.path, season, " Formatted_inshore_v2.csv"))
+data. <- read.csv(paste0(data.path, season, " Formatted_inshore_v3.csv"))
 
 data. %>% 
   group_by(Date) %>%
@@ -237,8 +238,7 @@ if (save.fig)
 The estimated number of mother-calf pairs during the 2023 migration
 season was `r signif(Estimates[Estimates$Year == 2023, "Mean"], 4)`
 (95%CI = `r signif(Estimates[Estimates$Year == 2023, "LCL"], 4)` -
-`r signif(Estimates[Estimates$Year == 2023, "UCL"], 4)`), which was one
-of the lowest estimates since the survey started in 1994 but showed an increasing trend over the last few years (Figure \@ref(fig:Figure-Nhats)).
+`r signif(Estimates[Estimates$Year == 2023, "UCL"], 4)`), which was almost twice as  many as the 2022 estimate (216.7, SE = 33.4, Figure \@ref(fig:Figure-Nhats)).
 
 ```{r Figure-Nhats, echo=FALSE, message=FALSE, fig.cap="Estimated means and 95% CIs of the number of mother-calf pairs of north-bound gray whales off Piedras Blancas since 1994. "}
 

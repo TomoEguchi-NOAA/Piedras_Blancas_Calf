@@ -19,7 +19,7 @@ source("Piedras_Blancas_fcns.R")
 
 ```{r}
 dir.1 <- "data/Formatted Annual Data/"
-dir.2 <- "data/Formatted Annual Data v2/"
+dir.2 <- "data/Formatted Annual Data v3/"
 data.dir <- "data/All data/"
 
 files.1 <- list.files(path = dir.1, 
@@ -46,7 +46,7 @@ col.def.1.1997 <- cols(Week = col_integer(),
                        Sightings = col_integer())
 
 files.2 <- list.files(path = dir.2, 
-                    pattern = "Formatted_inshore_v2.csv")
+                    pattern = "Formatted_inshore_v3.csv")
 
 col.def.2 <- cols(Week = col_integer(),
                   Date = col_date(format = "%Y-%m-%d"),
@@ -136,7 +136,7 @@ for (k in 1:length(years)){
     
   }
   
-  data.2 <- read_csv(file = paste0(dir.2, Y, " Formatted_inshore_v2.csv"),
+  data.2 <- read_csv(file = paste0(dir.2, Y, " Formatted_inshore_v3.csv"),
                      col_types = col.def.2)
   
   daily.summary.list[[k]]  <- fcn.compare.data(data.1, data.2, Y)
@@ -158,7 +158,7 @@ daily.summary.list[[which(years == Y)]]$figure
 ```{r}
 # Code chunk from Extract Excel data.Rmd
 dir.name <- paste0("C_C ", Y)
-start.time <- "630"
+start.time <- "100"
 
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
@@ -182,7 +182,8 @@ out.list <- get.all.data(list.sheet.names.inshore[[idx.list]],
 
 Effort:
 ```{r}
-
+THE FOLLOWING FUNCTION DOES NOT WORK AT THE MOMENT BECAUSE SHIFTS ARE DEFINED
+DIFFERENTLY BETWEEN V1 AND V3. THE FUNCTION NEEDS TO BE MODIFIED. 2023-06-22
 effort.dif.list <- find.effort.dif(Y, daily.summary.list, out.list)
 
 length(effort.dif.list$date.dif)
