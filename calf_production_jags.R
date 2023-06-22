@@ -15,7 +15,7 @@ library(bayesplot)
 source("Piedras_Blancas_fcns.R")
 
 save.file <- T
-data.ext <- "v2"  # or v2
+data.ext <- "v3" # "v2"  # or v2
 model <- "v1"
 
 #FILES <- list.files(pattern = ".csv$")
@@ -25,17 +25,17 @@ if (data.ext == "v1"){
   FILES <- list.files(path = data.path, 
                       pattern = "Formatted.csv")
   
-} else if (data.ext == "v2"){
-  data.path <- "data/Formatted Annual Data v2/"
+} else {
+  data.path <- paste0("data/Formatted Annual Data ", data.ext, "/")
   FILES <- list.files(path = data.path,
-                      pattern = "Formatted_inshore_v2.csv")
+                      pattern = paste0("Formatted_inshore_", data.ext, ".csv"))
   
 }
 
-MCMC.params <- list(n.samples = 80000,
-                    n.thin = 80,
-                    n.burnin = 40000,
-                    n.chains = 3)
+MCMC.params <- list(n.samples = 100000,
+                    n.thin = 100,
+                    n.burnin = 50000,
+                    n.chains = 5)
 
 n.samples <- MCMC.params$n.chains * ((MCMC.params$n.samples - MCMC.params$n.burnin)/MCMC.params$n.thin)
 
@@ -54,11 +54,11 @@ jags.params <- c("count.true",
   years <- vector(mode = "numeric", length = length(FILES))
   jm.out <- list()
   for(i in 1:length(FILES)){
-    if (data.ext == "v2"){
-      years[i] <- as.numeric(str_split(FILES[i], " Formatted_inshore_v2.csv")[[1]][1])
-    } else if (data.ext == "v1"){
+    if (data.ext == "v1"){
       years[i] <- as.numeric(str_split(FILES[i], " Formatted.csv")[[1]][1])
-      
+    } else {
+      years[i] <- as.numeric(str_split(FILES[i], " Formatted_inshore")[[1]][1])
+    
     }
     
     out.file.name <- paste0("RData/calf_estimates_", data.ext, "_M", model, "_", years[i], ".rds") 

@@ -522,7 +522,7 @@ find.effort.2 <- function(x){
   T0.minutes <- char_time2min("0400")
   
   # End of shift time in minutes since 0100. 600 is 1000hrs
-  shift.ends <- c(420, 600, 780, 960, 1140)
+  shift.ends <- c(240, 420, 600, 780, 960, 1140)
   
   shift.begins <- c(T0.minutes, shift.ends)
   
@@ -634,7 +634,7 @@ find.effort.2 <- function(x){
           }
           
           # add one row at the top and end of one.shift, so that it has
-          # Event 1 at the top, and 5 at the bottom if they are not there:
+          # Event 1 at the top, and 5 at the bottom if they are not there already:
           if (one.shift[1,"Event"] != 1){
             one.shift.eft <- rbind(one.shift[1,], one.shift)
             one.shift.eft[1, "Event"] <- 1

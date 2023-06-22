@@ -14,11 +14,17 @@ source("Piedras_Blancas_fcns.R")
 
 data.dir <- "data/All data/"
 #out.dir <- "data/Processed data/"    # completed in May 2022 but needs revisions
-out.dir <- "data/Processed data v2/"  # for revising outputs
-out.formatted.dir <- "data/Formatted Annual Data v2/"
+
+# v3 includes the new shift definitions
+ver <- "v3"  # v2
+
+out.dir <- paste0("data/Processed data ", ver, "/")  # for revising outputs
+out.formatted.dir <- paste0("data/Formatted Annual Data ", ver, "/")
 
 # Regardless of if output file exists, this will overwrite the output files
 save.files <- TRUE
+start.time <- "100"   # This is for v3. For v2, should be year specific.
+
 
 ```
 
@@ -37,6 +43,61 @@ THIS FILE NEEDS TO BE UPDATED AND ANNOTATED BETTER. EACH YEAR HAS A DIFFERENT FO
 
 2023-06-01 A HA MOMENT. RATHER THAN MAKING ARBITRARY STARTING TIME OF 0630 OR 0700, CREATE 3-HR SHIFTS STARTING FROM 0100. 
 
+NEW FUNCTIONS WERE CREATED AND TESTED. THE NEXT CHUNK WILL RUN ALL YEARS. 
+
+```{r}
+years <- c(1994:2019, 2021:2023)
+inshore.xls.file.idx <- c(1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1)
+offshore.xls.file.idx <- c(2,2,2,2,2,2,2,2,2,2,3,2,2,2,2,2,3,3,3,2,2,3,2,NA,NA,NA,NA,NA,NA)
+
+for (k in 24:length(years)){
+  Year <- years[k]
+  dir.name <- paste0("C_C ", Year)
+  
+  xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
+  xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[inshore.xls.file.idx[k]])
+  if (!is.na(offshore.xls.file.idx[k])){
+    xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[offshore.xls.file.idx[k]])
+    
+  }
+  
+  idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
+  if (Year < 2017){
+    out.list <- get.all.data(list.sheet.names.inshore[[idx.list]], 
+                             list.sheet.names.offshore[[idx.list]],
+                             list.col.types.inshore[[idx.list]], 
+                             list.col.types.offshore[[idx.list]],
+                             list.col.names.inshore[[idx.list]], 
+                             list.col.names.offshore[[idx.list]],
+                             Year, 
+                             xls.file.name.inshore, xls.file.name.offshore,
+                             start.time)
+    
+  } else {
+    out.list <- get.data.inshore.only(Year = Year,
+                                      xls.file.name = xls.file.name.inshore,
+                                      sheet.name = list.sheet.names.inshore[[idx.list]],
+                                      col.types = list.col.types.inshore[[idx.list]],
+                                      col.names = list.col.names.inshore[[idx.list]],
+                                      start.time = start.time)
+  }
+  
+  if (save.files){
+    # Creates file names and saves files
+    files <- file.names(out.dir = out.dir, 
+                        ver = ver, 
+                        Year = Year, 
+                        out.list = out.list)
+    
+  }
+  
+  
+}
+
+```
+
+THE FOLLOWING CHUNKS ARE NEEDED FOR NOTES ON HOW DATA FILES WERE EDITED AFTER GOING THROUGH THEM. BUT NO NEED TO RUN THEM FOR EXTRACTING DATA. 
+
 ## 1994
 
 ```{r}
@@ -49,9 +110,8 @@ Year <- 1994
 # Offshore
 # C509 Changed 328 to 628 in Time column 2023-05-08
 
-
 dir.name <- paste0("C_C ", Year)
-start.time <- "100"
+#start.time <- "630" 
 
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
@@ -70,7 +130,10 @@ out.list <- get.all.data(list.sheet.names.inshore[[idx.list]],
 
 if (save.files){
   # Creates file names and saves files
-  files <- file.names(out.dir, Year, out.list)
+  files <- file.names(out.dir = out.dir, 
+                      ver = ver, 
+                      Year = Year, 
+                      out.list = out.list)
   
 }
 
@@ -90,9 +153,10 @@ if (save.files){
 # D740, D747 Observer code SN, changed to 11
 # D752, D760 Observer code steph, changed to 12 
 
+
 Year <- 1995
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+#start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -110,7 +174,11 @@ out.list <- get.all.data(list.sheet.names.inshore[[idx.list]],
 
 if (save.files){
   # Creates file names and saves files
-  files <- file.names(out.dir, Year, out.list)
+    files <- file.names(out.dir = out.dir, 
+                      ver = ver, 
+                      Year = Year, 
+                      out.list = out.list)
+
   
 }
 
@@ -132,7 +200,7 @@ if (save.files){
 
 Year <- 1996
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+#start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -149,7 +217,11 @@ out.list <- get.all.data(list.sheet.names.inshore[[idx.list]],
                          start.time)
 if (save.files){
   # Creates file names and saves files
-  files <- file.names(out.dir, Year, out.list)
+  files <- file.names(out.dir = out.dir, 
+                      ver = ver, 
+                      Year = Year, 
+                      out.list = out.list)
+
   
 }
 
@@ -165,14 +237,12 @@ if (save.files){
 # Inshore:
 # Row 838 TIME was 100. Changed to 1100. 2023-05-08
 
-
 Year <- 1997
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+#start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
-
 
 idx.list <- which(names(list.sheet.names.inshore) == paste0("Y", Year))
 out.list <- get.all.data(list.sheet.names.inshore[[idx.list]], 
@@ -187,7 +257,11 @@ out.list <- get.all.data(list.sheet.names.inshore[[idx.list]],
 
 if (save.files){
   # Creates file names and saves files
-  files <- file.names(out.dir, Year, out.list)
+  files <- file.names(out.dir = out.dir, 
+                      ver = ver, 
+                      Year = Year, 
+                      out.list = out.list)
+
   
 }
 
@@ -205,7 +279,7 @@ if (save.files){
 
 Year <- 1998
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+#start.time <- "630"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -243,7 +317,7 @@ if (save.files){
 
 Year <- 1999
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+#start.time <- "630"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -273,9 +347,10 @@ if (save.files){
 ## 2000
 
 ```{r}
+
 Year <- 2000
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+#start.time <- "630"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -320,7 +395,7 @@ if (save.files){
 
 Year <- 2001
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+#start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -349,9 +424,10 @@ if (save.files){
 ## 2002
 
 ```{r}
+
 Year <- 2002
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+#start.time <- "630"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -385,7 +461,7 @@ if (save.files){
 
 Year <- 2003
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+#start.time <- "630"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -416,9 +492,10 @@ if (save.files){
 ## 2004
 
 ```{r}
+
 Year <- 2004
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+#start.time <- "630"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[3])
@@ -449,9 +526,10 @@ if (save.files){
 ## 2005
 
 ```{r}
+
 Year <- 2005
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+#start.time <- "630"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -488,7 +566,7 @@ if (save.files){
 
 Year <- 2006
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+#start.time <- "630"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -520,9 +598,10 @@ if (save.files){
 ## 2007
 
 ```{r}
+
 Year <- 2007
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+#start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -554,9 +633,10 @@ if (save.files){
 ## 2008
 
 ```{r}
+
 Year <- 2008
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+#start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -586,9 +666,10 @@ if (save.files){
 ## 2009
 
 ```{r}
+
 Year <- 2009
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+#start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -621,9 +702,10 @@ Files seem to be about the same from these years...
 ## 2010
 
 ```{r}
+
 Year <- 2010
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+#start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[3])
@@ -654,9 +736,10 @@ if (save.files){
 ## 2011
 
 ```{r}
+
 Year <- 2011
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+#start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[3])
@@ -692,7 +775,7 @@ if (save.files){
 
 Year <- 2012
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+#start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[2])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[3])
@@ -730,7 +813,7 @@ if (save.files){
 
 Year <- 2013
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+#start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[2])
@@ -761,9 +844,10 @@ if (save.files){
 ## 2014
 
 ```{r}
+
 Year <- 2014
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+#start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[grep("INSHORE", xls.files)])
@@ -798,7 +882,7 @@ if (save.files){
 
 Year <- 2015
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+#start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[grep("INSHORE", xls.files)])
@@ -835,7 +919,7 @@ if (save.files){
 
 Year <- 2016
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+#start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[grep("INSHORE", xls.files)])
 xls.file.name.offshore <- paste0(data.dir, dir.name, "/", xls.files[grep("OFFSHORE", xls.files)])
@@ -870,7 +954,7 @@ No offshore log exists for 2017
 
 Year <- 2017
 dir.name <- paste0("C_C ", Year)
-start.time <- "0700"
+#start.time <- "0700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 
@@ -902,7 +986,7 @@ No offshore log exists for 2018
 ```{r}
 Year <- 2018
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+#start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 
@@ -963,7 +1047,7 @@ No offshore log exists for 2019
 
 Year <- 2019
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+#start.time <- "700"
 
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
@@ -1016,10 +1100,11 @@ No data for 2020 - COVID.
 ## 2021
 
 ```{r}
+
 # Event for 4/20/2021 at 745 was changed from "3" to "5". 2022-06-24
 Year <- 2021
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+#start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 
@@ -1032,30 +1117,6 @@ out.list <- get.data.inshore.only(Year = Year,
                                      col.types = list.col.types.inshore[[idx.list]],
                                      col.names = list.col.names.inshore[[idx.list]],
                                      start.time = start.time)
-
-# # get the data using get.data function, which is in Piedras_Blancas_fcns.R
-# data.inshore <- get.data(Year = Year,
-#                      xls.file.name = xls.file.name.inshore,
-#                      sheet.name = list.sheet.names.inshore[[idx.list]],
-#                      col.types = list.col.types.inshore[[idx.list]],
-#                      col.names = list.col.names.inshore[[idx.list]],
-#                      start.time = start.time) %>%
-#   extract.all.vars()
-# 
-# # calculate effort and other statistics per 3-hr shift, using find.effort
-# # function in Piedras_Blancas_fcns.R
-# data.shift <- find.effort(data.inshore, T0 = start.time) #%>% extract.shift.vars()
-# 
-# formatted.inshore <- format.output(data.shift$out.df, 
-#                                    max.shift = max(data.shift$out.df$Shift))
-# 
-# out.list <- list(data.offshore = NULL,
-#                  data.inshore = data.inshore,
-#                  shift.data.offshore = NULL,
-#                  shift.data.inshore = data.shift$out.df,
-#                  formatted.data.offshore = NULL,
-#                  formatted.data.inshore = formatted.inshore)
-# 
 
 if (save.files){
   # Creates file names and saves files
@@ -1077,7 +1138,7 @@ if (save.files){
 
 Year <- 2022
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+#start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 
@@ -1090,30 +1151,6 @@ out.list <- get.data.inshore.only(Year = Year,
                                      col.types = list.col.types.inshore[[idx.list]],
                                      col.names = list.col.names.inshore[[idx.list]],
                                      start.time = start.time)
-
-# # get the data using get.data function, which is in Piedras_Blancas_fcns.R
-# data.inshore <- get.data(Year = Year,
-#                      xls.file.name = xls.file.name.inshore,
-#                      sheet.name = list.sheet.names.inshore[[idx.list]],
-#                      col.types = list.col.types.inshore[[idx.list]],
-#                      col.names = list.col.names.inshore[[idx.list]],
-#                      start.time = start.time) %>%
-#   extract.all.vars()
-# 
-# 
-# # calculate effort and other statistics per 3-hr shift, using find.effort
-# # function in Piedras_Blancas_fcns.R
-# data.shift <- find.effort(data.inshore, T0 = start.time) #%>% extract.shift.vars()
-# 
-# formatted.inshore <- format.output(data.shift$out.df, 
-#                                    max.shift = max(data.shift$out.df$Shift))
-# 
-# out.list <- list(data.offshore = NULL,
-#                  data.inshore = data.inshore,
-#                  shift.data.offshore = NULL,
-#                  shift.data.inshore = data.shift$out.df,
-#                  formatted.data.offshore = NULL,
-#                  formatted.data.inshore = formatted.inshore)
 
 if (save.files){
   # Creates file names and saves files
@@ -1129,9 +1166,10 @@ if (save.files){
 
 
 ```{r}
+
 Year <- 2023
 dir.name <- paste0("C_C ", Year)
-start.time <- "700"
+#start.time <- "700"
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])
 
@@ -1144,7 +1182,6 @@ out.list <- get.data.inshore.only(Year = Year,
                                      col.types = list.col.types.inshore[[idx.list]],
                                      col.names = list.col.names.inshore[[idx.list]],
                                      start.time = start.time)
-
 
 if (save.files){
   # Creates file names and saves files
