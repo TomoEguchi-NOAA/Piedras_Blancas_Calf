@@ -51,7 +51,7 @@ Year <- 1994
 
 
 dir.name <- paste0("C_C ", Year)
-start.time <- "630"
+start.time <- "100"
 
 xls.files <- list.files(path = paste0(data.dir, dir.name), pattern = ".xls")
 xls.file.name.inshore <- paste0(data.dir, dir.name, "/", xls.files[1])

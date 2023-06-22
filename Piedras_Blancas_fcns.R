@@ -34,14 +34,20 @@ get.all.data <- function(sheet.name.inshore, sheet.name.offshore,
   #   arrange(Date.date, Minutes_since_0000) %>% 
   #   extract.all.vars() -> data.all
   
-  shift.offshore <- find.effort(data.offshore, T0 = start.time) 
-  shift.inshore <- find.effort(data.inshore, T0 = start.time) 
+  #shift.offshore <- find.effort(data.offshore, T0 = start.time) 
+  #shift.inshore <- find.effort(data.inshore, T0 = start.time) 
   
-  formatted.offshore <- format.output(shift.offshore$out.df, 
-                                      max.shift = max(shift.offshore$out.df$Shift))
-  formatted.inshore <- format.output(shift.inshore$out.df, 
-                                     max.shift = max(shift.inshore$out.df$Shift))
+  shift.offshore <- find.effort.2(data.offshore) 
+  shift.inshore <- find.effort.2(data.inshore) 
   
+  # formatted.offshore <- format.output(shift.offshore$out.df, 
+  #                                     max.shift = max(shift.offshore$out.df$Shift))
+  # formatted.inshore <- format.output(shift.inshore$out.df, 
+  #                                    max.shift = max(shift.inshore$out.df$Shift))
+  
+  formatted.offshore <- format.output.2(shift.offshore$out.df)
+  formatted.inshore <- format.output.2(shift.inshore$out.df)
+
   return(list(data.offshore = data.offshore,
               data.inshore = data.inshore,
               shift.data.offshore = shift.offshore$out.df,
@@ -112,7 +118,7 @@ get.data <- function(Year, xls.file.name, sheet.name,
   } 
 
   # filter out rows with NAs in certain fields, then order them using
-  # Date and time since T0 (i.e., start.time defined above).
+  # Date and time since 0000 .
   # Create Date fields with character and date format - may not be necessary?
   data.out %>% 
     filter(!is.na(Date)) %>%
@@ -162,11 +168,14 @@ get.data.inshore.only <- function(sheet.name,
   
   # calculate effort and other statistics per 3-hr shift, using find.effort
   # function in Piedras_Blancas_fcns.R
-  data.shift <- find.effort(data.inshore, T0 = start.time) #%>% extract.shift.vars()
+  #data.shift <- find.effort(data.inshore, T0 = start.time) #%>% extract.shift.vars()
   
-  formatted.inshore <- format.output(data.shift$out.df, 
-                                     max.shift = max(data.shift$out.df$Shift))
+  data.shift <- find.effort.2(data.inshore) 
   
+  # formatted.inshore <- format.output(data.shift$out.df, 
+  #                                    max.shift = max(data.shift$out.df$Shift))
+  
+  formatted.inshore <- format.output.2(data.shift$out.df)
   out.list <- list(data.inshore = data.inshore,
                    shift.data.inshore = data.shift$out.df,
                    formatted.data.inshore = formatted.inshore)
@@ -183,10 +192,9 @@ get.data.inshore.only <- function(sheet.name,
 #4 = GRAY WHALE SIGHTING
 #5 = END EFFORT
 #6 = OTHER SPECIES SIGHTING
-# provide a data frame that came back from get.data function, hrs for 
-# start and end of each day (default = 7 and 19, correspond to 0700
-# and 1900), and the maximum number of shift per day (default to 4).
-#find.effort <- function(x, start.hr = 7, end.hr = 19, max.shift = 4){
+# provide a data frame that came back from get.data function and the start
+# time of the first shift (T0) in character.
+# find.effort <- function(x, T0){
 # 2023-06-01 A HA MOMENT. RATHER THAN MAKING ARBITRARY STARTING TIME OF 0630 OR 0700, 
 # CREATE 3-HR SHIFTS STARTING FROM 0100. This has not been implemented. The comparison
 # between Ver1 and Ver2 needs to be completed first. 
@@ -218,7 +226,7 @@ find.effort <- function(x, T0){
   # Start time of shift 1:
   T0.minutes <- char_time2min(T0)
   
-  # End of shift time in minutes since 0000. 600 is 1000hrs
+  # End of shift time in minutes since 0100. 600 is 1000hrs
   shift.ends <- c(600, 780, 960, 1140, 1320)
   
   shift.begins <- c(T0.minutes, shift.ends)
@@ -230,7 +238,8 @@ find.effort <- function(x, T0){
   k4 <- 1
   for (d in 1:length(all.dates)){
     # pick just one day's worth of data
-    one.day <- filter(x, Date == as.Date(all.dates[d])) %>% arrange(Minutes_since_0000)
+    one.day <- filter(x, Date == as.Date(all.dates[d])) %>%
+      arrange(Minutes_since_0000)
     
     # Must have at least one Event = 1
     one.day %>% filter(Event == 1) -> one.day.event.1
@@ -484,6 +493,26 @@ find.effort <- function(x, T0){
               shift.df = shift.df))
 }
 
+# x is a data.frame with at least three fields: Date (character), 
+# Minutes_since_0000
+# and Shift - find.shift is used to come up with this (or find.shift.2)
+# 1 = START EFFORT
+#2 = CHANGE OBSERVERS
+#3 = CHANGE SIGHTING CONDITIONS
+#4 = GRAY WHALE SIGHTING
+#5 = END EFFORT
+#6 = OTHER SPECIES SIGHTING
+# provide a data frame that came back from get.data function
+# Unlike find.effort, this one does not need the start time of the first
+# shift. The first shift is considered to start at 0100 This way,
+# Shift 1: 0100-0400
+# Shift 2: 0400-0700
+# Shift 3: 0700-1000
+# Shift 4: 1000-1300
+# Shift 5: 1300-1600
+# Shift 6: 1600-1900
+# Shift 7: 1900-2200
+# Shift 8: 2200-0100
 find.effort.2 <- function(x){
   
   # this turns dates in to character
@@ -492,7 +521,7 @@ find.effort.2 <- function(x){
   # Start time of shift 2:
   T0.minutes <- char_time2min("0400")
   
-  # End of shift time in minutes since 0000. 600 is 1000hrs
+  # End of shift time in minutes since 0100. 600 is 1000hrs
   shift.ends <- c(420, 600, 780, 960, 1140)
   
   shift.begins <- c(T0.minutes, shift.ends)
@@ -504,7 +533,8 @@ find.effort.2 <- function(x){
   k4 <- 1
   for (d in 1:length(all.dates)){
     # pick just one day's worth of data
-    one.day <- filter(x, Date == as.Date(all.dates[d])) %>% arrange(Minutes_since_0000)
+    one.day <- filter(x, Date == as.Date(all.dates[d])) %>% 
+      arrange(Minutes_since_0000)
     
     # Must have at least one Event = 1
     one.day %>% filter(Event == 1) -> one.day.event.1
@@ -556,11 +586,8 @@ find.effort.2 <- function(x){
         shift.last <- strsplit(shift, "/")[[1]][1] %>% as.numeric()
       }
       
-      # go through one shift at a time but remove the 5th shift
-      if (shift.last > 4) shift.last <- 4
-      
       for (k4 in shift.first:shift.last){
-        if (k4 == 1){
+        if (k4 == shift.first){
           # for the first shift, sometimes they put a comment in the first row
           # with Event = 6, rather than Event = 1. Those need to be removed.
           # take all Event == 1
@@ -581,7 +608,7 @@ find.effort.2 <- function(x){
         
         T0000.end <- shift.ends[k4]
         
-        if (k4 == 1){
+        if (k4 == shift.first){
           one.day %>% filter(Minutes_since_0000 >= (T0000.begin),
                              Minutes_since_0000 <= T0000.end) -> one.shift  
         } else {
@@ -612,7 +639,7 @@ find.effort.2 <- function(x){
             one.shift.eft <- rbind(one.shift[1,], one.shift)
             one.shift.eft[1, "Event"] <- 1
             one.shift.eft[1, "Time"] <- minutes2time_char(shift.begins[k4])
-            one.shift.eft[1, "Minutes_since_T0"] <- shift.begins[k4] - char_time2min(T0)
+            one.shift.eft[1, "Minutes_since_T0"] <- shift.begins[k4] - char_time2min("100")
             one.shift.eft[1, "Minutes_since_0000"] <- shift.begins[k4]
             one.shift.eft[1, "Mother_Calf"] <- NA
             
@@ -624,7 +651,7 @@ find.effort.2 <- function(x){
             one.shift.eft <- rbind(one.shift.eft, one.shift[nrow(one.shift),])
             one.shift.eft[nrow(one.shift.eft), "Event"] <- 5
             one.shift.eft[nrow(one.shift.eft), "Time"] <- minutes2time_char(shift.ends[k4])
-            one.shift.eft[nrow(one.shift.eft), "Minutes_since_T0"] <- shift.ends[k4] - char_time2min(T0)
+            one.shift.eft[nrow(one.shift.eft), "Minutes_since_T0"] <- shift.ends[k4] - char_time2min("100")
             one.shift.eft[nrow(one.shift.eft), "Minutes_since_0000"] <- shift.ends[k4]
             one.shift.eft[nrow(one.shift.eft), "Mother_Calf"] <- NA 
           }
@@ -962,21 +989,20 @@ format.output <- function(data.shift, max.shift){
   return(formatted.all.data)
 }
 
-# THIS FUNCTION IS NOT COMPLETED. 
-format.output.2 <- function(data.shift,max.shift){
+format.output.2 <- function(data.shift){
   # create a data frame with the full set of date/shift for dates with observations
   # WITH NEW DEFINITIONS OF SHIFTS, THE FOLLOWING DATA FRAME NEEDS TO BE DEFINED
   # DIFFERENTLY. THE FIRST SHIFT STARTS AT 0100. SO MAX.SHIFT CANNOT BE USED TO 
   # REPLICATE DATE. 
-  day.shifts <- data.frame(Date = rep(unique(data.shift$Date),
-                                      each = max.shift),
-                           Shift = rep(c(1,2,3,4), 
-                                       times = length(unique(data.shift$Date))))
+  data.all.shifts <- data.frame(Date = rep(unique(data.shift$Date),
+                                           each = 8),
+                                Shift = rep(c(1:8), 
+                                            times = length(unique(data.shift$Date))))
   
   # Combine the full set of date/shift with the observed - some shifts are NAs because
   # they were not in the dataset
-  day.shifts %>% 
-    left_join(data.shift, by = c("Date", "Shift")) -> all.day.shifts
+  data.all.shifts %>% 
+    left_join(data.shift, by = c("Date", "Shift")) -> all.data.shifts
   
   
   # create a vector with sequential weeks
@@ -986,7 +1012,7 @@ format.output.2 <- function(data.shift,max.shift){
   
   # select necessary data from per-shift data frame, mutate the column names
   # then create a new data frame
-  data.shift %>% 
+  all.data.shifts %>% 
     select(Shift, Date, Effort, Mother_Calf) %>%
     mutate(Date = Date,
            Effort = Effort/60,
@@ -1047,20 +1073,23 @@ extract.shift.vars <- function(x) {
   return(x.out)
 }
 
-file.names <- function(out.dir, Year, out.list){
+# ver is the data extraction version. v2 is my original one
+# v3 is one with the first shift starting at 0100.
+file.names <- function(out.dir, ver, Year, out.list){
   out.file.name.inshore <- paste0(out.dir, "Processed_inshore_data_",
-                              Year, "_v2.csv")
+                              Year, "_", ver, ".csv")
   out.file.name.offshore <- paste0(out.dir, "Processed_offshore_data_",
-                                  Year, "_v2.csv")
+                                  Year, "_", ver, ".csv")
   out.file.name.shift.inshore <- paste0(out.dir, "Processed_by_shift_inshore_data_", 
-                                Year, "_v2.csv")
+                                Year, "_", ver, ".csv")
   out.file.name.shift.offshore <- paste0(out.dir, "Processed_by_shift_offshore_data_", 
-                                        Year, "_v2.csv")
+                                        Year, "_", ver, ".csv")
   
   out.file.name.formatted.inshore <- paste0(out.formatted.dir,
-                                    Year, " Formatted_inshore_v2.csv")
+                                    Year, " Formatted_inshore_", ver, ".csv")
   out.file.name.formatted.offshore <- paste0(out.formatted.dir,
-                                            Year, " Formatted_offshore_v2.csv")
+                                            Year, " Formatted_offshore_", 
+                                            ver, ".csv")
   
   files <- list(inshore = out.file.name.inshore,
                 offshore = out.file.name.offshore,

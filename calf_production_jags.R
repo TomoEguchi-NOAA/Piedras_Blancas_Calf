@@ -15,14 +15,22 @@ library(bayesplot)
 source("Piedras_Blancas_fcns.R")
 
 save.file <- T
+data.ext <- "v2"  # or v2
 model <- "v1"
 
 #FILES <- list.files(pattern = ".csv$")
-#data.path <- "data/Formatted Annual Data/"
-data.path <- "data/Formatted Annual Data v2/"
-#data.path <- "data/Formatted Annual Data/"
-FILES <- list.files(path = data.path, 
-                    pattern = "Formatted_inshore_v2.csv")
+#
+if (data.ext == "v1"){
+  data.path <- "data/Formatted Annual Data/"
+  FILES <- list.files(path = data.path, 
+                      pattern = "Formatted.csv")
+  
+} else if (data.ext == "v2"){
+  data.path <- "data/Formatted Annual Data v2/"
+  FILES <- list.files(path = data.path,
+                      pattern = "Formatted_inshore_v2.csv")
+  
+}
 
 MCMC.params <- list(n.samples = 80000,
                     n.thin = 80,
@@ -46,16 +54,22 @@ jags.params <- c("count.true",
   years <- vector(mode = "numeric", length = length(FILES))
   jm.out <- list()
   for(i in 1:length(FILES)){
-    years[i] <- as.numeric(str_split(FILES[i], " Formatted_inshore_v2.csv")[[1]][1])
-    
-    if (file.exists(paste0("RData/calf_estimates_", model, "_", years[i], ".rds"))){
-      jm.out[[i]] <- readRDS(paste0("RData/calf_estimates_", model, "_", years[i], ".rds"))
+    if (data.ext == "v2"){
+      years[i] <- as.numeric(str_split(FILES[i], " Formatted_inshore_v2.csv")[[1]][1])
+    } else if (data.ext == "v1"){
+      years[i] <- as.numeric(str_split(FILES[i], " Formatted.csv")[[1]][1])
       
+    }
+    
+    out.file.name <- paste0("RData/calf_estimates_", data.ext, "_M", model, "_", years[i], ".rds") 
+    if (file.exists(out.file.name)){
+      jm.out[[i]] <- readRDS(out.file.name)
       
     } else {
       
       data <- read.csv(paste0(data.path, FILES[i]))
       data$Effort[is.na(data$Effort)] <- 0
+      data$Effort[data$Effort > 3] <- 3
       data$Sightings[data$Effort == 0] <- 0  # no effort, no sightings
       
       jags.data <- list(count.obs = data$Sightings,
@@ -92,7 +106,7 @@ jags.params <- c("count.true",
                           run.date = Sys.Date())     
       
       saveRDS(jm.out[[i]],
-              file = paste0("RData/calf_estimates_", model, "_", years[i], ".rds"))
+              file = out.file.name)
     }
   
   }
@@ -203,7 +217,7 @@ Estimates$Method <- model
 
 if (save.file)
   write.csv(Estimates,
-            paste0("data/Calf_Estimates_v2_", model, "_", Sys.Date(), ".csv"),
+            paste0("data/Calf_Estimates_", data.ext, "_M", model, "_", Sys.Date(), ".csv"),
             row.names = F)
 
 
