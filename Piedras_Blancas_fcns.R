@@ -1212,10 +1212,19 @@ find.sightings.dif <- function(Y, daily.summary.list, out.list){
   k <- 1
   for (k in 1:length(date.dif.sightings)){
     daily.summary.list[[which(years == Y)]]$data.1 %>%
-      filter(Date == as.Date(date.dif.sightings[k])) -> data.1.dif[[k]]
+      filter(Date == as.Date(date.dif.sightings[k])) %>%
+      slice(1:4) -> tmp 
+    
+    # Add one row at the top with 0 effort and 0 sightings
+    # unelegant way of doing this but it works
+    tmp <- rbind(tmp[1,], tmp) 
+    tmp[1, "Effort"] <- 0
+    tmp[1, "Sightings"] <- 0
+    data.1.dif[[k]] <- tmp
     
     daily.summary.list[[which(years == Y)]]$data.2 %>%
-      filter(Date == as.Date(date.dif.sightings[k])) -> data.2.dif[[k]]
+      filter(Date == as.Date(date.dif.sightings[k])) %>%
+      slice(2:6) -> data.2.dif[[k]]
     
     # Absolute difference in sightings is greater than 0
     shift.dif[[k]] <- data.2.dif[[k]]$Shift[which(abs(data.1.dif[[k]]$Sightings - data.2.dif[[k]]$Sightings) != 0)]

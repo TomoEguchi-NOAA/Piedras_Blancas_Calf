@@ -14,7 +14,7 @@ csl: marine-ecology-progress-series.csl
 ```{r setup, include=FALSE}
 rm(list = ls())
 knitr::opts_chunk$set(echo = TRUE)
-save.fig <- T
+save.fig <- F
 season <- 2023
 
 source("Piedras_Blancas_fcns.R")
@@ -257,85 +257,7 @@ flextable(Estimates %>%
   set_table_properties(width = 0.5, layout = "autofit")
 ```
 
-### Calf production relative to abundance {.unnumbered}
 
-```{r compare-with-Nhats, echo=FALSE, include=FALSE, cache=TRUE}
-#Nhats are not necessarily the numbers out of analysis because we decided to keep the past estimates intact and not update as we add more data. So... estimates from Durban's approach need to be entered manually.
-
-Durban_estim <- data.frame(Year = c(2007, 2008, 2010, 2011, 2015, 2016, 2022, 2023),
-                           Season = c("2006/2007", "2007/2008", "2009/2010",
-                                      "2010/2011", "2014/2015", "2015/2016",
-                                       "2021/2022", "2022/2023"),
-                           Nhat = c(20750, 17820, 21210, 20990, 23530, 26960, 16650, 14526),
-                           LCL = c(18860, 16150, 19420, 19230, 21270, 24420, 15170, 13195),
-                           UCL = c(23320, 19920, 23250, 22900, 25945, 29830, 18335, 16040),
-                           Method = "Durban")
-
-# all_estimates_2023.csv file was created in GC Gray Whale Abundance Phenology Estimates V1 2023.Rmd
-# Line 212, which is commented out once the file was created. 
-Nhats <- read.csv(file = "~/R/Granite_Canyon_Counts/Data/all_estimates_2023.csv") %>%
-  filter(Method == "Laake" & Year > 1993 & Year < 2007) %>% 
-  dplyr::select(!X) %>% na.omit()
-
-Estimates %>% 
-  left_join(rbind(Nhats, Durban_estim), by = "Year") %>%
-  na.omit() %>%
-  mutate(p.MC = Mean/Nhat) -> MC_Nhats
-
-MC_Nhats %>%
-  transmute(log.Mean = log(Mean),
-            log.Median = log(Median),
-            log.LCL.x = log(LCL.x),
-            log.UCL.x = log(UCL.x),
-            Year = Year,
-            Method.x = Method.x,
-            Season = Season,
-            log.Nhat = log(Nhat),
-            log.LCL.y = log(LCL.y),
-            log.UCL.y = log(UCL.y),
-            Method.y = Method.y) -> log.MC_Nhats
-
-p.NvsCalves <- ggplot(MC_Nhats %>% na.omit()) +
-  geom_point(aes(x = Nhat, 
-                 y = Mean, 
-                 color = factor(Year))) +
-  geom_errorbar(aes(x = Nhat, 
-                    ymin = LCL.x, 
-                    ymax = UCL.x, 
-                    color = factor(Year))) +
-  geom_errorbarh(aes(y = Mean, 
-                     xmin = LCL.y, 
-                     xmax = UCL.y, 
-                     color = factor(Year))) +
-  xlab("Abundance") + ylab("Number of calves") +
-  labs(color = "Year")
-
-if (save.fig)
-  ggsave(filename = "figures/NvsCalves.png",
-         plot = p.NvsCalves, 
-         device = "png", dpi = 600)
-
-p.NvsCalves.log <- ggplot(log.MC_Nhats %>% na.omit()) +
-  geom_point(aes(x = log.Nhat, 
-                 y = log.Mean, 
-                 color = factor(Year))) +
-  geom_errorbar(aes(x = log.Nhat, 
-                    ymin = log.LCL.x, 
-                    ymax = log.UCL.x, 
-                    color = factor(Year))) +
-  geom_errorbarh(aes(y = log.Mean, 
-                     xmin = log.LCL.y, 
-                     xmax = log.UCL.y, 
-                     color = factor(Year))) +
-  xlab("log(Abundance)") + 
-  ylab("log(Calf production)") + 
-   labs(color = "Year")
-
-if (save.fig)
-  ggsave(filename = "figures/NvsCalves_log.png",
-         plot = p.NvsCalves.log, device = "png", dpi = 600)
-
-```
 
 We compared estimated calf production with estimated abundance of gray
 whales from the surveys at Granite Canyon, CA. The estimated abundance
@@ -344,56 +266,7 @@ between `r min(MC_Nhats$Year)` and `r max(MC_Nhats$Year)` ranged from
 `r filter(MC_Nhats, Nhat == min(Nhat)) %>% select(Year) %>% pull()` to
 `r format.big.number(max(MC_Nhats$Nhat))` in
 `r filter(MC_Nhats, Nhat == max(Nhat)) %>% select(Year) %>% pull()`
-(Table \@ref(tab:Table-prop-Nhats-v1)). Proportion of mother-calf pairs
-to total abundance ranged from `r signif(min(MC_Nhats$p.MC), 4)` in
-`r filter(MC_Nhats, p.MC == min(p.MC)) %>% select(Year) %>% pull()` to
-`r signif(max(MC_Nhats$p.MC), 4)` in
-`r filter(MC_Nhats, p.MC == max(p.MC)) %>% select(Year) %>% pull()`.
-
-```{r Table-prop-Nhats-v1, echo=FALSE, warning=FALSE}
-flextable(MC_Nhats %>% 
-#            dplyr::relocate(Season) %>% 
-            dplyr::select(Season, Nhat, LCL.y, UCL.y,
-                          Mean, LCL.x, UCL.x, p.MC) %>%
-            transmute(Season = Season,
-                      Abundace = Nhat,
-                      LCL_N = LCL.y,
-                      UCL_N = UCL.y,
-                      Calf = Mean,
-                      LCL_MC = LCL.x,
-                      UCL_MC = UCL.x,
-                      prop_MC = p.MC)) %>%
-  set_caption(paste0("Estimates (Abundance and Mother_Calf) and 95% lower (LCL) and upper (UCL) confidence limits of gray whale total abundance and mother-calf pairs. prop_MC is the proportion of mother-calf pairs to the total abundance."))  %>%
-  colformat_double(j = c("Calf", "LCL_N", "UCL_N",
-                         "LCL_MC", "UCL_MC"), 
-                   digits = 1) %>%
-  colformat_double(j = "prop_MC", digits = 3) %>%
-  set_table_properties(width = 0.5, layout = "autofit")
-```
-
-```{r proportion-to-Nhats, echo=FALSE, include=FALSE, cache=TRUE}
-
-p.propMC <- ggplot(MC_Nhats) + 
-  geom_point(aes(x = Nhat, y = p.MC, color = Season)) +
-  geom_path(aes(x = Nhat, y = p.MC)) +
-  #geom_errorbar(aes(x = p.MC, ymin = LCL.y, ymax = UCL.y))
-  xlab("Estimated abundance") + 
-  ylab("Proportion of mother/calf pairs to estimated abundance")
-  
-if (save.fig)
-  ggsave(plot = p.propMC,
-         filename = "figures/propMC.png",
-         device = "png", dpi = 600)
-```
-
-There was a linear relationship between estimated abundance and the
-number of mother-calf pairs (Figure \@ref(fig:Figure-NvsV1)).
-
-```{r Figure-NvsV1, echo=FALSE, message=FALSE, fig.cap="The relationship between estimated abundance and estimated calf production."}
-
-knitr::include_graphics("figures/NvsCalves.png")
-
-```
+(Table \@ref(tab:Table-prop-Nhats-v1)). 
 
 ## Acknowledgements {.unnumbered}
 
