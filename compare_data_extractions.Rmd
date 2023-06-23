@@ -147,7 +147,7 @@ for (k in 1:length(years)){
 ```
 
 
-1994 
+## 1994 
 
 ```{r}
 Y <- 1994
@@ -179,14 +179,11 @@ out.list <- get.all.data(list.sheet.names.inshore[[idx.list]],
 
 ```
 
-
 Effort:
 ```{r}
-THE FOLLOWING FUNCTION DOES NOT WORK AT THE MOMENT BECAUSE SHIFTS ARE DEFINED
-DIFFERENTLY BETWEEN V1 AND V3. THE FUNCTION NEEDS TO BE MODIFIED. 2023-06-22
 effort.dif.list <- find.effort.dif(Y, daily.summary.list, out.list)
 
-length(effort.dif.list$date.dif)
+# length(effort.dif.list$date.dif)
 ```
 
 There were `r length(effort.dif.list$date.dif)` differences between the two extraction algorithms for year `r Y`. Many differences come from the first shift starting at 0630, rather than 0700. In the v1 extraction algorithm, the first shift was assumed to start at 0700, so 30 min were removed, whereas the v2 algorithm counts all data. Spot checks show v2 doing a good job counting all. v1 seems to ignore sea state > 4. 
@@ -195,7 +192,7 @@ There are a few shift 5... I think they should be deleted. They have been remove
 
 Here are the differences.
 
-1. `r effort.dif.list$date.dif[1]`
+### `r effort.dif.list$date.dif[1]`
 
 Data:
 ```{r}
@@ -210,7 +207,7 @@ effort.dif.list$dif.1[[1]]
 ```
 
 
-Version 2 extraction:
+Version 3 extraction:
 ```{r}
 effort.dif.list$dif.2[[1]]
 
@@ -219,69 +216,59 @@ effort.dif.list$dif.2[[1]]
 Observation started at 0630 (Event = 1). So, I think it makes sense to include extra 30 minutes.
 
 
-2. `r effort.dif.list$date.dif[2]`
+### `r effort.dif.list$date.dif[2]`
 
-```{r}
-length(effort.dif.list$raw.data[[2]])
-```
+There were `r length(effort.dif.list$raw.data[[2]])` differences between V1 and V3 extractions within `r effort.dif.list$date.dif[2]`.
 
-There were `r length(effort.dif.list$raw.data[[2]])` differences between V1 and V2 extractions within `r effort.dif.list$date.dif[2]`.
-
-(1) 
+#### Shift `r effort.dif.list$dif.shift[[2]][1]`
 
 Data:
 ```{r}
 effort.dif.list$raw.data[[2]][[1]]
 ```
 
-The first shift started at 0631 and ended at 1000. However, the visibility became 5 at 0950. So, the effort for this shift should be 3 hr and 19 min (or 199 minutes or 3.3167 hrs).
 
+The first shift started at 0631 and should have ended at 0700, which was not recorded in the v1 extraction.
 
-(2) 
+The v1 extraction removed 29 minutes of observation from 0631 to 0700.
+```{r}
+
+effort.dif.list$dif.1[[2]]
+
+```
+
+In the v3 extraction, the 29 minunte period was counted.
+
+```{r}
+effort.dif.list$dif.2[[2]]
+```
+
+#### Shift `r effort.dif.list$dif.shift[[2]][2]`
+
+During the shift from 1000 to 1300, sea state changed to 5 from 1230 to 1252 (22 minutes). Consequently, the total effort for this shift should be 158 minutes (2.63 hrs). The v1 extraction calculated 1.80 hrs.
 
 ```{r}
 effort.dif.list$raw.data[[2]][[2]]
 ```
 
-This shift started at 1000, paused at 1230 (2.5 hrs), restarted at 1252, then ended at 1300 (8 minutes or 0.133 hrs). So the total effort was 2.633 hrs.
 
-
-(3)
+#### Shift `r effort.dif.list$dif.shift[[2]][3]`
 
 ```{r}
 effort.dif.list$raw.data[[2]][[3]]
 ```
 
-There was no effort for this shift because the sea state was at 5 the entire time.
-
-Version 1 extraction:
-```{r}
-effort.dif.list$dif.1[[2]]
-
-```
+There was no effort for this shift because the sea state was at 5 the entire time. The v1 extraction calculated one hour of observation. 
 
 
-Version 2 extraction:
-```{r}
-effort.dif.list$dif.2[[2]]
-
-```
-
-V1 did not include 0631 - 0700 for Shift 1. 
-
-I don't know how V1 computed 1.8 hrs for Shift 2. 
-
-High sea state was not considered for Shift 3. It's unclear how 1 hr of effort for this shift was computed
-
-
-3. `r effort.dif.list$date.dif[3]`
+### `r effort.dif.list$date.dif[3]`
 
 Data:
 ```{r}
 effort.dif.list$raw.data[[3]]
 ```
 
-Because of the high sea state during Shift 4 (Beaufort 5 and 6), no effort should have been calculated. 
+Because of the high sea state during the shift from 1600 to 1900, no effort should have been calculated. 
 
 Version 1 extraction:
 ```{r}
@@ -289,8 +276,7 @@ effort.dif.list$dif.1[[3]]
 
 ```
 
-
-Version 2 extraction:
+Version 3 extraction:
 ```{r}
 effort.dif.list$dif.2[[3]]
 
@@ -299,14 +285,14 @@ effort.dif.list$dif.2[[3]]
 V1 computed 0.62 hrs of effort for Shift 4. This should have been zero. 
 
 
-4. `r effort.dif.list$date.dif[4]`
+### `r effort.dif.list$date.dif[4]`
 
 Data:
 ```{r}
 effort.dif.list$raw.data[[4]]
 ```
 
-Sea state changed from 4 to 5 at 0922 so the effort was from 0630 to 0922 (2 hrs and 52 min or 2.867 hrs). 
+Effort from 0630 to 0700 was not recorded under the v1 extraction.
 
 Version 1 extraction:
 ```{r}
@@ -314,24 +300,20 @@ effort.dif.list$dif.1[[4]]
 
 ```
 
-
-Version 2 extraction:
+Version 3 extraction:
 ```{r}
 effort.dif.list$dif.2[[4]]
 
 ```
 
-V1 correctly excluded Beaufort 5 but did not include 0630 to 0700. 
-
-
-5. `r effort.dif.list$date.dif[5]`
+### `r effort.dif.list$date.dif[5]`
 
 Data:
 ```{r}
 effort.dif.list$raw.data[[5]]
 ```
 
-
+Effort from 0630 to 0700 was not recorded by the v1 extraction.
 
 Version 1 extraction:
 ```{r}
@@ -339,21 +321,19 @@ effort.dif.list$dif.1[[5]]
 
 ```
 
-
-Version 2 extraction:
+Version 3 extraction:
 ```{r}
 effort.dif.list$dif.2[[5]]
 
 ```
 
-V1 did not include 0630 - 0700.
-
-6. `r effort.dif.list$date.dif[6]`
+### `r effort.dif.list$date.dif[6]`
 
 Data:
 ```{r}
 effort.dif.list$raw.data[[6]]
 ```
+Effort from 0629 to 0700 was not recorded by the v1 extraction.
 
 Version 1 extraction:
 ```{r}
@@ -361,24 +341,20 @@ effort.dif.list$dif.1[[6]]
 
 ```
 
-
-Version 2 extraction:
+Version 3 extraction:
 ```{r}
 effort.dif.list$dif.2[[6]]
 
 ```
 
-Visibility changed to 5 at 0900, then turned 4 at 0930. So, it was 2.5 hrs of effort, excluding 0630-0700.
-
-V2 considered 0629 - 0700 as search effort.
-
-
-7. `r effort.dif.list$date.dif[7]`
+### `r effort.dif.list$date.dif[7]`
 
 Data:
 ```{r}
 effort.dif.list$raw.data[[7]]
 ```
+
+Effort from 0630 to 0700 was not recorded by the v1 extraction.
 
 Version 1 extraction:
 ```{r}
@@ -386,23 +362,20 @@ effort.dif.list$dif.1[[7]]
 
 ```
 
-
-Version 2 extraction:
+Version 3 extraction:
 ```{r}
 effort.dif.list$dif.2[[7]]
 
 ```
 
-The difference comes from whether or not to include 0630 - 0700 as search effort.
-
-
-
-8. `r effort.dif.list$date.dif[8]`
+### `r effort.dif.list$date.dif[8]`
 
 Data:
 ```{r}
 effort.dif.list$raw.data[[8]]
 ```
+
+Effort from 0630 to 0700 was not recorded by the v1 extraction.
 
 Version 1 extraction:
 ```{r}
@@ -410,23 +383,21 @@ effort.dif.list$dif.1[[8]]
 
 ```
 
+Version 3 extraction:
 
-Version 2 extraction:
 ```{r}
 effort.dif.list$dif.2[[8]]
 
 ```
 
-The difference comes from whether or not to include 0630 - 0700 as search effort.
-
-
-
-9. `r effort.dif.list$date.dif[9]`
+### `r effort.dif.list$date.dif[9]`
 
 Data:
 ```{r}
 effort.dif.list$raw.data[[9]]
 ```
+
+Effort from 0630 to 0700 was not recorded by the v1 extraction.
 
 Version 1 extraction:
 ```{r}
@@ -435,71 +406,62 @@ effort.dif.list$dif.1[[9]]
 ```
 
 
-Version 2 extraction:
+Version 3 extraction:
 ```{r}
 effort.dif.list$dif.2[[9]]
 
 ```
 
-The difference comes from whether or not to include 0630 - 0700 as search effort.
-
-
-
-10. `r effort.dif.list$date.dif[10]`
-
-```{r}
-length(effort.dif.list$raw.data[[10]])
-```
+### `r effort.dif.list$date.dif[10]`
 
 There were `r length(effort.dif.list$raw.data[[10]])` differences for `r effort.dif.list$date.dif[10]`.
 
-Data:
+Version 1 extraction:
 
-(1)
+```{r}
+effort.dif.list$dif.1[[10]]
+```
+
+Version 3 extraction:
+
+```{r}
+effort.dif.list$dif.2[[10]]
+```
+
+
+#### Shift `r effort.dif.list$dif.shift[[10]][1]`
 
 ```{r}
 effort.dif.list$raw.data[[10]][[1]]
 ```
 
+Effort from 0628 to 0700 was not recorded by the v1 extraction.
 
-(2)
+#### Shift `r effort.dif.list$dif.shift[[10]][2]`
 
 ```{r}
-effort.dif.list$raw.data[[10]][[2]]
+out.list$shift.all.inshore %>% 
+  filter(Date == "1994-03-30") %>%
+  filter(Minutes_since_0000 > 590 & Minutes_since_0000 < 900)
 ```
-The first shift was ended at 0957. The next effort started at 1450. So, there was no Shift 2 on 1994-03-30. 
 
+There was no record for the shift from 1000 to 1300. Consequently the effort for this shift should have been zero. 
 
-(3)
+#### Shift `r effort.dif.list$dif.shift[[10]][3]`
 
 ```{r}
 effort.dif.list$raw.data[[10]][[3]]
 ```
 
+For this shift, effort was from 1450 to 1600 (70 minutes or 1.17 hrs). The v1 extraction computed 3 hrs for this shift. 
 
-
-Version 1 extraction:
 ```{r}
-effort.dif.list$dif.1[[10]]
+out.list$shift.all.inshore %>% filter(Date == "1994-03-30")
 
 ```
 
 
-Version 2 extraction:
-```{r}
-effort.dif.list$dif.2[[10]]
-
-```
-
-For Shift 1, V1 did not include 0628 - 0700.
-
-For Shift 2, V1 somehow gave a full effort (3 hrs) but the data show 0 hrs of effort.
-
-For Shift 3, the effort started at 1450, rather than 1300. So, the true effort was 1450 - 1600 (70 min or 1.167 hrs)
-
-
-
-11. `r effort.dif.list$date.dif[11]`
+### `r effort.dif.list$date.dif[11]`
 
 Data:
 ```{r}
