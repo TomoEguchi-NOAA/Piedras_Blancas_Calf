@@ -129,7 +129,7 @@ In some years, a survey was concluded mid-week after three consecutive days of 0
 
 ```{r data.2022, echo=FALSE, include=FALSE, cache=TRUE, message=FALSE}
 
-data.2022 <- read.csv(paste0(data.path, "2022 Formatted.csv"))
+data.2022 <- read.csv(paste0(data.path, "2022 Formatted_inshore_v2.csv"))
 
 data.2022 %>% group_by(Date) %>%
   summarise(Daily_Sightings = sum(Sightings),
