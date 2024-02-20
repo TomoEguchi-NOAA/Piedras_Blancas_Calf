@@ -164,6 +164,8 @@ knitr::include_graphics("figures/daily_sightings_2022.png")
 
 
 ```{r Nhats, echo=FALSE, include=FALSE, message=FALSE}
+# Here is what they suggested, "X-axis needs a year label. Y-axis needs a better label – mean what? The figure label is sufficient for mentioning the 95% CIs."  2024-02-16 email from Jonathan Scordino on his manuscript
+
 p.Nhats <- ggplot(data = Estimates) +
   geom_point(aes(x = Year, y = Mean)) + 
   geom_errorbar(aes(x = Year, ymin = LCL, ymax = UCL)) +
@@ -171,7 +173,8 @@ p.Nhats <- ggplot(data = Estimates) +
             aes(xmin = Year, xmax = Year+1,
                 ymin = 0, ymax = 2000),
             fill = "gold", alpha = 0.4) +
-  xlab("") + ylab("Mean and 95% CI") 
+  xlab("Year") + ylab("Estimated mean number of calves") 
+
 
 if (save.fig)
   ggsave(filename = "figures/Nhats_2022.png",
