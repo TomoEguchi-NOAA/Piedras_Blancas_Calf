@@ -10,7 +10,7 @@ output:
 ```{r setup, include=FALSE}
 rm(list = ls())
 knitr::opts_chunk$set(echo = TRUE)
-save.fig <- T
+save.fig <- F
 
 source("Piedras_Blancas_fcns.R")
 library(tidyverse)
@@ -175,10 +175,10 @@ p.Nhats <- ggplot(data = Estimates) +
             fill = "gold", alpha = 0.4) +
   xlab("Year") + ylab("Estimated mean number of calves") 
 
-
+# Changed the output format to jpg as per a request from Jonathan on 2024-03-04
 if (save.fig)
-  ggsave(filename = "figures/Nhats_2022.png",
-         plot = p.Nhats, device = "png", dpi = 600)
+  ggsave(filename = "figures/Nhats_2022.jpg",
+         plot = p.Nhats, device = "jpeg", dpi = 600)
 
 
 p.PvsV1 <- ggplot(estimates.PandV1) + 
