@@ -3,7 +3,7 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-This notebook is used to extract data from original data files in the Excel format. Because the file format changes over time, each year is done separately. 
+This notebook is used to extract data from original data files in the Excel format. 
 
 ```{r setup}
 rm(list=ls())
